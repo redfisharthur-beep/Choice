@@ -1,6 +1,6 @@
 {
   "$schema":"./node_modules/wrangler/config-schema.json",
-  "name":"choice-realtime",
+  "name":"choice",
   "main":"src/index.js",
   "compatibility_date":"2026-09-06",
   "assets":{"directory":"..","binding":"ASSETS"},
