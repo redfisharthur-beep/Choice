@@ -19,6 +19,13 @@ const redirect=(location,cookies=[])=>{const headers=new Headers({'location':loc
 const sessionSecret=env=>env.LINE_LOGIN_SESSION_SECRET||env.LINE_LOGIN_CHANNEL_SECRET||'';
 const configured=env=>!!(env.LINE_LOGIN_CHANNEL_ID&&env.LINE_LOGIN_CHANNEL_SECRET);
 const DEFAULT_VOTE_WINDOW_MS=7*24*60*60*1000;
+const ROOM_LIST_RESET_AT=1788691747000;
+const chatTone=value=>{
+  const s=String(value||'');
+  let h=2166136261>>>0;
+  for(let i=0;i<s.length;i++)h=Math.imul(h^s.charCodeAt(i),16777619)>>>0;
+  return h%8;
+};
 
 function voteOutcome(state){
   const options=Array.isArray(state?.options)?state.options:[];
@@ -115,6 +122,25 @@ export class ChoiceRoom extends BaseChoiceRoom{
   async webSocketMessage(ws,message){
     let msg=null;try{msg=JSON.parse(message)}catch{}
     if(!msg)return;
+
+    if(msg.type==='chat'){
+      const a=this.attachment(ws);
+      const text=String(msg.text||'').trim().replace(/\s+/g,' ').slice(0,300);
+      if(!text)return;
+      let list=await this.getChatMessages();
+      const item={
+        id:crypto.randomUUID(),
+        name:String(a.name||'訪客').slice(0,20),
+        text,
+        at:Date.now(),
+        tone:chatTone(a.voterKey||a.clientId)
+      };
+      list=[...list,item].slice(-100);
+      this.chatMessages=list;
+      await this.ctx.storage.put('chatMessages',list);
+      this.broadcast({type:'chat',message:item});
+      return;
+    }
 
     if(msg.type==='room:close'){
       try{ws.send(JSON.stringify({type:'error',message:'房間會持續保留，可使用左下離開按鈕回首頁'}))}catch{}
@@ -266,6 +292,14 @@ export default{
     }
     const auth=await handleLineAuth(request,env);
     if(auth)return auth;
+    if(url.pathname==='/api/rooms'&&request.method==='GET'){
+      const response=await baseWorker.fetch(request,env,ctx);
+      if(!response.ok)return response;
+      const data=await response.clone().json().catch(()=>null);
+      if(!data||!Array.isArray(data.rooms))return response;
+      const rooms=data.rooms.filter(room=>Number(room?.createdAt||0)>=ROOM_LIST_RESET_AT);
+      return json({...data,rooms},response.status);
+    }
     return baseWorker.fetch(request,env,ctx);
   }
 };
