@@ -10,13 +10,12 @@ window.addEventListener('load',()=>{
     const s=document.createElement('script');
     s.src=src;
     s.setAttribute(key,'1');
-    s.onload=()=>resolve();
-    s.onerror=()=>resolve();
+    s.onload=resolve;
+    s.onerror=resolve;
     document.body.appendChild(s);
   });
   (async()=>{
     await load('./vote-chat-tweaks.js','data-choice-vote-chat-tweaks');
-    await load('./participant-draw-sync.js','data-choice-participant-draw-sync');
     await load('./participant-draw-fix.js','data-choice-participant-draw-fix');
   })();
 });
