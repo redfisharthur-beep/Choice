@@ -101,3 +101,28 @@ body{background:linear-gradient(180deg,#eef1ee 0%,#e8ece9 100%)!important;font-s
 }
 @media(max-height:620px) and (orientation:landscape){.shell{margin-top:8px!important}.hero-actions{margin-top:6px!important;gap:20px!important;padding:6px 10px!important}.hero-action-btn{width:52px!important;height:52px!important}.hero-action-btn img{width:46px!important;height:46px!important}.hero-mic-btn img{width:50px!important;height:50px!important}.home-login-page{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(220px,.55fr)!important;align-items:center!important;gap:10px!important;padding:12px 22px!important}.home-hero-image{grid-column:1!important;grid-row:1/3!important;width:min(450px,52vw)!important;max-height:58dvh!important}.home-login-row{width:100%!important;grid-column:2!important;grid-row:1!important;align-self:end!important}.home-login-image-btn{grid-column:2!important;grid-row:2!important;align-self:start!important;width:min(230px,28vw)!important;margin-top:10px!important}.room-list{max-height:24dvh!important}}
 @media(prefers-reduced-motion:reduce){.home-hero-image{animation:none!important;transform:none!important}}
+
+/* Large hero artwork: visual LINE/GO live inside hero.png; keep controls clickable only. */
+#homeLoginPage{padding:0!important;gap:0!important;min-height:0!important;background:transparent!important;box-shadow:none!important;overflow:hidden!important}
+#homeLoginPage::before,#homeLoginPage::after{display:none!important}
+#homeLoginPage .home-hero-image{width:100%!important;max-width:none!important;max-height:none!important;height:auto!important;margin:0!important;animation:none!important;filter:none!important;display:block!important;position:relative!important;z-index:1!important}
+#homeLoginPage .home-login-row{position:absolute!important;left:50%!important;top:64%!important;transform:translateX(-50%)!important;width:min(430px,64%)!important;grid-template-columns:minmax(0,1fr) 84px!important;gap:12px!important;margin:0!important;z-index:5!important}
+#homeLoginPage .home-name-input{height:68px!important;background:rgba(250,249,246,.93)!important;backdrop-filter:blur(4px)!important;-webkit-backdrop-filter:blur(4px)!important}
+#homeLoginPage .home-line-login{width:84px!important;height:68px!important;border:0!important;border-radius:20px!important;background:transparent!important;box-shadow:none!important;padding:0!important;opacity:1!important}
+#homeLoginPage .home-line-login img{display:none!important}
+#homeLoginPage .home-login-image-btn{position:absolute!important;left:50%!important;top:82%!important;transform:translateX(-50%)!important;width:min(300px,38%)!important;height:11%!important;min-height:76px!important;margin:0!important;padding:0!important;border:0!important;border-radius:999px!important;background:transparent!important;box-shadow:none!important;z-index:6!important;opacity:1!important}
+#homeLoginPage .home-login-image-btn:hover{transform:translateX(-50%) scale(1.01)!important;background:rgba(255,255,255,.04)!important}
+#homeLoginPage .home-login-image-btn img{display:none!important}
+#homeLoginPage .home-login-image-btn::before,#homeLoginPage .home-login-image-btn::after{display:none!important}
+/* Community icon: no capsule/frame around the top community image. */
+.hero-actions>a.hero-action-btn{background:transparent!important;box-shadow:none!important;border-radius:0!important}
+.hero-actions>a.hero-action-btn:hover{background:transparent!important;box-shadow:none!important}
+@media(max-width:600px){
+  #homeLoginPage .home-login-row{top:64%!important;width:min(360px,72%)!important;grid-template-columns:minmax(0,1fr) 72px!important;gap:9px!important}
+  #homeLoginPage .home-name-input{height:60px!important;font-size:16px!important}
+  #homeLoginPage .home-line-login{width:72px!important;height:60px!important}
+  #homeLoginPage .home-login-image-btn{top:82%!important;width:44%!important;height:10%!important;min-height:64px!important}
+  #homeLoginPage:focus-within .home-hero-image{width:100%!important;max-height:none!important}
+  #homeLoginPage:focus-within .home-login-row{width:min(360px,78%)!important}
+  #homeLoginPage:focus-within .home-login-image-btn{display:block!important}
+}
