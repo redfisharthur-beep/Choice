@@ -69,6 +69,8 @@
     if(!chat)return;
     chat.querySelector('.choice-chat-title')?.remove();
     chat.querySelectorAll('.choice-chat-empty').forEach(el=>el.remove());
+    const input=chat.querySelector('#choiceChatInput');
+    if(input)input.placeholder='發表你的看法';
     if(actions&&chat.nextElementSibling!==actions)actions.parentNode?.insertBefore(chat,actions);
   }
 
@@ -214,4 +216,40 @@
   };
 
   rebuildDrawChoices();
+})();
+
+/* Vote UI v3: icon-only selection feedback, reserved Check.png gutter, Morandi topic palette. */
+(()=>{
+  const $=s=>document.querySelector(s);
+  if(!document.getElementById('choiceVoteV3Styles')){
+    const style=document.createElement('style');
+    style.id='choiceVoteV3Styles';
+    style.textContent=`
+:root{--choice-morandi-title:#6f7f8c;--choice-morandi-title-bg:#d9dedf;--choice-morandi-title-border:#c4ced0;--choice-morandi-accent:#829c98}
+.room-head-compact{background:rgba(217,222,223,.9)!important;border-color:var(--choice-morandi-title-border)!important}
+#roomTitle{color:var(--choice-morandi-title)!important;font-weight:700!important;text-shadow:none!important}
+#pollTitleDisplay{color:#7c8e95!important}
+#roomDeadlineTop{color:#6f858d!important;background:rgba(205,214,216,.68)!important}
+#flowNav button.active{color:#648078!important;border-color:#92aaa5!important;background:#d8e3df!important}
+#voteOptions .percent-row{padding-left:86px!important;grid-template-columns:minmax(110px,145px) minmax(0,1fr) 54px!important;column-gap:14px!important}
+#voteOptions .vote-option.selected,#voteOptions .vote-option.voted-choice{background:transparent!important;box-shadow:none!important;border-color:transparent!important;outline:0!important}
+#voteOptions .vote-option.selected:not(.voted-choice)::before{content:'';position:absolute;left:14px;top:50%;width:62px;height:62px;transform:translateY(-50%);background:url('./assets/stamp/Check.png') center/contain no-repeat;pointer-events:none;z-index:24;filter:drop-shadow(0 5px 8px rgba(72,91,92,.12))}
+#voteOptions .vote-option .vote-choice-fx{left:45px!important;top:50%!important;width:68px!important;height:68px!important;transform:translate(-50%,-50%)!important;opacity:1!important;animation:none!important;filter:drop-shadow(0 5px 8px rgba(72,91,92,.12))!important}
+#voteOptions .percent-name{color:#657b84!important}
+#voteOptions .percent-value{color:#6c858f!important}
+@media(max-width:600px){
+  #voteOptions .percent-row{padding-left:70px!important;grid-template-columns:minmax(90px,118px) minmax(0,1fr) 46px!important;column-gap:9px!important}
+  #voteOptions .vote-option.selected:not(.voted-choice)::before{left:10px;width:52px;height:52px}
+  #voteOptions .vote-option .vote-choice-fx{left:36px!important;width:56px!important;height:56px!important}
+}
+`;
+    document.head.appendChild(style);
+  }
+
+  function refreshVoteUi(){
+    const chatInput=$('#choiceChatInput');
+    if(chatInput)chatInput.placeholder='發表你的看法';
+  }
+  refreshVoteUi();
+  new MutationObserver(refreshVoteUi).observe(document.body,{childList:true,subtree:true});
 })();
