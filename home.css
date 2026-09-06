@@ -26,19 +26,19 @@ body{background:linear-gradient(180deg,#eef1ee 0%,#e8ece9 100%)!important;font-s
 #homeView{width:100%!important}
 .home-page{width:100%!important;box-sizing:border-box!important}
 .home-page.hidden{display:none!important}
-.home-login-page{position:relative!important;overflow:hidden!important;background:linear-gradient(180deg,#dfd9d0 0%,#ddd5ca 56%,#d7d4cc 100%)!important;border-radius:0!important;padding:0!important;box-sizing:border-box!important;min-height:100dvh!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;gap:0!important;box-shadow:none!important}
-.home-login-page::before,.home-login-page::after{display:none!important}
-.home-hero-image{display:block!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;object-fit:fill!important;object-position:center top!important;margin:0!important;filter:none!important;animation:none!important;position:absolute!important;inset:0!important;z-index:1!important;pointer-events:none!important}
-.home-login-row{position:absolute!important;left:calc(50% + 5px)!important;top:calc(67.2% + 10px)!important;transform:translateX(-50%)!important;width:min(430px,61%)!important;display:grid!important;grid-template-columns:minmax(0,1fr) 24%!important;gap:2%!important;margin:0!important;z-index:6!important;align-items:stretch!important}
-.home-name-input{width:100%!important;height:70px!important;padding:0 12px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#536b78!important;font-size:18px!important;text-align:center!important;outline:none!important}
-.home-name-input:focus{border:0!important;background:transparent!important;box-shadow:none!important;outline:none!important}
-.home-name-input::placeholder{color:rgba(83,107,120,.55)!important}
-.home-line-login{width:100%!important;height:70px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;opacity:1!important;transform:translateX(10px)!important}
-.home-line-login:hover{transform:translateX(10px)!important}
-.home-line-login img{display:none!important}
-.home-login-image-btn{position:absolute!important;left:50%!important;top:84%!important;transform:translateX(-50%)!important;width:42%!important;height:11%!important;min-height:68px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;z-index:6!important;opacity:1!important;cursor:pointer!important}
-.home-login-image-btn:hover{transform:translateX(-50%)!important;background:transparent!important}
-.home-login-image-btn img,.home-login-image-btn::before,.home-login-image-btn::after{display:none!important}
+#homeView #homeLoginPage.home-login-page{position:relative!important;overflow:hidden!important;background:transparent!important;border-radius:0!important;padding:0!important;box-sizing:border-box!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;gap:0!important;box-shadow:none!important}
+#homeView #homeLoginPage::before,#homeView #homeLoginPage::after{display:none!important}
+#homeView #homeLoginPage .home-hero-image{display:block!important;position:absolute!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;min-width:100vw!important;min-height:100dvh!important;object-fit:cover!important;object-position:center center!important;margin:0!important;padding:0!important;filter:none!important;animation:none!important;transform:none!important;z-index:1!important;pointer-events:none!important}
+#homeView #homeLoginPage .home-login-row{position:absolute!important;left:calc(50% + 5px)!important;top:calc(67.2% + 10px)!important;transform:translateX(-50%)!important;width:min(430px,61%)!important;display:grid!important;grid-template-columns:minmax(0,1fr) 24%!important;gap:2%!important;margin:0!important;z-index:6!important;align-items:stretch!important;background:transparent!important}
+#homeView #homeLoginPage .home-name-input{width:100%!important;height:70px!important;padding:0 12px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#536b78!important;font-size:18px!important;text-align:center!important;outline:none!important}
+#homeView #homeLoginPage .home-name-input:focus{border:0!important;background:transparent!important;box-shadow:none!important;outline:none!important}
+#homeView #homeLoginPage .home-name-input::placeholder{color:rgba(83,107,120,.55)!important}
+#homeView #homeLoginPage .home-line-login{width:100%!important;height:70px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;opacity:1!important;transform:translateX(10px)!important}
+#homeView #homeLoginPage .home-line-login:hover{transform:translateX(10px)!important}
+#homeView #homeLoginPage .home-line-login img{display:none!important}
+#homeView #homeLoginPage .home-login-image-btn{position:absolute!important;left:50%!important;top:84%!important;transform:translateX(-50%)!important;width:42%!important;height:11%!important;min-height:68px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;z-index:6!important;opacity:1!important;cursor:pointer!important}
+#homeView #homeLoginPage .home-login-image-btn:hover{transform:translateX(-50%)!important;background:transparent!important}
+#homeView #homeLoginPage .home-login-image-btn img,#homeView #homeLoginPage .home-login-image-btn::before,#homeView #homeLoginPage .home-login-image-btn::after{display:none!important}
 
 .home-lobby-page{display:flex!important;flex-direction:column!important;gap:0!important}.home-lobby-page.hidden{display:none!important}
 .home-lobby-top{position:relative!important;background:linear-gradient(180deg,#ddd6cd,#d9d3ca)!important;border-radius:30px 30px 0 0!important;padding:26px 24px 30px!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:12px!important}
@@ -64,13 +64,11 @@ body{background:linear-gradient(180deg,#eef1ee 0%,#e8ece9 100%)!important;font-s
 
 #voteOptions .percent-row{border-radius:22px!important;border:1px solid rgba(106,124,128,.10)!important}#voteOptions .percent-row:nth-child(6n+1){background:#efe7e2!important;color:#5d666d!important}#voteOptions .percent-row:nth-child(6n+2){background:#e8ece3!important;color:#58676a!important}#voteOptions .percent-row:nth-child(6n+3){background:#e6e9ef!important;color:#586573!important}#voteOptions .percent-row:nth-child(6n+4){background:#efe9df!important;color:#625f67!important}#voteOptions .percent-row:nth-child(6n+5){background:#e3ece8!important;color:#55686a!important}#voteOptions .percent-row:nth-child(6n){background:#eee6eb!important;color:#615f6c!important}
 
-/* Only the actual login page is viewport-locked. */
-body:has(#homeView:not(.hidden) #homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))){height:100dvh!important;overflow:hidden!important;overscroll-behavior:none!important}
-body:has(#homeView:not(.hidden) #homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .shell{width:100%!important;max-width:none!important;height:100dvh!important;margin:0!important;padding:0!important;overflow:hidden!important}
+body:has(#homeView:not(.hidden) #homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))){height:100dvh!important;overflow:hidden!important;overscroll-behavior:none!important;background:transparent!important}
+body:has(#homeView:not(.hidden) #homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .shell{width:100%!important;max-width:none!important;height:100dvh!important;margin:0!important;padding:0!important;overflow:hidden!important;background:transparent!important}
 body:has(#homeView:not(.hidden) #homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{position:absolute!important;top:40px!important;left:50%!important;transform:translateX(-50%)!important;width:min(430px,72vw)!important;margin:0!important;padding:0!important;gap:26px!important;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;z-index:20!important}
 body:has(#homeView:not(.hidden) #homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-action-btn{background:transparent!important;box-shadow:none!important;border-radius:0!important}
 
-/* Lobby and room screens always scroll; the three actions stay in a separate Morandi tray. */
 body:has(#homeLobbyPage:not(.hidden)),body:has(#roomView:not(.hidden)){height:auto!important;min-height:100dvh!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior-y:auto!important;-webkit-overflow-scrolling:touch!important;touch-action:auto!important}
 body:has(#homeLobbyPage:not(.hidden)) .shell,body:has(#roomView:not(.hidden)) .shell{height:auto!important;min-height:100dvh!important;overflow:visible!important;margin-top:94px!important;margin-bottom:72px!important}
 body:has(#homeLobbyPage:not(.hidden)) .hero-actions,body:has(#roomView:not(.hidden)) .hero-actions{position:fixed!important;top:8px!important;left:50%!important;transform:translateX(-50%)!important;width:min(var(--home-width),calc(100% - 20px))!important;margin:0!important;padding:10px 18px 12px!important;gap:42px!important;background:rgba(204,215,207,.97)!important;border:1px solid rgba(103,124,114,.16)!important;border-radius:24px!important;box-shadow:0 8px 24px rgba(74,88,82,.13)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important;z-index:1000!important}
@@ -80,10 +78,10 @@ body:has(#homeLobbyPage:not(.hidden)) #homeView,body:has(#roomView:not(.hidden))
 
 @media(max-width:600px){
   body{font-size:17px!important}.shell{width:calc(100% - 16px)!important;margin:10px auto 34px!important}.hero-actions{gap:24px!important;padding:9px 12px 10px!important;border-radius:22px!important}.hero-action-btn{width:54px!important;height:54px!important}.hero-action-btn img{width:48px!important;height:48px!important}.hero-mic-btn img{width:52px!important;height:52px!important}
-  #homeLoginPage .home-login-row{left:calc(50% + 5px)!important;top:calc(67.2% + 10px)!important;width:74%!important;grid-template-columns:minmax(0,1fr) 25%!important;gap:2%!important}
-  #homeLoginPage .home-name-input{height:64px!important;font-size:16px!important;padding:0 8px!important}
-  #homeLoginPage .home-line-login{height:64px!important;transform:translateX(10px)!important}
-  #homeLoginPage .home-login-image-btn{top:84%!important;width:48%!important;height:10%!important;min-height:64px!important}
+  #homeView #homeLoginPage .home-login-row{left:calc(50% + 5px)!important;top:calc(67.2% + 10px)!important;width:74%!important;grid-template-columns:minmax(0,1fr) 25%!important;gap:2%!important}
+  #homeView #homeLoginPage .home-name-input{height:64px!important;font-size:16px!important;padding:0 8px!important}
+  #homeView #homeLoginPage .home-line-login{height:64px!important;transform:translateX(10px)!important}
+  #homeView #homeLoginPage .home-login-image-btn{top:84%!important;width:48%!important;height:10%!important;min-height:64px!important}
   body:has(#homeView:not(.hidden) #homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{top:38px!important;width:62vw!important;gap:18px!important}
   body:has(#homeLobbyPage:not(.hidden)) .shell,body:has(#roomView:not(.hidden)) .shell{margin-top:84px!important;margin-bottom:56px!important}
   body:has(#homeLobbyPage:not(.hidden)) .hero-actions,body:has(#roomView:not(.hidden)) .hero-actions{top:6px!important;width:calc(100% - 14px)!important;padding:8px 12px 10px!important;gap:24px!important;border-radius:20px!important}
