@@ -1,8 +1,8 @@
 /* Readable modal controls for desktop, tablet and mobile */
 #openRoomDialog.dialog,#joinDialog.dialog,#voiceDialog.dialog{width:min(620px,calc(100vw - 32px));padding:clamp(28px,3vw,46px);border-radius:30px;font-size:18px}
 #openRoomDialog .dialog-icon,#joinDialog .dialog-icon,#voiceDialog .dialog-icon{line-height:1}
-#openRoomDialog .choice-dialog-icon{width:100%;height:190px;display:flex;justify-content:center;align-items:center;margin:0 0 18px;padding:0;overflow:visible}
-#openRoomDialog .choice-dialog-icon img{display:block;width:500px;max-width:96%;height:auto;max-height:190px;object-fit:contain;transform:scale(1.18);transform-origin:center}
+#openRoomDialog .choice-dialog-icon{width:100%;height:220px;display:flex;justify-content:center;align-items:center;margin:0 0 18px;padding:0;overflow:visible}
+#openRoomDialog .choice-dialog-icon img{display:block;width:560px;max-width:100%;height:auto;max-height:220px;object-fit:contain;transform:scale(1.32);transform-origin:center}
 #voiceDialog .voice-dialog-icon{width:78px;height:78px;display:grid;place-items:center;margin-bottom:10px}
 #voiceDialog .voice-dialog-icon img{width:68px;height:68px;object-fit:contain}
 #joinDialog .dialog-icon{font-size:52px}
@@ -17,8 +17,8 @@
 #createRoomBtn[disabled]{opacity:.72;cursor:wait}
 @media(max-width:640px){
   #openRoomDialog.dialog,#joinDialog.dialog,#voiceDialog.dialog{width:calc(100vw - 20px);padding:24px 20px;font-size:16px;border-radius:24px}
-  #openRoomDialog .choice-dialog-icon{height:150px;margin-bottom:14px}
-  #openRoomDialog .choice-dialog-icon img{width:410px;max-width:96%;max-height:150px;transform:scale(1.2)}
+  #openRoomDialog .choice-dialog-icon{height:180px;margin-bottom:14px}
+  #openRoomDialog .choice-dialog-icon img{width:470px;max-width:100%;max-height:180px;transform:scale(1.34)}
   #joinDialog h3,#voiceDialog h3{font-size:25px;margin-bottom:18px}
   #openRoomDialog label,#joinDialog label,#voiceDialog label{font-size:16px;margin:13px 0}
   #openRoomDialog input,#joinDialog input,#voiceDialog input{font-size:17px;min-height:54px}
