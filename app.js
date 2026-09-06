@@ -13,10 +13,11 @@ function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');cl
 function totalVotes(){return data.options.reduce((a,o)=>a+(o.votes||0),0)}
 function topChoice(){const s=[...data.options].sort((a,b)=>(b.votes||0)-(a.votes||0));return s[0]&&s[0].votes?s[0]:null}
 function phaseStep(){return data.phase==='voting'?'vote':data.phase==='closed'?'analysis':data.phase==='draw'?'draw':'setup'}
+async function readJsonResponse(r){const text=await r.text();if(!text)return {ok:false,error:`伺服器沒有回應（HTTP ${r.status}）`};try{return JSON.parse(text)}catch{return {ok:false,error:`伺服器回應格式錯誤（HTTP ${r.status}）`}}}
 
 async function loadRoomList(){
   const list=$('#roomList');if(!list||data.roomCode)return;
-  try{const r=await fetch(api('/api/rooms'),{cache:'no-store'}),j=await r.json();if(!r.ok)throw new Error(j.error||'讀取失敗');const rooms=Array.isArray(j.rooms)?j.rooms:[];list.innerHTML=rooms.map(room=>`<button class="room-list-item" type="button" data-room-code="${esc(room.code)}"><span class="room-list-name">${esc(room.title||'未命名房間')}</span><span class="room-list-meta">${room.locked?'🔒':'進入'}</span></button>`).join('')}catch{list.innerHTML=''}
+  try{const r=await fetch(api('/api/rooms'),{cache:'no-store'}),j=await readJsonResponse(r);if(!r.ok)throw new Error(j.error||'讀取失敗');const rooms=Array.isArray(j.rooms)?j.rooms:[];list.innerHTML=rooms.map(room=>`<button class="room-list-item" type="button" data-room-code="${esc(room.code)}"><span class="room-list-name">${esc(room.title||'未命名房間')}</span><span class="room-list-meta">${room.locked?'🔒':'進入'}</span></button>`).join('')}catch{list.innerHTML=''}
 }
 
 function render(){
@@ -47,7 +48,12 @@ function applyState(s,myVote=null,hostFlag=null){if(!s)return;data.title=s.title
 async function createRoom(){
   const title=$('#roomTopicInput').value.trim()||'我的 Choice',password=$('#roomPasswordInput').value.trim();
   data={...blank,title,roomPassword:password};selectedVote=null;drawSelected.clear();
-  try{const r=await fetch(api('/api/rooms'),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password,state:roomState()})});const j=await r.json();if(!r.ok)throw new Error(j.error||'建立失敗');data.roomCode=j.code;data.hostToken=j.hostToken||'';isHost=true;save();$('#openRoomDialog').close();connectRoom();render();showStep('setup',true);toast(`房間 ${j.code} 已建立`)}catch(e){toast(e.message||'無法建立房間');throw e}
+  try{
+    const r=await fetch(api('/api/rooms'),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password,state:roomState()})});
+    const j=await readJsonResponse(r);
+    if(!r.ok||!j.code)throw new Error(j.error||`建立失敗（HTTP ${r.status}）`);
+    data.roomCode=j.code;data.hostToken=j.hostToken||'';isHost=true;save();$('#openRoomDialog').close();connectRoom();render();showStep('setup',true);toast(`房間 ${j.code} 已建立`);loadRoomList();
+  }catch(e){toast(e.message||'無法建立房間');throw e}
 }
 function connectRoom(){
   if(!data.roomCode)return;if(roomSocket)try{roomSocket.close()}catch{}
