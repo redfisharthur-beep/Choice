@@ -18,6 +18,10 @@
     <div class="home-main-stage">
       <section class="home-band home-band-middle">
         <img src="./assets/hero/hero.png" alt="Choice" class="home-hero-image">
+        <div class="home-login-row" aria-label="玩家登入">
+          <input id="hostNameInput" class="home-name-input" maxlength="20" autocomplete="nickname" placeholder="輸入名字" aria-label="輸入名字">
+          <button id="lineLoginBtn" class="home-line-login" type="button" aria-label="LINE 登入" title="LINE 登入"><img src="./assets/hero/line.png" alt="LINE 登入"></button>
+        </div>
         <button id="openRoomBtn" class="room-image-btn" type="button" aria-label="建立房間"><img src="./assets/hero/room.png" alt="開房"></button>
       </section>
       <section class="home-band home-band-bottom room-directory" aria-label="房間列表"><div id="roomList" class="room-list"></div></section>
@@ -38,7 +42,7 @@
   </section>
 </main>
 
-<dialog id="openRoomDialog" class="dialog"><button class="x" data-close>×</button><div class="dialog-icon choice-dialog-icon"><img src="./assets/stamp/choice.png" alt="Choice"></div><label>名稱<input id="hostNameInput" maxlength="20" autocomplete="nickname"></label><label>主題<input id="roomTopicInput" maxlength="50"></label><label>密碼<input id="roomPasswordInput" maxlength="20" type="password"></label><button id="createRoomBtn" class="big-btn">建立</button></dialog>
+<dialog id="openRoomDialog" class="dialog"><button class="x" data-close>×</button><div class="dialog-icon choice-dialog-icon"><img src="./assets/stamp/choice.png" alt="Choice"></div><label>主題<input id="roomTopicInput" maxlength="50"></label><label>密碼<input id="roomPasswordInput" maxlength="20" type="password"></label><button id="createRoomBtn" class="big-btn">建立</button></dialog>
 <dialog id="joinDialog" class="dialog"><button class="x" data-close>×</button><div class="dialog-icon">👋</div><h3>加入房間</h3><label>名稱<input id="joinNameInput" maxlength="20" autocomplete="nickname"></label><label id="joinPasswordLabel">密碼<input id="joinPasswordInput" type="password" maxlength="20"></label><button id="joinWithPasswordBtn" class="big-btn">加入</button></dialog>
 <dialog id="voiceDialog" class="dialog"><button class="x" data-close>×</button><div class="dialog-icon voice-dialog-icon"><img src="./assets/hero/mic.png" alt="麥克風"></div><h3>房間語音</h3><div class="voice-meter"><i id="voiceMeterBar"></i></div><button id="micTestBtn" class="soft-wide">測試麥克風</button><button id="joinVoiceBtn" class="big-btn">加入語音</button><button id="muteVoiceBtn" class="soft-wide hidden">靜音</button><button id="leaveVoiceBtn" class="soft-wide hidden">離開語音</button><p id="voiceStatus" class="small-note">進入房間後即可使用</p><div id="voiceAudioRack" hidden></div></dialog>
 <dialog id="lineReminderDialog" class="dialog"><button class="x" data-close>×</button><div class="dialog-icon voice-dialog-icon"><img src="./assets/hero/line.png" alt="LINE"></div><h3>LINE提醒</h3><p class="small-note">到 Choice 官方 LINE 傳送：</p><div id="lineBindCommand" class="winner-box">綁定 ——</div><button id="copyLineBindBtn" class="soft-wide" type="button">複製綁定指令</button><a id="openLineBindBtn" class="big-btn" href="https://lin.ee/t5BkC6O" target="_blank" rel="noopener">開啟官方 LINE</a><p id="lineConfigStatus" class="small-note">檢查 LINE 通知設定中…</p></dialog>
