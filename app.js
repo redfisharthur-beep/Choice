@@ -30,8 +30,8 @@ function renderAnalysis(){
   const total=totalVotes();
   $('#chartList').innerHTML=data.options.length?data.options.map((o,i)=>{const p=total?Math.round(o.votes/total*100):0;return `<div class="bar-row"><div class="bar-label">${emojis[i%emojis.length]} ${esc(o.name)}</div><div class="bar-track"><div class="bar-fill" style="width:${p}%;background:linear-gradient(90deg,${palette[i%palette.length]},#84bff0)"></div></div><div class="bar-value">${p}%</div></div>`}).join(''):'<p class="hint centered">尚未建立選項</p>';
   const sorted=[...data.options].sort((a,b)=>b.votes-a.votes);
-  let copy='目前還沒有投票，先去蓋下第一個章吧！';
-  if(total){const top=sorted[0];const tied=sorted.filter(o=>o.votes===top.votes);copy=tied.length>1?`目前有 ${tied.length} 個選項並列第一，都是 ${top.votes} 票。投票結果可直接作為決策依據；若你想改用隨機方式決定，也可以另外使用射鏢抽籤。`:`「${top.name}」暫時領先，共 ${top.votes} 票，占 ${Math.round(top.votes/total*100)}%。你可以直接採用投票結果，射鏢抽籤則是額外選擇。`}
+  let copy='目前尚未產生投票資料。你可以回到投票頁開始投票；如果不想投票，也可以直接切到射鏢抽籤，用同一組選項隨機決定。';
+  if(total){const top=sorted[0];const tied=sorted.filter(o=>o.votes===top.votes);copy=tied.length>1?`目前有 ${tied.length} 個選項並列第一，都是 ${top.votes} 票。你可以直接採用投票結果，也可以另外使用射鏢抽籤作為隨機決定。`:`「${top.name}」暫時領先，共 ${top.votes} 票，占 ${Math.round(top.votes/total*100)}%。你可以直接採用投票結果；射鏢抽籤則是獨立的另一種玩法。`}
   $('#insightText').textContent=copy;
 }
 
@@ -54,7 +54,7 @@ function switchView(name){
   window.scrollTo({top:Math.max(0,$('.mode-tabs').offsetTop-12),behavior:'smooth'});
 }
 
-$('#pollTitle').addEventListener('input',e=>{data.title=e.target.value.trim()||'未命名投票';save();$('#pollTitleDisplay').textContent=data.title});
+$('#pollTitle').addEventListener('input',e=>{data.title=e.target.value.trim()||'未命名主題';save();$('#pollTitleDisplay').textContent=data.title});
 $('#addOptionBtn').addEventListener('click',addOption);
 $('#optionInput').addEventListener('keydown',e=>{if(e.key==='Enter')addOption()});
 function addOption(){
@@ -97,7 +97,7 @@ $('#throwBtn').addEventListener('click',()=>{
   $('#rouletteResult').textContent='射鏢飛行中…';$('#rouletteSub').textContent='會射中哪一個目標呢？';
   setTimeout(()=>{
     $('#rouletteResult').textContent=pick.name;
-    $('#rouletteSub').textContent=`射中了「${pick.name}」！這次就交給命運決定吧。`;
+    $('#rouletteSub').textContent=`射中了「${pick.name}」！這次就由抽籤結果決定。`;
     data.recent=[pick.name,...(data.recent||[])].slice(0,5);save();renderRecent();throwing=false;
   },1000);
 });
