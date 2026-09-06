@@ -62,7 +62,7 @@ function render(){
   $('#drawChecks').innerHTML=data.options.map(o=>`<label class="draw-check"><input type="checkbox" data-draw="${o.id}" ${drawSelected.has(o.id)?'checked':''} ${!isHost?'disabled':''}>${esc(o.name)}</label>`).join('');
   $('#throwBtn').classList.toggle('hidden',!isHost);$('#drawResult').textContent=data.lastDraw?`🎯 ${data.lastDraw}`:'準備好了嗎？';$('#announceDrawBtn').classList.toggle('hidden',!isHost||!data.lastDraw);
   $('#lineOfficialBtn').href=cfg.lineOfficialUrl||'#';
-  $$('#flowNav button').forEach(b=>{const step=b.dataset.step;if(!isHost)b.disabled=step!==phaseStep();else b.disabled=data.phase!=='setup'&&step==='setup'});
+  $$('#flowNav button').forEach(b=>{const step=b.dataset.step;if(!isHost)b.disabled=true;else b.disabled=data.phase!=='setup'&&step==='setup'});
 }
 function showStep(name,force=false){if(!force&&!isHost&&name!==phaseStep())return;$$('.step').forEach(e=>e.classList.toggle('active',e.id===`${name}Step`));$$('#flowNav button').forEach(b=>b.classList.toggle('active',b.dataset.step===name));window.scrollTo({top:0,behavior:'smooth'})}
 function roomState(){return {title:data.title,options:data.options,recent:data.recent,lastDraw:data.lastDraw,phase:data.phase}}
@@ -92,7 +92,11 @@ function connectRoom(){
       if(m.type==='voice:signal'&&voiceJoined)await handleVoiceSignal(m.from,m.data);
       if(m.type==='voice:left')closeVoicePeer(m.clientId);
       if(m.type==='announce')showAnnouncement(m.result);
-      if(m.type==='draw'&&m.name){data.lastDraw=m.name;save();render();toast(`🎯 抽中 ${m.name}`)}
+      if(m.type==='draw:start'){
+        if(Array.isArray(m.optionIds)){drawSelected=new Set(m.optionIds);render()}
+        showStep('draw',true);const dart=$('#dart');if(dart){dart.classList.remove('fly');void dart.offsetWidth;dart.classList.add('fly')}const out=$('#drawResult');if(out)out.textContent='射鏢飛行中…';
+      }
+      if(m.type==='draw'&&m.name){data.lastDraw=m.name;save();render();showStep('draw',true);toast(`🎯 抽中 ${m.name}`)}
       if(m.type==='vote:ack'){const f=$('#stampFx');f.classList.remove('show');void f.offsetWidth;f.classList.add('show');toast('已投票 ✓')}
       if(m.type==='room:closed'){toast('房主已關閉房間');clearRoomState()}
       if(m.type==='error')toast(m.message||'操作失敗');
@@ -140,7 +144,7 @@ $('#openRoomBtn').onclick=()=>{$('#hostNameInput').value=data.displayName||local
 $('#roomList').onclick=e=>{const b=e.target.closest('[data-room-code]');if(b)openJoinDialog(b.dataset.roomCode,b.dataset.locked==='1')};
 $('#createRoomBtn').onclick=createRoom;
 $('#joinWithPasswordBtn').onclick=()=>{const name=$('#joinNameInput').value.trim(),p=pendingJoinLocked?$('#joinPasswordInput').value:'';if(!name)return toast('請輸入名稱');$('#joinDialog').close();attemptJoin(pendingJoinCode,p,name)};$('#shareRoomBtn').onclick=shareRoom;$('#leaveRoomBtn').onclick=leaveRoom;
-$$('#flowNav button').forEach(b=>b.onclick=()=>showStep(b.dataset.step));
+$$('#flowNav button').forEach(b=>b.onclick=()=>{if(isHost)showStep(b.dataset.step)});
 
 function addOption(){if(!isHost||data.phase!=='setup')return;const input=$('#optionInput'),name=input.value.trim();if(!name)return;if(data.options.length>=12)return toast('最多 12 個項目');if(data.options.some(o=>o.name===name))return toast('項目重複');const id=makeId();data.options.push({id,name,votes:0});drawSelected.add(id);input.value='';save();render();sync()}
 $('#addOptionBtn').onclick=addOption;$('#optionInput').onkeydown=e=>{if(e.key==='Enter')addOption()};
@@ -148,7 +152,7 @@ $('#setupOptions').onclick=e=>{if(!isHost||data.phase!=='setup')return;const b=e
 $('#goVoteBtn').onclick=()=>{if(data.options.length<2)return toast('至少要有 2 個項目');send({type:'phase',phase:'voting'})};$('#goDrawBtn').onclick=()=>{if(data.options.length<2)return toast('至少要有 2 個項目');send({type:'phase',phase:'draw'})};
 $('#voteOptions').onclick=e=>{const b=e.target.closest('[data-vote]');if(!b||data.phase!=='voting')return;selectedVote=b.dataset.vote;render()};$('#voteBtn').onclick=()=>{if(!selectedVote||data.phase!=='voting')return;send({type:'vote',optionId:selectedVote})};$('#closeVoteBtn').onclick=()=>send({type:'phase',phase:'closed'});$('#analysisDrawBtn').onclick=()=>send({type:'phase',phase:'draw'});$('#announceVoteBtn').onclick=()=>{const t=topChoice();if(!t)return toast('目前沒有投票結果');announce(t.name)};
 $('#drawChecks').onchange=e=>{if(!isHost)return;const c=e.target.closest('[data-draw]');if(!c)return;c.checked?drawSelected.add(c.dataset.draw):drawSelected.delete(c.dataset.draw)};
-$('#throwBtn').onclick=()=>{if(!isHost||throwing)return;const ids=[...drawSelected].filter(id=>data.options.some(o=>o.id===id));if(ids.length<2)return toast('至少勾選 2 個項目');throwing=true;const dart=$('#dart');dart.classList.remove('fly');void dart.offsetWidth;dart.classList.add('fly');$('#drawResult').textContent='射鏢飛行中…';setTimeout(()=>{send({type:'draw:request',optionIds:ids});throwing=false},850)};
+$('#throwBtn').onclick=()=>{if(!isHost||throwing)return;const ids=[...drawSelected].filter(id=>data.options.some(o=>o.id===id));if(ids.length<2)return toast('至少勾選 2 個項目');throwing=true;data.lastDraw=null;save();render();send({type:'draw:request',optionIds:ids});setTimeout(()=>{throwing=false},1100)};
 $('#announceDrawBtn').onclick=()=>{if(data.lastDraw)announce(data.lastDraw)};function announce(result){if(!isHost)return;send({type:'announce',result});showAnnouncement(result)}function showAnnouncement(result){$('#announceResult').textContent=result;$('#announceDialog').showModal()}
 
 $('#voiceBtn').onclick=()=>{updateVoiceUi();$('#voiceDialog').showModal()};$('#micTestBtn').onclick=toggleMicTest;$('#joinVoiceBtn').onclick=joinVoice;$('#muteVoiceBtn').onclick=toggleVoiceMute;$('#leaveVoiceBtn').onclick=()=>stopVoice(true);
