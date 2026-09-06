@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#f8fbff" />
+  <title>Choice｜投票 × 分析 × 射鏢抽籤</title>
+  <meta name="description" content="自己填選項、一起投票、即時分析，再用射鏢抽出今天的 Choice！" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="bg-blob blob-a"></div>
+  <div class="bg-blob blob-b"></div>
+  <div class="bg-blob blob-c"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Choice 首頁">
+      <span class="brand-mark">✓</span>
+      <span><b>Choice</b><small>一起選，讓決定變好玩</small></span>
+    </a>
+    <div class="top-actions">
+      <button id="voiceBtn" class="icon-btn" type="button" title="語音聊天">🎙️<span>語音</span></button>
+      <button id="lineLoginBtn" class="line-btn" type="button"><span class="line-dot">LINE</span><span>登入</span></button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <section class="hero-card">
+      <div class="hero-copy">
+        <span class="eyebrow">MAKE A CHOICE, HAVE SOME FUN!</span>
+        <h1>今天，要選哪一個？</h1>
+        <p>建立選項、投票分析，最後再射一鏢！聚餐、旅遊、活動、分組都能玩。</p>
+        <div class="hero-chips">
+          <span>🗳️ 蓋章投票</span><span>📊 即時分析</span><span>🎯 射鏢抽籤</span>
+        </div>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="mini-target"><i></i><i></i><i></i><b>🎯</b></div>
+        <div class="float-card card-one">🍓<b>草莓鬆餅</b></div>
+        <div class="float-card card-two">🌿<b>森林野餐</b></div>
+        <div class="float-card card-three">🐣<b>一起決定</b></div>
+      </div>
+    </section>
+
+    <nav class="mode-tabs" aria-label="功能切換">
+      <button class="mode-tab active" data-view="vote">🗳️ 投票</button>
+      <button class="mode-tab" data-view="analysis">📊 分析</button>
+      <button class="mode-tab" data-view="roulette">🎯 射鏢抽籤</button>
+    </nav>
+
+    <section id="voteView" class="view active">
+      <div class="section-head">
+        <div><span class="section-kicker">STEP 01</span><h2>建立今天的選項</h2></div>
+        <button id="resetBtn" class="text-btn" type="button">重新開始</button>
+      </div>
+
+      <div class="composer card">
+        <div class="field grow">
+          <label for="pollTitle">投票主題</label>
+          <input id="pollTitle" maxlength="50" value="今天晚餐吃什麼？" placeholder="輸入投票主題" />
+        </div>
+        <div class="field grow">
+          <label for="optionInput">新增選項</label>
+          <div class="inline-input">
+            <input id="optionInput" maxlength="30" placeholder="例如：火鍋、燒肉、義大利麵" />
+            <button id="addOptionBtn" class="primary-btn" type="button">＋ 加入</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="voteArea" class="card vote-card">
+        <div class="poll-title-row">
+          <div><span class="tiny-label">現在投票</span><h3 id="pollTitleDisplay">今天晚餐吃什麼？</h3></div>
+          <span id="voteCount" class="count-pill">0 票</span>
+        </div>
+        <div id="optionsGrid" class="options-grid"></div>
+        <p class="hint">點選一個選項後按「蓋章投票」，每次都可以更改自己的選擇。</p>
+        <button id="voteBtn" class="stamp-btn" type="button" disabled>
+          <span class="stamp-icon">✓</span><span>蓋章投票！</span>
+        </button>
+        <div id="stampFx" class="stamp-fx" aria-hidden="true">CHOICE!</div>
+      </div>
+    </section>
+
+    <section id="analysisView" class="view">
+      <div class="section-head"><div><span class="section-kicker">STEP 02</span><h2>投票結果分析</h2></div><span id="analysisTotal" class="count-pill">0 票</span></div>
+      <div class="analysis-layout">
+        <div class="card chart-card">
+          <div id="chartList" class="chart-list"></div>
+        </div>
+        <div class="card insight-card">
+          <span class="insight-emoji">🔎</span>
+          <h3>Choice 小分析</h3>
+          <div id="insightText" class="insight-copy">目前還沒有投票，先去蓋下第一個章吧！</div>
+          <button class="secondary-btn jump-roulette" type="button">結果太接近？去射一鏢 🎯</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="rouletteView" class="view">
+      <div class="section-head"><div><span class="section-kicker">STEP 03</span><h2>射鏢決定最後 Choice</h2></div><span class="soft-pill">使用目前所有選項</span></div>
+      <div class="roulette-layout">
+        <div class="card board-card">
+          <div class="board-wrap">
+            <div id="dartBoard" class="dart-board"></div>
+            <div id="dart" class="dart" aria-hidden="true">➳</div>
+          </div>
+          <button id="throwBtn" class="throw-btn" type="button">🎯 射一鏢！</button>
+          <p class="hint centered">每個選項機率相同；射中後會顯示抽中的目標。</p>
+        </div>
+        <div class="card result-card">
+          <div class="mascot">🐰</div>
+          <span class="tiny-label">THIS IS YOUR CHOICE</span>
+          <h3 id="rouletteResult">準備好了嗎？</h3>
+          <p id="rouletteSub">按下「射一鏢」，讓命運幫你做決定！</p>
+          <div id="recentResults" class="recent-results"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="voiceDialog" class="dialog">
+    <button class="dialog-close" aria-label="關閉">×</button>
+    <div class="dialog-icon">🎙️</div>
+    <h3>語音聊天</h3>
+    <p>前端入口已建立。多人即時語音將使用 WebRTC，搭配 Cloudflare 做房間訊號交換；接上後可在同一投票房直接通話。</p>
+    <div class="status-box"><b>目前狀態</b><span>等待建立 Cloudflare 即時房間服務</span></div>
+  </dialog>
+
+  <dialog id="lineDialog" class="dialog">
+    <button class="dialog-close" aria-label="關閉">×</button>
+    <div class="dialog-icon line">LINE</div>
+    <h3>LINE 登入</h3>
+    <p>登入介面已預留。正式串接需要 LINE Login Channel ID、Channel Secret 與正式 Callback URL，憑證會放 Cloudflare 環境變數，不寫進 GitHub。</p>
+    <div class="status-box"><b>安全設計</b><span>Secrets 僅存 Cloudflare，不進前端程式碼</span></div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js"></script>
+</body>
+</html>
