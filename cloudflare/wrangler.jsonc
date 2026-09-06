@@ -1,0 +1,9 @@
+{
+  "$schema":"./node_modules/wrangler/config-schema.json",
+  "name":"choice-realtime",
+  "main":"src/index.js",
+  "compatibility_date":"2026-09-06",
+  "durable_objects":{"bindings":[{"name":"CHOICE_ROOMS","class_name":"ChoiceRoom"}]},
+  "migrations":[{"tag":"v1","new_sqlite_classes":["ChoiceRoom"]}],
+  "vars":{"LINE_CHANNEL_ID":"","LINE_CALLBACK_URL":""}
+}
