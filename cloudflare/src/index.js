@@ -82,10 +82,23 @@ export class ChoiceRoom extends DurableObject{
   async fetch(request){
     const url=new URL(request.url);
     try{
-      if(url.pathname==='/directory/list'){const now=Date.now(),maxAge=6*60*60*1000;let rooms=await this.ctx.storage.get('directoryRooms')||[];rooms=rooms.filter(r=>now-Number(r.createdAt||0)<maxAge).slice(0,30);await this.ctx.storage.put('directoryRooms',rooms);return json({rooms})}
+      if(url.pathname==='/directory/list'){
+        const now=Date.now(),maxAge=6*60*60*1000;let rooms=await this.ctx.storage.get('directoryRooms')||[];
+        const candidates=rooms.filter(r=>now-Number(r.createdAt||0)<maxAge).slice(0,30);
+        const checked=await Promise.all(candidates.map(async room=>{
+          try{
+            const stub=this.env.CHOICE_ROOMS.get(this.env.CHOICE_ROOMS.idFromName(String(room.code||'').toUpperCase()));
+            const r=await stub.fetch('https://room.local/exists');
+            const j=await r.json().catch(()=>({exists:false}));
+            return j.exists?room:null;
+          }catch{return null}
+        }));
+        rooms=checked.filter(Boolean);await this.ctx.storage.put('directoryRooms',rooms);return json({rooms});
+      }
       if(url.pathname==='/directory/register'&&request.method==='POST'){const body=await request.json().catch(()=>({}));let rooms=await this.ctx.storage.get('directoryRooms')||[];const item={code:String(body.code||'').slice(0,6).toUpperCase(),title:String(body.title||'未命名房間').slice(0,50),locked:!!body.locked,createdAt:Number(body.createdAt)||Date.now()};rooms=[item,...rooms.filter(r=>r.code!==item.code)].slice(0,50);await this.ctx.storage.put('directoryRooms',rooms);return json({ok:true})}
       if(url.pathname==='/directory/remove'&&request.method==='POST'){const body=await request.json().catch(()=>({}));let rooms=await this.ctx.storage.get('directoryRooms')||[];const c=String(body.code||'').toUpperCase();rooms=rooms.filter(r=>r.code!==c);await this.ctx.storage.put('directoryRooms',rooms);return json({ok:true})}
       if(url.pathname==='/init'&&request.method==='POST'){const body=await request.json().catch(()=>({}));this.state={title:String(body.state?.title||'未命名主題').slice(0,50),options:cleanOptions(body.state?.options),recent:[],lastDraw:null,phase:'setup'};this.passwordHash=String(body.passwordHash||'');this.hostToken=String(body.hostToken||'');this.ballots={};this.lineSubscribers=[];this.initialized=true;this.roomCode=String(body.roomCode||'').toUpperCase();await this.ctx.storage.put({roomState:this.state,passwordHash:this.passwordHash,hostToken:this.hostToken,ballots:this.ballots,lineSubscribers:[],initialized:true,roomCode:this.roomCode,createdAt:Number(body.createdAt)||Date.now()});return json({ok:true})}
+      if(url.pathname==='/exists')return json({exists:await this.isInitialized()});
       if(url.pathname==='/line/subscribe'&&request.method==='POST'){if(!await this.isInitialized())return json({error:'room not found'},404);const body=await request.json().catch(()=>({})),userId=String(body.userId||'');if(!userId)return json({error:'missing userId'},400);let users=await this.getLineSubscribers();if(!users.includes(userId))users=[...users,userId].slice(-50);this.lineSubscribers=users;await this.ctx.storage.put('lineSubscribers',users);return json({ok:true,title:(await this.getState()).title})}
       if(url.pathname==='/line/unsubscribe'&&request.method==='POST'){const body=await request.json().catch(()=>({})),userId=String(body.userId||'');let users=await this.getLineSubscribers();users=users.filter(x=>x!==userId);this.lineSubscribers=users;await this.ctx.storage.put('lineSubscribers',users);return json({ok:true})}
       if(url.pathname==='/state'){if(!await this.isInitialized())return json({error:'room not found'},404);if(!await this.authorized(url))return json({error:'password required'},401);return json({state:await this.getState(),members:this.members()})}
