@@ -9,3 +9,6 @@
 .vote-option.percent-row .vote-choice-fx.show{animation:choiceVoteCheck2s 2s ease both!important}
 @keyframes choiceVoteCheck2s{0%{opacity:0;transform:translate(-50%,-50%) scale(.55)}10%{opacity:1;transform:translate(-50%,-50%) scale(1.10)}18%{opacity:1;transform:translate(-50%,-50%) scale(1)}88%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.96)}}
 @media(max-width:600px){.vote-option.percent-row .vote-choice-fx{width:82px!important;height:82px!important}}
+
+/* During dart animation, keep only the target itself — no white capsule/square behind it. */
+body.draw-focus-mode .draw-stage{background:transparent!important;border-radius:0!important;box-shadow:none!important}
