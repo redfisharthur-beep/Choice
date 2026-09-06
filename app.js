@@ -61,7 +61,7 @@ function render(){
   if(!drawSelected.size)data.options.forEach(o=>drawSelected.add(o.id));for(const id of [...drawSelected])if(!data.options.some(o=>o.id===id))drawSelected.delete(id);
   $('#drawChecks').innerHTML=data.options.map(o=>`<label class="draw-check"><input type="checkbox" data-draw="${o.id}" ${drawSelected.has(o.id)?'checked':''} ${!isHost?'disabled':''}>${esc(o.name)}</label>`).join('');
   $('#throwBtn').classList.toggle('hidden',!isHost);$('#drawResult').textContent=data.lastDraw?`🎯 ${data.lastDraw}`:'準備好了嗎？';$('#announceDrawBtn').classList.toggle('hidden',!isHost||!data.lastDraw);
-  $('#lineOfficialBtn').href=cfg.lineOfficialUrl||'#';$('#lineFloat').href=cfg.lineOfficialUrl||'#';
+  $('#lineOfficialBtn').href=cfg.lineOfficialUrl||'#';
   $$('#flowNav button').forEach(b=>{const step=b.dataset.step;if(!isHost)b.disabled=step!==phaseStep();else b.disabled=data.phase!=='setup'&&step==='setup'});
 }
 function showStep(name,force=false){if(!force&&!isHost&&name!==phaseStep())return;$$('.step').forEach(e=>e.classList.toggle('active',e.id===`${name}Step`));$$('#flowNav button').forEach(b=>b.classList.toggle('active',b.dataset.step===name));window.scrollTo({top:0,behavior:'smooth'})}
@@ -151,7 +151,6 @@ $('#drawChecks').onchange=e=>{if(!isHost)return;const c=e.target.closest('[data-
 $('#throwBtn').onclick=()=>{if(!isHost||throwing)return;const ids=[...drawSelected].filter(id=>data.options.some(o=>o.id===id));if(ids.length<2)return toast('至少勾選 2 個項目');throwing=true;const dart=$('#dart');dart.classList.remove('fly');void dart.offsetWidth;dart.classList.add('fly');$('#drawResult').textContent='射鏢飛行中…';setTimeout(()=>{send({type:'draw:request',optionIds:ids});throwing=false},850)};
 $('#announceDrawBtn').onclick=()=>{if(data.lastDraw)announce(data.lastDraw)};function announce(result){if(!isHost)return;send({type:'announce',result});showAnnouncement(result)}function showAnnouncement(result){$('#announceResult').textContent=result;$('#announceDialog').showModal()}
 
-$('#lineFloat').onclick=e=>{if(!cfg.lineOfficialUrl){e.preventDefault();toast('官方 LINE 尚未設定')}};
 $('#voiceBtn').onclick=()=>{updateVoiceUi();$('#voiceDialog').showModal()};$('#micTestBtn').onclick=toggleMicTest;$('#joinVoiceBtn').onclick=joinVoice;$('#muteVoiceBtn').onclick=toggleVoiceMute;$('#leaveVoiceBtn').onclick=()=>stopVoice(true);
 $$('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
 
