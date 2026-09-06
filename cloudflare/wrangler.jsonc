@@ -3,6 +3,7 @@
   "name":"choice",
   "main":"src/entry.js",
   "compatibility_date":"2026-09-06",
+  "keep_vars":true,
   "assets":{"directory":"..","binding":"ASSETS"},
   "durable_objects":{"bindings":[{"name":"CHOICE_ROOMS","class_name":"ChoiceRoom"}]},
   "migrations":[{"tag":"v1","new_sqlite_classes":["ChoiceRoom"]}]
