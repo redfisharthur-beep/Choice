@@ -24,6 +24,43 @@
   };
   const loadSession=async()=>{try{const r=await fetch('/api/auth/me',{cache:'no-store',credentials:'same-origin'}),j=await r.json();if(j.authenticated&&j.user){setLineUi(j.user);if(input){input.value=j.user.displayName||input.value;syncName(input.value)}}else setLineUi(null)}catch{setLineUi(null)}};
 
+  const configureJoinDialog=(code,locked)=>{
+    const dialog=document.querySelector('#joinDialog'),nameInput=document.querySelector('#joinNameInput'),passLabel=document.querySelector('#joinPasswordLabel'),passInput=document.querySelector('#joinPasswordInput'),btn=document.querySelector('#joinWithPasswordBtn');
+    if(!dialog)return;
+    const heading=dialog.querySelector('h3'),icon=dialog.querySelector('.dialog-icon');
+    if(heading)heading.textContent=locked?'加入房間':'輸入名字';
+    if(icon)icon.textContent=locked?'🔐':'👋';
+    if(nameInput){
+      nameInput.type='text';nameInput.placeholder='輸入名字';nameInput.autocomplete='nickname';nameInput.maxLength=20;nameInput.setAttribute('aria-label','輸入名字');
+      nameInput.value=localStorage.getItem('choice-display-name')||'';
+      nameInput.style.display='block';nameInput.style.width='100%';nameInput.style.minHeight='58px';nameInput.style.margin='12px 0';nameInput.style.padding='0 16px';nameInput.style.borderRadius='16px';nameInput.style.boxSizing='border-box';
+    }
+    passLabel?.classList.toggle('hidden',!locked);if(passInput&&!locked)passInput.value='';
+    if(btn)btn.textContent='進入房間';
+    try{pendingJoinCode=String(code||'').toUpperCase();pendingJoinLocked=!!locked}catch{}
+    if(!dialog.open)dialog.showModal();
+    setTimeout(()=>{if(nameInput&&!nameInput.value)nameInput.focus();else if(locked)passInput?.focus();else btn?.focus()},60);
+  };
+  const resolveSharedRoom=async()=>{
+    const code=new URL(location.href).searchParams.get('room');
+    if(!code||!/^[A-Za-z0-9]{6}$/.test(code))return;
+    const roomCode=code.toUpperCase();
+    let remembered='';try{remembered=typeof hostTokenFor==='function'?hostTokenFor(roomCode):''}catch{}
+    if(remembered)return;
+    const dialog=document.querySelector('#joinDialog');if(dialog?.open)dialog.close();
+    let locked=false,found=false;
+    try{
+      const r=await fetch('/api/rooms',{cache:'no-store'}),j=await r.json();
+      const room=Array.isArray(j?.rooms)?j.rooms.find(x=>String(x?.code||'').toUpperCase()===roomCode):null;
+      if(room){found=true;locked=!!room.locked}
+    }catch{}
+    const saved=String(localStorage.getItem('choice-display-name')||'').trim();
+    if(found&&!locked&&saved){
+      try{attemptJoin(roomCode,'',saved);return}catch{}
+    }
+    configureJoinDialog(roomCode,found?locked:false);
+  };
+
   const currentVoteFlow=()=>{try{if(typeof data==='undefined'||!data?.roomCode)return {room:false,host:false,phase:'setup',tie:false};const options=Array.isArray(data.options)?data.options:[],max=options.reduce((m,o)=>Math.max(m,Math.max(0,Number(o?.votes)||0)),0),tie=max>0&&options.filter(o=>(Number(o?.votes)||0)===max).length>1;return {room:true,host:typeof isHost!=='undefined'&&!!isHost,phase:String(data.phase||'setup'),tie}}catch{return {room:false,host:false,phase:'setup',tie:false}}};
   const applyFlowRules=()=>{
     const flow=currentVoteFlow(),nav=document.querySelector('#flowNav');if(!nav)return;
@@ -96,4 +133,5 @@
   setInterval(applyFlowRules,1000);applyFlowRules();
   const qs=new URL(location.href).searchParams,loginResult=qs.get('line_login');if(loginResult){history.replaceState({},'',location.pathname+location.hash);if(loginResult==='success')showToast('LINE 登入成功');else if(loginResult==='cancelled')showToast('已取消 LINE 登入');else if(loginResult==='not_configured')showToast('LINE Login 尚未完成設定');else showToast('LINE 登入失敗，請再試一次')}
   loadSession();
+  setTimeout(resolveSharedRoom,0);
 })();
