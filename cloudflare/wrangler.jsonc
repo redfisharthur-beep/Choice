@@ -1,7 +1,7 @@
 {
   "$schema":"./node_modules/wrangler/config-schema.json",
   "name":"choice",
-  "main":"src/index.js",
+  "main":"src/entry.js",
   "compatibility_date":"2026-09-06",
   "assets":{"directory":"..","binding":"ASSETS"},
   "durable_objects":{"bindings":[{"name":"CHOICE_ROOMS","class_name":"ChoiceRoom"}]},
