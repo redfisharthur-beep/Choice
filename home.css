@@ -20,8 +20,8 @@ body{background:var(--morandi-page)}
 .hero-action-btn:hover{transform:translateY(-2px) scale(1.04)!important}
 .hero-action-btn img{display:block!important;width:64px!important;height:64px!important;object-fit:contain!important;border:0!important;background:transparent!important;box-shadow:none!important}
 .hero-mic-btn img{width:70px!important;height:70px!important}
-.home-hero-image{display:block!important;width:min(540px,76%)!important;height:auto!important;max-height:400px!important;object-fit:contain!important;margin:0 auto!important;filter:drop-shadow(0 14px 24px rgba(60,63,62,.10));transform-origin:50% 76%;will-change:transform;animation:choiceHeroWiggle 3.4s ease-in-out infinite}
-@keyframes choiceHeroWiggle{0%,100%{transform:translateY(0) rotate(-1deg)}25%{transform:translateY(-5px) rotate(.7deg)}50%{transform:translateY(-8px) rotate(1.3deg)}75%{transform:translateY(-4px) rotate(-.5deg)}}
+.home-hero-image{display:block!important;width:min(540px,76%)!important;height:auto!important;max-height:400px!important;object-fit:contain!important;margin:0 auto!important;filter:drop-shadow(0 14px 24px rgba(60,63,62,.10));will-change:transform;animation:choiceHeroFloat 3.6s ease-in-out infinite}
+@keyframes choiceHeroFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 .home-login-row{width:min(430px,78%)!important;display:grid!important;grid-template-columns:minmax(0,1fr) 68px!important;align-items:center!important;gap:12px!important;margin:2px auto 0!important}
 .home-name-input{width:100%!important;height:58px!important;border:1px solid rgba(92,104,103,.16)!important;border-radius:18px!important;background:rgba(255,255,255,.88)!important;color:var(--ink)!important;padding:0 18px!important;font-size:17px!important;outline:0!important;box-shadow:0 8px 18px rgba(76,78,74,.06)!important}
 .home-name-input::placeholder{color:#9a9f9e!important}
