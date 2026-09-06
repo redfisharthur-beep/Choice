@@ -1,4 +1,4 @@
-import baseWorker,{ChoiceRoom} from './index.js';
+import baseWorker,{ChoiceRoom as BaseChoiceRoom} from './index.js';
 
 const enc=new TextEncoder();
 const dec=new TextDecoder();
@@ -18,6 +18,16 @@ const clearCookie=name=>`${name}=; Path=/; Max-Age=0; SameSite=Lax; Secure; Http
 const redirect=(location,cookies=[])=>{const headers=new Headers({'location':location,'cache-control':'no-store'});for(const value of cookies)headers.append('set-cookie',value);return new Response(null,{status:302,headers})};
 const sessionSecret=env=>env.LINE_LOGIN_SESSION_SECRET||env.LINE_LOGIN_CHANNEL_SECRET||'';
 const configured=env=>!!(env.LINE_LOGIN_CHANNEL_ID&&env.LINE_LOGIN_CHANNEL_SECRET);
+const DEFAULT_VOTE_WINDOW_MS=7*24*60*60*1000;
+
+function finalVoteResult(state){
+  const options=Array.isArray(state?.options)?state.options:[];
+  const max=options.reduce((m,o)=>Math.max(m,Math.max(0,Number(o?.votes)||0)),0);
+  if(max<=0)return '本次投票無人投票';
+  const winners=options.filter(o=>(Number(o?.votes)||0)===max).map(o=>String(o?.name||'').trim()).filter(Boolean);
+  if(!winners.length)return '本次投票無人投票';
+  return winners.length===1?`${winners[0]}（${max} 票）`:`${winners.join('、')}（同票 ${max} 票）`;
+}
 
 async function getMessagingBotInfo(env){
   const token=String(env.LINE_CHANNEL_ACCESS_TOKEN||'');
@@ -95,6 +105,39 @@ async function handleLineAuth(request,env){
   return json({error:'Not found'},404);
 }
 
+export class ChoiceRoom extends BaseChoiceRoom{
+  async webSocketMessage(ws,message){
+    let msg=null;try{msg=JSON.parse(message)}catch{}
+    if(msg?.type==='room:close'){
+      try{ws.send(JSON.stringify({type:'error',message:'房間會持續保留，可使用左下離開按鈕回首頁'}))}catch{}
+      return;
+    }
+    if(msg?.type==='phase'&&msg.phase==='voting'){
+      const s=await this.getState();
+      if(!s.voteDeadline){
+        s.voteDeadline=new Date(Date.now()+DEFAULT_VOTE_WINDOW_MS).toISOString();
+        this.state=s;
+        await this.persistState();
+      }
+    }
+    return super.webSocketMessage(ws,message);
+  }
+
+  async closeVotingForDeadline(){
+    const s=await this.getState();
+    if(s.phase!=='voting'||!this.voteExpired(s))return false;
+    s.phase='closed';this.state=s;
+    await this.persistState();
+    await this.broadcastState();
+    const result=finalVoteResult(s);
+    this.broadcast({type:'announce',result,automatic:true});
+    await this.notifyLineSubscribers(result);
+    return true;
+  }
+
+  async alarm(){await this.closeVotingForDeadline()}
+}
+
 export default{
   async fetch(request,env,ctx){
     const url=new URL(request.url);
@@ -107,5 +150,3 @@ export default{
     return baseWorker.fetch(request,env,ctx);
   }
 };
-
-export {ChoiceRoom};
