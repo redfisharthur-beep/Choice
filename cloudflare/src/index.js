@@ -7,14 +7,15 @@ const hash=async value=>{if(!value)return '';const buf=await crypto.subtle.diges
 
 export default{
   async fetch(request,env){
-    const url=new URL(request.url);if(request.method==='OPTIONS')return new Response(null,{headers:H});
+    const url=new URL(request.url);if(request.method==='OPTIONS'&&url.pathname.startsWith('/api/'))return new Response(null,{headers:H});
     if(url.pathname==='/api/health')return json({ok:true,service:'choice-realtime'});
     if(url.pathname==='/api/rooms'&&request.method==='POST'){
       const body=await request.json().catch(()=>({}));const room=code(),id=env.CHOICE_ROOMS.idFromName(room),stub=env.CHOICE_ROOMS.get(id);
       await stub.fetch('https://room.local/init',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({state:body.state||{},passwordHash:await hash(body.password||'')})});return json({code:room});
     }
     const m=url.pathname.match(/^\/api\/rooms\/([A-Z0-9]{6})(\/ws)?$/i);if(m){const id=env.CHOICE_ROOMS.idFromName(m[1].toUpperCase()),stub=env.CHOICE_ROOMS.get(id),forward=new URL(request.url);forward.hostname='room.local';forward.pathname=m[2]?'/ws':'/state';return stub.fetch(new Request(forward,request))}
-    return json({error:'Not found'},404);
+    if(url.pathname.startsWith('/api/'))return json({error:'Not found'},404);
+    return env.ASSETS.fetch(request);
   }
 };
 
