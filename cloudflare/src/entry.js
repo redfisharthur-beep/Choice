@@ -19,6 +19,17 @@ const redirect=(location,cookies=[])=>{const headers=new Headers({'location':loc
 const sessionSecret=env=>env.LINE_LOGIN_SESSION_SECRET||env.LINE_LOGIN_CHANNEL_SECRET||'';
 const configured=env=>!!(env.LINE_LOGIN_CHANNEL_ID&&env.LINE_LOGIN_CHANNEL_SECRET);
 
+async function getMessagingBotInfo(env){
+  const token=String(env.LINE_CHANNEL_ACCESS_TOKEN||'');
+  if(!token)return {ok:false,status:503,data:{configured:false,error:'LINE_CHANNEL_ACCESS_TOKEN missing'}};
+  try{
+    const r=await fetch('https://api.line.me/v2/bot/info',{headers:{authorization:`Bearer ${token}`}});
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok)return {ok:false,status:r.status,data:{configured:true,tokenValid:false,error:data.message||'LINE bot info failed'}};
+    return {ok:true,status:200,data:{configured:true,tokenValid:true,basicId:String(data.basicId||data.premiumId||''),displayName:String(data.displayName||''),pictureUrl:String(data.pictureUrl||'')}};
+  }catch(err){return {ok:false,status:502,data:{configured:true,tokenValid:false,error:err?.message||'LINE bot info failed'}}}
+}
+
 async function handleLineAuth(request,env){
   const url=new URL(request.url),path=url.pathname;
   if(!path.startsWith('/api/auth/'))return null;
@@ -86,6 +97,11 @@ async function handleLineAuth(request,env){
 
 export default{
   async fetch(request,env,ctx){
+    const url=new URL(request.url);
+    if(url.pathname==='/api/line/bot-info'&&request.method==='GET'){
+      const info=await getMessagingBotInfo(env);
+      return json(info.data,info.status);
+    }
     const auth=await handleLineAuth(request,env);
     if(auth)return auth;
     return baseWorker.fetch(request,env,ctx);
