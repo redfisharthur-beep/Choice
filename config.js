@@ -1,5 +1,5 @@
 window.CHOICE_CONFIG={
-  apiBase:"",
+  apiBase:"https://choice.redfisharthur.workers.dev",
   realtimeEnabled:false,
-  lineEnabled:false
+  lineOfficialUrl:""
 };
