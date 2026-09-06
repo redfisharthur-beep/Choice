@@ -45,7 +45,7 @@ function sync(){if(isHost&&data.phase==='setup')send({type:'state:set',state:roo
 function applyState(s,myVote=null,hostFlag=null){if(!s)return;data.title=s.title||data.title;data.options=Array.isArray(s.options)?s.options:data.options;data.recent=Array.isArray(s.recent)?s.recent:data.recent;data.lastDraw=s.lastDraw||null;data.phase=s.phase||'setup';if(hostFlag!==null)isHost=!!hostFlag;data.myVote=myVote||null;selectedVote=data.myVote;if(selectedVote&&!data.options.some(o=>o.id===selectedVote))selectedVote=null;save();render();showStep(phaseStep(),true)}
 
 async function createRoom(){
-  const title=$('#roomTopicInput').value.trim()||'我的 Choice',noPassword=$('#noPasswordCheck').checked,password=noPassword?'':$('#roomPasswordInput').value;
+  const title=$('#roomTopicInput').value.trim()||'我的 Choice',password=$('#roomPasswordInput').value.trim();
   data={...blank,title,roomPassword:password};selectedVote=null;drawSelected.clear();
   try{const r=await fetch(api('/api/rooms'),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password,state:roomState()})});const j=await r.json();if(!r.ok)throw new Error(j.error||'建立失敗');data.roomCode=j.code;data.hostToken=j.hostToken||'';isHost=true;save();$('#openRoomDialog').close();connectRoom();render();showStep('setup',true);toast(`房間 ${j.code} 已建立`)}catch(e){toast(e.message||'無法建立房間');throw e}
 }
@@ -60,7 +60,6 @@ async function shareRoom(){const u=new URL(location.href);u.searchParams.set('ro
 
 $('#openRoomBtn').onclick=()=>$('#openRoomDialog').showModal();
 $('#roomList').onclick=e=>{const b=e.target.closest('[data-room-code]');if(b)attemptJoin(b.dataset.roomCode)};
-$('#noPasswordCheck').onchange=e=>{$('#roomPasswordInput').disabled=e.target.checked;if(e.target.checked)$('#roomPasswordInput').value=''};$('#roomPasswordInput').disabled=true;
 $('#createRoomBtn').onclick=createRoom;
 $('#joinWithPasswordBtn').onclick=()=>{const p=$('#joinPasswordInput').value;$('#joinDialog').close();attemptJoin(pendingJoinCode,p)};$('#shareRoomBtn').onclick=shareRoom;$('#leaveRoomBtn').onclick=leaveRoom;
 $$('#flowNav button').forEach(b=>b.onclick=()=>showStep(b.dataset.step));
