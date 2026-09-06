@@ -23,8 +23,8 @@
   };
   const copy=$('#copyLineBindBtn');
   if(copy)copy.onclick=async()=>{
-    const text=$('#lineBindCommand')?.textContent||'';
-    if(!/^[\u7DB綁定\sA-Z0-9]+$/i.test(text)&&!text.startsWith('綁定 '))return showToast('綁定指令尚未產生');
+    const text=String($('#lineBindCommand')?.textContent||'').trim();
+    if(!/^綁定\s+[A-Z0-9]{6}$/i.test(text))return showToast('綁定指令尚未產生');
     try{await copyCommand(text);showToast('綁定指令已複製，請傳送到官方 LINE')}
     catch{showToast('請允許瀏覽器使用剪貼簿')}
   };
