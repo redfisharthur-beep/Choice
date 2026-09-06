@@ -14,7 +14,7 @@ const persistName=name=>{const n=String(name||'').trim().slice(0,20);data.displa
 function load(){try{return {...blank,...JSON.parse(localStorage.getItem(stateKey)||localStorage.getItem('choice-app-v4')||'{}')}}catch{return {...blank}}}
 function save(){localStorage.setItem(stateKey,JSON.stringify(data))}
 function api(path){return `${cfg.apiBase||''}${path}`}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))}
 function toast(t){const e=$('#toast');if(!e)return;e.textContent=t;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),1800)}
 function totalVotes(){return data.options.reduce((a,o)=>a+(o.votes||0),0)}
 function topChoice(){const s=[...data.options].sort((a,b)=>(b.votes||0)-(a.votes||0));return s[0]&&s[0].votes?s[0]:null}
@@ -26,7 +26,7 @@ function deadlineIso(value){if(!value)return '';const d=new Date(value);return N
 function displayDate(value){const d=new Date(`${value}T00:00:00`);return Number.isNaN(d.getTime())?value:new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'numeric',day:'numeric',weekday:'short'}).format(d)}
 async function readJsonResponse(r){const text=await r.text();if(!text)return {ok:false,error:`伺服器沒有回應（HTTP ${r.status}）`};try{return JSON.parse(text)}catch{return {ok:false,error:`伺服器回應格式錯誤（HTTP ${r.status}）`}}}
 
-async function loadRoomList(){const list=$('#roomList');if(!list||data.roomCode)return;try{const r=await fetch(api('/api/rooms'),{cache:'no-store'}),j=await readJsonResponse(r);if(!r.ok)throw new Error(j.error||'讀取失敗');const rooms=Array.isArray(j.rooms)?j.rooms:[];list.innerHTML=rooms.map(room=>`<button class="room-list-item" type="button" data-room-code="${esc(room.code)}" data-locked="${room.locked?'1':'0'}"><span class="room-list-name">${esc(room.title||'未命名房間')}</span><span class="room-list-meta">${room.locked?'🔒':'進入'}</span></button>`).join('')}catch{list.innerHTML=''}}
+async function loadRoomList(){const list=$('#roomList');if(!list||data.roomCode)return;try{const r=await fetch(api('/api/rooms'),{cache:'no-store'}),j=await readJsonResponse(r);if(!r.ok)throw new Error(j.error||'讀取失敗');const rooms=Array.isArray(j.rooms)?j.rooms:[];list.innerHTML=rooms.map(room=>`<button class="room-list-item" style="position:relative;justify-content:center;text-align:center" type="button" data-room-code="${esc(room.code)}" data-locked="${room.locked?'1':'0'}"><span class="room-list-name" style="width:100%;text-align:center">${esc(room.title||'未命名房間')}</span>${room.locked?'<span class="room-list-meta" style="position:absolute;right:16px">🔒</span>':''}</button>`).join('')}catch{list.innerHTML=''}}
 
 function renderPlayers(){const list=$('#playerList'),status=$('#voteProgressText');if(!list||!status)return;let members=roomMembers;if(data.roomCode&&!members.length&&data.displayName)members=[{clientId,name:data.displayName,isHost,voted:votesUsed>0,voice:voiceJoined}];const voted=members.filter(m=>m.voted).length;if(data.phase==='voting'&&data.anonymous)status.textContent='匿名投票中';else status.textContent=data.phase==='voting'?`${voted}/${members.length} 已投票`:`${members.length} 人在線`;list.innerHTML=members.map(m=>`<div class="player-chip"><span class="player-name">${esc(m.name||'訪客')}${m.voice?' 🎙️':''}</span></div>`).join('')}
 
