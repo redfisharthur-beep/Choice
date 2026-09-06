@@ -20,7 +20,7 @@ export default{
         if(!env.CHOICE_ROOMS)return json({error:'CHOICE_ROOMS binding unavailable'},500);
         const body=await request.json().catch(()=>({}));
         const room=code(),hostToken=crypto.randomUUID(),id=env.CHOICE_ROOMS.idFromName(room),stub=env.CHOICE_ROOMS.get(id),password=String(body.password||''),title=String(body.state?.title||'未命名房間').slice(0,50);
-        const initResponse=await stub.fetch('https://room.local/init',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({state:body.state||{},passwordHash:await hash(password),hostToken,createdAt:Date.now()})});
+        const initResponse=await stub.fetch('https://room.local/init',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({roomCode:room,state:body.state||{},passwordHash:await hash(password),hostToken,createdAt:Date.now()})});
         if(!initResponse.ok){const text=await initResponse.text().catch(()=>'');return json({error:text||'Room initialization failed'},500)}
         try{
           const dir=env.CHOICE_ROOMS.get(env.CHOICE_ROOMS.idFromName('__CHOICE_DIRECTORY__'));
@@ -35,19 +35,17 @@ export default{
       }
       if(url.pathname.startsWith('/api/'))return json({error:'Not found'},404);
       return env.ASSETS.fetch(request);
-    }catch(err){
-      console.error('choice worker error',err);
-      return json({error:err?.message||'Worker error'},500);
-    }
+    }catch(err){console.error('choice worker error',err);return json({error:err?.message||'Worker error'},500)}
   }
 };
 
 export class ChoiceRoom extends DurableObject{
   constructor(ctx,env){
-    super(ctx,env);this.ctx=ctx;this.env=env;this.state=null;this.passwordHash=null;this.hostToken=null;this.ballots=null;this.initialized=null;
+    super(ctx,env);this.ctx=ctx;this.env=env;this.state=null;this.passwordHash=null;this.hostToken=null;this.ballots=null;this.initialized=null;this.roomCode=null;
     this.ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair('ping','pong'));
   }
   async isInitialized(){if(this.initialized!==null)return this.initialized;this.initialized=!!(await this.ctx.storage.get('initialized'));return this.initialized}
+  async getRoomCode(){if(this.roomCode!==null)return this.roomCode;this.roomCode=String(await this.ctx.storage.get('roomCode')||'');return this.roomCode}
   async getState(){if(this.state)return this.state;this.state=await this.ctx.storage.get('roomState')||{title:'未命名主題',options:[],recent:[],lastDraw:null,phase:'setup'};if(!this.state.phase)this.state.phase='setup';return this.state}
   async getPasswordHash(){if(this.passwordHash!==null)return this.passwordHash;this.passwordHash=await this.ctx.storage.get('passwordHash')||'';return this.passwordHash}
   async getHostToken(){if(this.hostToken!==null)return this.hostToken;this.hostToken=await this.ctx.storage.get('hostToken')||'';return this.hostToken}
@@ -60,6 +58,7 @@ export class ChoiceRoom extends DurableObject{
   async persistState(){await this.ctx.storage.put('roomState',this.state)}
   async resetVotes(){const s=await this.getState();this.ballots={};s.options=s.options.map(o=>({...o,votes:0}));await this.ctx.storage.put('ballots',this.ballots);await this.persistState()}
   async recomputeVotes(){const s=await this.getState(),ballots=await this.getBallots(),counts={};for(const id of Object.values(ballots))counts[id]=(counts[id]||0)+1;s.options=s.options.map(o=>({...o,votes:counts[o.id]||0}));await this.persistState()}
+  async removeFromDirectory(){const roomCode=await this.getRoomCode();if(!roomCode)return;try{const dir=this.env.CHOICE_ROOMS.get(this.env.CHOICE_ROOMS.idFromName('__CHOICE_DIRECTORY__'));await dir.fetch('https://room.local/directory/remove',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code:roomCode})})}catch(err){console.error('directory remove failed',err)}}
   async fetch(request){
     const url=new URL(request.url);
     try{
@@ -75,8 +74,8 @@ export class ChoiceRoom extends DurableObject{
         const body=await request.json().catch(()=>({}));let rooms=await this.ctx.storage.get('directoryRooms')||[];const c=String(body.code||'').toUpperCase();rooms=rooms.filter(r=>r.code!==c);await this.ctx.storage.put('directoryRooms',rooms);return json({ok:true});
       }
       if(url.pathname==='/init'&&request.method==='POST'){
-        const body=await request.json().catch(()=>({}));this.state={title:String(body.state?.title||'未命名主題').slice(0,50),options:cleanOptions(body.state?.options),recent:[],lastDraw:null,phase:'setup'};this.passwordHash=String(body.passwordHash||'');this.hostToken=String(body.hostToken||'');this.ballots={};this.initialized=true;
-        await this.ctx.storage.put({roomState:this.state,passwordHash:this.passwordHash,hostToken:this.hostToken,ballots:this.ballots,initialized:true,createdAt:Number(body.createdAt)||Date.now()});return json({ok:true});
+        const body=await request.json().catch(()=>({}));this.state={title:String(body.state?.title||'未命名主題').slice(0,50),options:cleanOptions(body.state?.options),recent:[],lastDraw:null,phase:'setup'};this.passwordHash=String(body.passwordHash||'');this.hostToken=String(body.hostToken||'');this.ballots={};this.initialized=true;this.roomCode=String(body.roomCode||'').toUpperCase();
+        await this.ctx.storage.put({roomState:this.state,passwordHash:this.passwordHash,hostToken:this.hostToken,ballots:this.ballots,initialized:true,roomCode:this.roomCode,createdAt:Number(body.createdAt)||Date.now()});return json({ok:true});
       }
       if(url.pathname==='/state'){
         if(!await this.isInitialized())return json({error:'room not found'},404);
@@ -101,6 +100,10 @@ export class ChoiceRoom extends DurableObject{
   async webSocketMessage(ws,message){
     let msg;try{msg=JSON.parse(message)}catch{return}const a=this.attachment(ws),s=await this.getState();
     if(msg.type==='join'){await this.sendSnapshot(ws);this.broadcastMembers();return}
+    if(msg.type==='room:close'){
+      if(!a.isHost)return ws.send(JSON.stringify({type:'error',message:'只有房主可以關閉房間'}));
+      this.initialized=false;await this.ctx.storage.put('initialized',false);await this.removeFromDirectory();this.broadcast({type:'room:closed'});for(const socket of this.ctx.getWebSockets())try{socket.close(4005,'room closed')}catch{}return;
+    }
     if(msg.type==='state:set'){
       if(!a.isHost||s.phase!=='setup')return ws.send(JSON.stringify({type:'error',message:'只有房主可在設定階段修改內容'}));
       const next=msg.state||{},oldIds=s.options.map(o=>o.id).join('|'),newOptions=cleanOptions(next.options),newIds=newOptions.map(o=>o.id).join('|');
