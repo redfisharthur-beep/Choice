@@ -4,7 +4,7 @@ const makeId=()=>crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`;
 const clientId=localStorage.getItem('choice-client-id')||makeId();localStorage.setItem('choice-client-id',clientId);
 const stateKey='choice-app-v4';
 const blank={title:'今晚吃什麼？',options:[],myVote:null,recent:[],roomCode:null,roomPassword:'',hostToken:'',displayName:'訪客',lastDraw:null,phase:'setup'};
-let data=load(),selectedVote=data.myVote||null,drawSelected=new Set(),roomSocket=null,roomMembers=[],throwing=false,pendingJoinCode='',micStream=null,audioCtx=null,analyser=null,meterRAF=null,isHost=false;
+let data=load(),selectedVote=data.myVote||null,drawSelected=new Set(),roomSocket=null,roomMembers=[],throwing=false,pendingJoinCode='',micStream=null,audioCtx=null,analyser=null,meterRAF=null,isHost=false,leavingRoom=false;
 function load(){try{return {...blank,...JSON.parse(localStorage.getItem(stateKey)||'{}')}}catch{return {...blank}}}
 function save(){localStorage.setItem(stateKey,JSON.stringify(data))}
 function api(path){return `${cfg.apiBase||''}${path}`}
@@ -44,6 +44,7 @@ function roomState(){return {title:data.title,options:data.options,recent:data.r
 function send(payload){try{if(roomSocket?.readyState===1)roomSocket.send(JSON.stringify(payload))}catch{}}
 function sync(){if(isHost&&data.phase==='setup')send({type:'state:set',state:roomState()})}
 function applyState(s,myVote=null,hostFlag=null){if(!s)return;data.title=s.title||data.title;data.options=Array.isArray(s.options)?s.options:data.options;data.recent=Array.isArray(s.recent)?s.recent:data.recent;data.lastDraw=s.lastDraw||null;data.phase=s.phase||'setup';if(hostFlag!==null)isHost=!!hostFlag;data.myVote=myVote||null;selectedVote=data.myVote;if(selectedVote&&!data.options.some(o=>o.id===selectedVote))selectedVote=null;save();render();showStep(phaseStep(),true)}
+function clearRoomState(){roomMembers=[];data.roomCode=null;data.roomPassword='';data.hostToken='';data.myVote=null;isHost=false;selectedVote=null;pendingJoinCode='';save();history.replaceState({},'',location.pathname);render();showStep('setup',true);setTimeout(loadRoomList,120)}
 
 async function createRoom(){
   const title=$('#roomTopicInput').value.trim()||'我的 Choice',password=$('#roomPasswordInput').value.trim();
@@ -52,16 +53,39 @@ async function createRoom(){
     const r=await fetch(api('/api/rooms'),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password,state:roomState()})});
     const j=await readJsonResponse(r);
     if(!r.ok||!j.code)throw new Error(j.error||`建立失敗（HTTP ${r.status}）`);
-    data.roomCode=j.code;data.hostToken=j.hostToken||'';isHost=true;save();$('#openRoomDialog').close();connectRoom();render();showStep('setup',true);toast(`房間 ${j.code} 已建立`);loadRoomList();
+    data.roomCode=j.code;data.hostToken=j.hostToken||'';isHost=true;save();$('#openRoomDialog').close();connectRoom();render();showStep('setup',true);toast(`房間 ${j.code} 已建立`);
   }catch(e){toast(e.message||'無法建立房間');throw e}
 }
 function connectRoom(){
   if(!data.roomCode)return;if(roomSocket)try{roomSocket.close()}catch{}
   const u=new URL(api(`/api/rooms/${data.roomCode}/ws`),location.href);u.searchParams.set('clientId',clientId);u.searchParams.set('name',data.displayName);if(data.roomPassword)u.searchParams.set('password',data.roomPassword);if(data.hostToken)u.searchParams.set('hostToken',data.hostToken);u.protocol=u.protocol==='https:'?'wss:':'ws:';
-  try{roomSocket=new WebSocket(u);roomSocket.onopen=()=>send({type:'join'});roomSocket.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch{return}if(m.type==='snapshot')applyState(m.state,m.myVote,m.isHost);if(m.type==='members'){roomMembers=m.members||[];render()}if(m.type==='announce')showAnnouncement(m.result);if(m.type==='draw'&&m.name){data.lastDraw=m.name;save();render();toast(`🎯 抽中 ${m.name}`)}if(m.type==='vote:ack'){const f=$('#stampFx');f.classList.remove('show');void f.offsetWidth;f.classList.add('show');toast('已投票 ✓')}if(m.type==='error')toast(m.message||'操作失敗')};roomSocket.onclose=e=>{roomMembers=[];render();if(e.code===4001){pendingJoinCode=data.roomCode;data.roomCode=null;data.roomPassword='';data.hostToken='';isHost=false;save();render();$('#joinDialog').showModal();toast('需要房間密碼')}}}catch{toast('連線失敗')}
+  try{
+    roomSocket=new WebSocket(u);
+    roomSocket.onopen=()=>send({type:'join'});
+    roomSocket.onmessage=e=>{
+      let m;try{m=JSON.parse(e.data)}catch{return}
+      if(m.type==='snapshot')applyState(m.state,m.myVote,m.isHost);
+      if(m.type==='members'){roomMembers=m.members||[];render()}
+      if(m.type==='announce')showAnnouncement(m.result);
+      if(m.type==='draw'&&m.name){data.lastDraw=m.name;save();render();toast(`🎯 抽中 ${m.name}`)}
+      if(m.type==='vote:ack'){const f=$('#stampFx');f.classList.remove('show');void f.offsetWidth;f.classList.add('show');toast('已投票 ✓')}
+      if(m.type==='room:closed'){toast('房主已關閉房間');clearRoomState()}
+      if(m.type==='error')toast(m.message||'操作失敗');
+    };
+    roomSocket.onclose=e=>{
+      roomMembers=[];render();
+      if(leavingRoom){leavingRoom=false;return}
+      if(e.code===4001){pendingJoinCode=data.roomCode;data.roomCode=null;data.roomPassword='';data.hostToken='';isHost=false;save();render();$('#joinPasswordInput').value='';$('#joinDialog').showModal();toast('請輸入房間密碼');return}
+      if(e.code===4004||e.code===4005){clearRoomState();if(e.code===4004)toast('房間不存在或已失效');return}
+    };
+  }catch{toast('連線失敗')}
 }
 function attemptJoin(code,password=''){code=String(code||'').trim().toUpperCase();if(!/^[A-Z0-9]{6}$/.test(code))return toast('房間不存在');data.roomCode=code;data.roomPassword=password;data.hostToken='';isHost=false;pendingJoinCode=code;save();render();connectRoom()}
-function leaveRoom(){try{roomSocket?.close()}catch{}roomSocket=null;roomMembers=[];data.roomCode=null;data.roomPassword='';data.hostToken='';data.myVote=null;isHost=false;selectedVote=null;save();history.replaceState({},'',location.pathname);render();showStep('setup',true);loadRoomList()}
+function leaveRoom(){
+  const wasHost=isHost;leavingRoom=true;
+  if(wasHost&&roomSocket?.readyState===1){send({type:'room:close'});setTimeout(()=>{try{roomSocket?.close()}catch{}roomSocket=null;clearRoomState()},120)}
+  else{try{roomSocket?.close()}catch{}roomSocket=null;clearRoomState()}
+}
 async function shareRoom(){const u=new URL(location.href);u.searchParams.set('room',data.roomCode);try{if(navigator.share)await navigator.share({title:data.title,text:`加入 Choice：${data.roomCode}`,url:u.href});else{await navigator.clipboard.writeText(u.href);toast('邀請連結已複製')}}catch{}}
 
 $('#openRoomBtn').onclick=()=>$('#openRoomDialog').showModal();
@@ -83,4 +107,4 @@ $('#lineFloat').onclick=e=>{if(!cfg.lineOfficialUrl){e.preventDefault();toast('�
 $('#voiceBtn').onclick=()=>$('#voiceDialog').showModal();$('#micTestBtn').onclick=async()=>{try{if(micStream){stopMic();return}micStream=await navigator.mediaDevices.getUserMedia({audio:true});audioCtx=new AudioContext();const src=audioCtx.createMediaStreamSource(micStream);analyser=audioCtx.createAnalyser();src.connect(analyser);$('#micTestBtn').textContent='停止測試';meter()}catch{toast('無法取得麥克風權限')}};function meter(){if(!analyser)return;const a=new Uint8Array(analyser.frequencyBinCount);analyser.getByteFrequencyData(a);$('#voiceMeterBar').style.width=`${Math.min(100,a.reduce((x,y)=>x+y,0)/a.length*1.4)}%`;meterRAF=requestAnimationFrame(meter)}function stopMic(){if(meterRAF)cancelAnimationFrame(meterRAF);micStream?.getTracks().forEach(t=>t.stop());audioCtx?.close();micStream=audioCtx=analyser=null;$('#voiceMeterBar').style.width='0';$('#micTestBtn').textContent='測試麥克風'}
 $$('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
 
-const roomFromUrl=new URL(location.href).searchParams.get('room');if(roomFromUrl&&/^[A-Za-z0-9]{6}$/.test(roomFromUrl)){pendingJoinCode=roomFromUrl.toUpperCase();attemptJoin(pendingJoinCode)}else if(data.roomCode)connectRoom();render();loadRoomList();setInterval(()=>{if(!data.roomCode)loadRoomList()},8000);
+const roomFromUrl=new URL(location.href).searchParams.get('room');if(roomFromUrl&&/^[A-Za-z0-9]{6}$/.test(roomFromUrl)){pendingJoinCode=roomFromUrl.toUpperCase();attemptJoin(pendingJoinCode)}else if(data.roomCode)connectRoom();render();loadRoomList();setInterval(()=>{if(!data.roomCode)loadRoomList()},5000);
