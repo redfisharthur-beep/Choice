@@ -62,4 +62,17 @@
     open.href='#';
     open.onclick=openOfficialLine;
   }
+
+  function fixChatLayout(){
+    const chat=$('#choiceChat');
+    const actions=document.querySelector('.room-utility-actions');
+    if(!chat)return;
+    chat.querySelector('.choice-chat-title')?.remove();
+    chat.querySelectorAll('.choice-chat-empty').forEach(el=>el.remove());
+    if(actions&&chat.nextElementSibling!==actions)actions.parentNode?.insertBefore(chat,actions);
+  }
+
+  fixChatLayout();
+  const chatObserver=new MutationObserver(()=>fixChatLayout());
+  chatObserver.observe(document.body,{childList:true,subtree:true});
 })();
