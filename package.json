@@ -1,0 +1,7 @@
+{
+  "name": "choice-app",
+  "private": true,
+  "scripts": {
+    "deploy": "cd cloudflare && npm install && npm run deploy"
+  }
+}
