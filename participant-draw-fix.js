@@ -1,6 +1,7 @@
 (()=>{
   const $=s=>document.querySelector(s);
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let participantLiveResult='';
 
   if(!document.getElementById('participantDrawHardFixStyles')){
     const style=document.createElement('style');
@@ -14,14 +15,18 @@
 #drawPanel.participant-draw #drawChecks .draw-check.readonly input{display:none!important}
 #drawPanel.participant-draw #throwBtn{display:none!important}
 #drawPanel.participant-draw #drawChecks .draw-check.readonly.draw-hit{background:linear-gradient(105deg,#fff1a8 0%,#b9efd5 35%,#afdfff 68%,#ffd4e3 100%)!important;border-color:#fff!important;color:#244f5b!important;font-weight:1000!important;box-shadow:0 0 0 3px rgba(119,191,224,.55),0 8px 28px rgba(115,204,181,.42),0 0 30px rgba(255,218,105,.5)!important;transform:scale(1.02)!important}
-#drawPanel.participant-draw.participant-live-draw #drawChecks{display:flex!important;visibility:visible!important}
-#drawPanel.participant-draw.participant-live-draw .draw-stage{display:grid!important;position:relative!important;left:auto!important;top:auto!important;transform:none!important;width:100%!important;min-height:420px!important;place-items:center!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:8px 0!important}
-#drawPanel.participant-draw.participant-live-draw .draw-target-wrap{display:grid!important;width:min(390px,74vw)!important;margin:0 auto!important}
+
+/* Participant mirrors host's active throw as a true fullscreen target. */
+#drawPanel.participant-draw.participant-live-draw #drawHostControls{visibility:hidden!important}
+#drawPanel.participant-draw.participant-live-draw #drawChecks{visibility:hidden!important}
+#drawPanel.participant-draw.participant-live-draw .draw-stage{display:grid!important;position:fixed!important;inset:0!important;left:0!important;top:0!important;transform:none!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;place-items:center!important;background:rgba(232,237,232,.97)!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:0!important;margin:0!important;z-index:10020!important}
+#drawPanel.participant-draw.participant-live-draw .draw-target-wrap{display:grid!important;width:min(82vw,82vh)!important;max-width:760px!important;margin:auto!important}
+body.participant-draw-playing{overflow:hidden!important}
 body.participant-draw-playing .draw-focus-backdrop{display:none!important}
+body.participant-draw-playing .hero-actions,body.participant-draw-playing #flowNav,body.participant-draw-playing .room-head-compact{visibility:hidden!important}
 @media(max-width:600px){
   #drawPanel.participant-draw #drawChecks .draw-check.readonly{font-size:20px!important;min-height:54px!important;padding:10px 14px!important}
-  #drawPanel.participant-draw.participant-live-draw .draw-stage{min-height:330px!important}
-  #drawPanel.participant-draw.participant-live-draw .draw-target-wrap{width:min(300px,78vw)!important}
+  #drawPanel.participant-draw.participant-live-draw .draw-target-wrap{width:min(92vw,72vh)!important}
 }
 `;
     document.head.appendChild(style);
@@ -36,16 +41,14 @@ body.participant-draw-playing .draw-focus-backdrop{display:none!important}
     document.body.classList.remove('participant-draw-playing');
     if(controls){controls.style.removeProperty('display');controls.style.removeProperty('visibility');controls.style.removeProperty('opacity')}
     if(checks){delete checks.dataset.participantHtml;checks.style.removeProperty('display');checks.style.removeProperty('visibility');checks.style.removeProperty('opacity')}
-    if(throwBtn){
-      throwBtn.style.removeProperty('display');
-      throwBtn.classList.remove('hidden');
-      throwBtn.removeAttribute('aria-hidden');
-    }
+    if(throwBtn){throwBtn.style.removeProperty('display');throwBtn.classList.remove('hidden');throwBtn.removeAttribute('aria-hidden')}
     return true;
   }
 
+  // On a normal participant entry, always show the FIRST official result.
+  // A result produced live in this browser session temporarily takes priority after the animation.
   function resultName(){
-    try{return String(visibleDrawResult||data?.lastDraw||data?.firstDrawResult||'').trim()}catch{return ''}
+    try{return String(participantLiveResult||data?.firstDrawResult||data?.lastDraw||'').trim()}catch{return participantLiveResult}
   }
 
   function rebuildParticipantChoices(){
@@ -73,23 +76,32 @@ body.participant-draw-playing .draw-focus-backdrop{display:none!important}
       drawAnimating=true;visibleDrawResult='';showStep('draw',true);
       const panel=$('#drawPanel');
       panel?.classList.add('participant-draw','participant-live-draw');
-      document.body.classList.remove('draw-focus-mode');document.body.classList.add('participant-draw-playing');
-      rebuildParticipantChoices();
+      document.body.classList.remove('draw-focus-mode');
+      document.body.classList.add('participant-draw-playing');
+
       const wheel=$('#drawWheel'),dart=$('#drawDart'),stage=$('.draw-stage'),wrap=$('.draw-target-wrap');
-      if(stage){stage.style.setProperty('display','grid','important');stage.style.setProperty('min-height','420px','important')}
+      if(stage){stage.style.setProperty('display','grid','important');stage.style.setProperty('min-height','100dvh','important')}
       if(wrap)wrap.style.setProperty('display','grid','important');
       wheel?.classList.remove('spinning','stopping');dart?.classList.remove('hit');
-      requestAnimationFrame(()=>wheel?.classList.add('spinning'));setTimeout(()=>dart?.classList.add('hit'),850);
+      requestAnimationFrame(()=>wheel?.classList.add('spinning'));
+      setTimeout(()=>dart?.classList.add('hit'),850);
+
       drawAnimTimer=setTimeout(()=>{
         wheel?.classList.remove('spinning');wheel?.classList.add('stopping');
-        const final=String(pendingDrawResult||result||data?.lastDraw||data?.firstDrawResult||'').trim();visibleDrawResult=final;
+        const final=String(pendingDrawResult||result||data?.lastDraw||data?.firstDrawResult||'').trim();
+        participantLiveResult=final;
+        visibleDrawResult=final;
         if(markSeen&&final&&typeof markDrawSeen==='function')markDrawSeen();
+
+        // Keep the hit visible for one second, then close fullscreen target and reveal the result list.
         setTimeout(()=>{
           wheel?.classList.remove('spinning','stopping');dart?.classList.remove('hit');
           if(stage){stage.style.setProperty('display','none','important');stage.style.setProperty('min-height','0','important')}
           if(wrap)wrap.style.setProperty('display','none','important');
-          panel?.classList.remove('participant-live-draw');document.body.classList.remove('participant-draw-playing');
-          drawAnimating=false;pendingDrawResult='';drawAnimTimer=null;rebuildParticipantChoices();
+          panel?.classList.remove('participant-live-draw');
+          document.body.classList.remove('participant-draw-playing');
+          drawAnimating=false;pendingDrawResult='';drawAnimTimer=null;
+          rebuildParticipantChoices();
         },1000);
       },1850);
     };
