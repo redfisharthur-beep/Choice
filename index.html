@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./social.css"><link rel="stylesheet" href="./responsive.css"><link rel="stylesheet" href="./modal-fix.css"><link rel="stylesheet" href="./home.css">
 </head>
 <body>
-<div class="hero-actions persistent-actions" aria-label="Choice 功能">
+<div class="hero-actions" aria-label="Choice 功能">
   <button id="voiceBtn" class="hero-action-btn hero-mic-btn" type="button" aria-label="開啟麥克風"><img src="./assets/hero/mic.png" alt="麥克風"></button>
   <a class="hero-action-btn" href="https://line.me/ti/g2/k29Jk_pZmJCCqt5jUZjxOLnv8RNnabWLeuFu4Q?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener" aria-label="Choice LINE 社群"><img src="./assets/hero/chat.png" alt="社群"></a>
 </div>
@@ -28,16 +28,23 @@
   </section>
 
   <section id="roomView" class="room-view hidden">
-    <div class="room-head card"><div><span class="eyebrow">ROOM</span><h2 id="roomTitle">我的 Choice</h2><p>房號 <b id="roomCodeText">——</b> · <span id="participantCount">1 人</span> · <span id="roleBadge" class="role-badge">參與者</span></p></div><div class="room-head-actions"><button id="lineReminderBtn" class="soft-btn">LINE提醒</button><button id="shareRoomBtn" class="soft-btn">分享</button><button id="leaveRoomBtn" class="soft-btn">離開</button></div></div>
-
-    <section class="player-strip card" aria-label="房間玩家"><div class="player-strip-head"><span id="voteProgressText">1 人在線</span></div><div id="playerList" class="player-list"></div></section>
+    <div class="room-head room-head-compact card">
+      <h2 id="roomTitle">我的 Choice</h2>
+      <button id="lineReminderBtn" class="room-note-btn" type="button" aria-label="LINE提醒" title="LINE提醒"><img src="./assets/hero/note.png" onerror="this.onerror=null;this.src='./assets/hero/line.png'" alt="LINE提醒"></button>
+      <span id="roomCodeText" hidden>——</span><span id="participantCount" hidden>1 人</span><span id="roleBadge" class="role-badge" hidden>參與者</span>
+    </div>
 
     <nav id="flowNav" class="flow-nav"><button data-step="setup" class="active">1 設定</button><button data-step="vote">2 投票</button><button data-step="analysis">3 分析</button><button data-step="draw">🎯 抽籤</button></nav>
+
+    <div id="participantWaiting" class="participant-wait card">等待房主開始投票或抽籤…</div>
 
     <section id="setupStep" class="step active"><div class="card panel"><div class="panel-icon">✏️</div><h3>填寫項目</h3><div class="inline-add"><input id="optionInput" maxlength="30" placeholder="輸入一個項目"><button id="addOptionBtn">＋</button></div><div id="setupOptions" class="setup-options"></div><div class="choice-actions"><button id="goVoteBtn" class="mode-choice vote-choice"><span>🗳️</span><b>開始投票</b></button><button id="goDrawBtn" class="mode-choice draw-choice"><span>🎯</span><b>直接抽籤</b></button></div></div></section>
     <section id="voteStep" class="step"><div class="card panel"><div class="panel-icon">🗳️</div><h3 id="pollTitleDisplay">投票</h3><div id="voteOptions" class="vote-options"></div><button id="voteBtn" class="big-btn" disabled>蓋章投票</button><div id="stampFx" class="stamp-fx">✓</div><button id="closeVoteBtn" class="soft-wide hidden">結束投票並看結果</button></div></section>
     <section id="analysisStep" class="step"><div class="card panel"><div class="panel-icon">📊</div><h3>投票結果</h3><div id="chartList" class="chart-list"></div><div id="insightText" class="winner-box">尚未投票</div><button id="analysisDrawBtn" class="soft-wide">再用抽籤決定 🎯</button><button id="announceVoteBtn" class="big-btn">公告決定</button></div></section>
     <section id="drawStep" class="step"><div class="card panel draw-panel"><div><div class="panel-icon">🎯</div><h3>勾選要抽的項目</h3><div id="drawChecks" class="draw-checks"></div></div><div class="draw-stage"><div class="dartboard" id="dartBoard"><span>🎯</span></div><div id="dart" class="dart">➳</div><button id="throwBtn" class="big-btn">射一鏢！</button><div id="drawResult" class="draw-result">準備好了嗎？</div><button id="announceDrawBtn" class="big-btn hidden">公告決定</button></div></div></section>
+
+    <section class="player-strip card" aria-label="房間玩家"><div class="player-strip-head"><span id="voteProgressText">1 人在線</span></div><div id="playerList" class="player-list"></div></section>
+    <div class="room-utility-actions"><button id="shareRoomBtn" class="soft-btn">分享房間</button><button id="leaveRoomBtn" class="soft-btn">離開房間</button></div>
   </section>
 </main>
 
