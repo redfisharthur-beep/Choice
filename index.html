@@ -15,8 +15,21 @@
 #setupStep .panel{padding-top:34px!important}
 #setupStep h3{margin-top:0!important}
 .setup-action-image{display:block!important;width:min(260px,88%)!important;max-height:118px!important;height:auto!important;object-fit:contain!important;margin:auto!important;pointer-events:none!important}
-#setupStep .choice-actions .mode-choice{min-height:150px!important;padding:12px!important;display:grid!important;place-items:center!important}
-@media(max-width:600px){.setup-action-image{width:min(220px,92%)!important;max-height:100px!important}#setupStep .choice-actions .mode-choice{min-height:126px!important}}
+#setupStep .choice-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
+#setupStep .choice-actions .mode-choice{min-width:0!important;min-height:150px!important;padding:12px!important;display:grid!important;place-items:center!important}
+#lineReminderDialog .line-bind-row{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:10px!important;align-items:center!important;margin:18px 0!important}
+#lineReminderDialog .line-bind-row #lineBindCommand{margin:0!important;min-width:0!important}
+#lineReminderDialog .line-bind-row #copyLineBindBtn{width:auto!important;min-width:110px!important;margin:0!important;padding:0 18px!important;white-space:nowrap!important}
+#lineReminderDialog .line-official-bottom{display:flex!important;justify-content:center!important;margin:30px auto 2px!important}
+#lineReminderDialog .line-official-bottom img{display:block!important;width:74px!important;height:74px!important;object-fit:contain!important}
+@media(max-width:600px){
+  .setup-action-image{width:min(180px,94%)!important;max-height:92px!important}
+  #setupStep .choice-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+  #setupStep .choice-actions .mode-choice{min-height:118px!important;padding:8px!important}
+  #lineReminderDialog .line-bind-row{grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important}
+  #lineReminderDialog .line-bind-row #copyLineBindBtn{min-width:88px!important;padding:0 12px!important;font-size:17px!important}
+  #lineReminderDialog .line-official-bottom img{width:68px!important;height:68px!important}
+}
 </style>
 </head>
 <body>
@@ -43,7 +56,7 @@
   <section id="roomView" class="room-view hidden">
     <div class="room-head room-head-compact card">
       <h2 id="roomTitle">我的 Choice</h2>
-      <button id="lineReminderBtn" class="room-note-btn" type="button" aria-label="LINE提醒" title="LINE提醒" style="width:120px!important;height:70px!important;right:14px!important;"><img src="./assets/hero/note.png" onerror="this.onerror=null;this.src='./assets/hero/line.png'" alt="LINE提醒" style="width:110px!important;height:62px!important;object-fit:contain!important;"></button>
+      <button id="lineReminderBtn" class="room-note-btn" type="button" aria-label="LINE提醒" title="LINE提醒"><img src="./assets/hero/note.png" onerror="this.onerror=null;this.src='./assets/hero/line.png'" alt="LINE提醒"></button>
       <span id="roomCodeText" hidden style="display:none!important">——</span><span id="participantCount" hidden style="display:none!important">1 人</span><span id="roleBadge" class="role-badge" hidden style="display:none!important">參與者</span>
     </div>
 
@@ -51,7 +64,7 @@
 
     <div id="participantWaiting" class="participant-wait card">等待房主開始投票或抽籤…</div>
 
-    <section id="setupStep" class="step active"><div class="card panel"><h3>選項</h3><div class="inline-add"><input id="optionInput" maxlength="30" placeholder="輸入一個項目"><button id="addOptionBtn">＋</button></div><div id="setupOptions" class="setup-options"></div><div class="choice-actions"><button id="goVoteBtn" class="mode-choice vote-choice" type="button" aria-label="開始投票"><img class="setup-action-image" src="./assets/stamp/stamp.png" onerror="this.onerror=null;this.src='./assets/stamp/vote.png'" alt="開始投票"></button><button id="goDrawBtn" class="mode-choice draw-choice" type="button" aria-label="直接抽籤"><img class="setup-action-image" src="./assets/dart/darts.png" onerror="this.onerror=null;this.src='./assets/dart/Darts%20fly.png'" alt="直接抽籤"></button></div></div></section>
+    <section id="setupStep" class="step active"><div class="card panel"><h3>選項</h3><div class="inline-add"><input id="optionInput" maxlength="30" placeholder="" aria-label="輸入一個項目"><button id="addOptionBtn">＋</button></div><div id="setupOptions" class="setup-options"></div><div class="choice-actions"><button id="goVoteBtn" class="mode-choice vote-choice" type="button" aria-label="開始投票"><img class="setup-action-image" src="./assets/stamp/stamp.png" onerror="this.onerror=null;this.src='./assets/stamp/vote.png'" alt="開始投票"></button><button id="goDrawBtn" class="mode-choice draw-choice" type="button" aria-label="直接抽籤"><img class="setup-action-image" src="./assets/dart/darts.png" onerror="this.onerror=null;this.src='./assets/dart/Darts%20fly.png'" alt="直接抽籤"></button></div></div></section>
     <section id="voteStep" class="step"><div class="card panel"><div class="panel-icon">🗳️</div><h3 id="pollTitleDisplay">投票</h3><div id="voteOptions" class="vote-options"></div><button id="voteBtn" class="big-btn" disabled>蓋章投票</button><div id="stampFx" class="stamp-fx">✓</div><button id="closeVoteBtn" class="soft-wide hidden">結束投票並看結果</button></div></section>
     <section id="analysisStep" class="step"><div class="card panel"><div class="panel-icon">📊</div><h3>投票結果</h3><div id="chartList" class="chart-list"></div><div id="insightText" class="winner-box">尚未投票</div><button id="analysisDrawBtn" class="soft-wide">再用抽籤決定 🎯</button><button id="announceVoteBtn" class="big-btn">公告決定</button></div></section>
     <section id="drawStep" class="step"><div class="card panel draw-panel"><div><div class="panel-icon">🎯</div><h3>勾選要抽的項目</h3><div id="drawChecks" class="draw-checks"></div></div><div class="draw-stage"><div class="dartboard" id="dartBoard"><span>🎯</span></div><div id="dart" class="dart">➳</div><button id="throwBtn" class="big-btn">射一鏢！</button><div id="drawResult" class="draw-result">準備好了嗎？</div><button id="announceDrawBtn" class="big-btn hidden">公告決定</button></div></div></section>
@@ -64,7 +77,7 @@
 <dialog id="openRoomDialog" class="dialog"><button class="x" type="button" data-close aria-label="關閉">×</button><div class="dialog-icon choice-dialog-icon"><img src="./assets/stamp/choice.png" alt="Choice"></div><label>主題<input id="roomTopicInput" maxlength="50"></label><label>密碼<input id="roomPasswordInput" maxlength="20" type="password"></label><button id="createRoomBtn" class="big-btn">建立</button></dialog>
 <dialog id="joinDialog" class="dialog join-password-dialog"><button class="x" type="button" data-close aria-label="關閉">×</button><div class="dialog-icon">🔐</div><h3>輸入房間密碼</h3><input id="joinNameInput" type="hidden"><label id="joinPasswordLabel">密碼<input id="joinPasswordInput" type="password" maxlength="20" autocomplete="current-password"></label><button id="joinWithPasswordBtn" class="big-btn">進入房間</button></dialog>
 <dialog id="voiceDialog" class="dialog"><button class="x" type="button" data-close aria-label="關閉">×</button><div class="dialog-icon voice-dialog-icon"><img src="./assets/hero/mic.png" alt="麥克風"></div><h3>房間語音</h3><div class="voice-meter"><i id="voiceMeterBar"></i></div><button id="micTestBtn" class="soft-wide">測試麥克風</button><button id="joinVoiceBtn" class="big-btn">加入語音</button><button id="muteVoiceBtn" class="soft-wide hidden">靜音</button><button id="leaveVoiceBtn" class="soft-wide hidden">離開語音</button><p id="voiceStatus" class="small-note">進入房間後即可使用</p><div id="voiceAudioRack" hidden></div></dialog>
-<dialog id="lineReminderDialog" class="dialog"><button class="x" type="button" data-close aria-label="關閉">×</button><div class="dialog-icon voice-dialog-icon"><img src="./assets/hero/line.png" alt="LINE"></div><h3>LINE提醒</h3><p class="small-note">到 Choice 官方 LINE 傳送：</p><div id="lineBindCommand" class="winner-box">綁定 ——</div><button id="copyLineBindBtn" class="soft-wide" type="button">複製綁定指令</button><a id="openLineBindBtn" class="big-btn" href="https://lin.ee/t5BkC6O" target="_blank" rel="noopener">開啟官方 LINE</a><p id="lineConfigStatus" class="small-note">檢查 LINE 通知設定中…</p></dialog>
+<dialog id="lineReminderDialog" class="dialog"><button class="x" type="button" data-close aria-label="關閉">×</button><h3>LINE提醒</h3><p class="small-note">複製【綁定指令】後傳送到 Choice 官方 LINE</p><div class="line-bind-row"><div id="lineBindCommand" class="winner-box">綁定 ——</div><button id="copyLineBindBtn" class="soft-wide" type="button">複製</button></div><p id="lineConfigStatus" class="small-note">檢查 LINE 通知設定中…</p><a id="openLineBindBtn" class="line-official-bottom" href="https://lin.ee/t5BkC6O" target="_blank" rel="noopener" aria-label="加入 Choice 官方 LINE" title="加入 Choice 官方 LINE"><img src="./assets/hero/line.png" alt="加入官方 LINE"></a></dialog>
 <dialog id="announceDialog" class="dialog announce-dialog"><div class="announce-burst">🎉</div><span class="eyebrow">FINAL CHOICE</span><h2 id="announceResult">—</h2><p>決定完成！</p><div class="announce-social"><a href="https://line.me/ti/g2/k29Jk_pZmJCCqt5jUZjxOLnv8RNnabWLeuFu4Q?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">💬 社群討論</a><a href="https://lin.ee/t5BkC6O" target="_blank" rel="noopener">🔔 接收提醒</a></div><button class="big-btn" type="button" data-close>完成</button></dialog>
 
 <span id="lineOfficialBtn" hidden aria-hidden="true"></span>
