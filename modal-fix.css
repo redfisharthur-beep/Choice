@@ -1,34 +1,37 @@
 /* Readable Morandi modal controls for desktop, tablet and mobile */
-#openRoomDialog.dialog,#joinDialog.dialog,#voiceDialog.dialog,#lineReminderDialog.dialog,#announceDialog.dialog{width:min(620px,calc(100vw - 32px));max-width:calc(100vw - 32px);padding:clamp(28px,3vw,46px);border-radius:30px;font-size:18px;background:#ddd5ca;color:#34495a;border:1px solid rgba(92,104,103,.16);box-shadow:0 24px 60px rgba(67,76,74,.22);box-sizing:border-box;overflow-x:hidden}
+#openRoomDialog.dialog,#joinDialog.dialog,#voiceDialog.dialog,#lineReminderDialog.dialog,#announceDialog.dialog{width:min(620px,calc(100vw - 32px));max-width:calc(100vw - 32px);padding:clamp(28px,3vw,46px);border-radius:30px;font-size:20px;background:#ddd5ca;color:#34495a;border:1px solid rgba(92,104,103,.16);box-shadow:0 24px 60px rgba(67,76,74,.22);box-sizing:border-box;overflow-x:hidden}
 #openRoomDialog::backdrop,#joinDialog::backdrop,#voiceDialog::backdrop,#lineReminderDialog::backdrop,#announceDialog::backdrop{background:rgba(91,99,96,.42);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 #openRoomDialog .dialog-icon,#joinDialog .dialog-icon,#voiceDialog .dialog-icon,#lineReminderDialog .dialog-icon{line-height:1}
 #openRoomDialog .choice-dialog-icon{width:100%;height:220px;display:flex;justify-content:center;align-items:center;margin:0 0 18px;padding:0;overflow:hidden;pointer-events:none;box-sizing:border-box}
 #openRoomDialog .choice-dialog-icon img{display:block;width:min(520px,100%);max-width:100%;height:auto;max-height:210px;object-fit:contain;transform:none;pointer-events:none}
-#voiceDialog .voice-dialog-icon,#lineReminderDialog .voice-dialog-icon{width:78px;height:78px;display:grid;place-items:center;margin-bottom:10px}
-#voiceDialog .voice-dialog-icon img,#lineReminderDialog .voice-dialog-icon img{width:68px;height:68px;object-fit:contain}
-#joinDialog .dialog-icon{font-size:52px}
-#joinDialog h3,#voiceDialog h3,#lineReminderDialog h3{font-size:clamp(27px,2vw,34px);margin:12px 0 24px;color:#34495a}
-#openRoomDialog label,#joinDialog label,#voiceDialog label{font-size:17px;line-height:1.5;margin:16px 0;font-weight:400;color:#5f747d}
-#openRoomDialog label{width:min(500px,82%);margin:16px auto}
-#openRoomDialog input,#joinDialog input,#voiceDialog input{font-size:18px;min-height:58px;padding:14px 18px;border-radius:16px;background:#f2f1ec;border:1px solid rgba(92,104,103,.14);color:#34495a;box-sizing:border-box}
+#voiceDialog .voice-dialog-icon,#lineReminderDialog .voice-dialog-icon{width:84px;height:84px;display:grid;place-items:center;margin-bottom:12px}
+#voiceDialog .voice-dialog-icon img,#lineReminderDialog .voice-dialog-icon img{width:74px;height:74px;object-fit:contain}
+#joinDialog .dialog-icon{font-size:58px}
+#joinDialog h3,#voiceDialog h3,#lineReminderDialog h3,#announceDialog h2{font-size:clamp(30px,2.4vw,38px);margin:12px 0 24px;color:#34495a}
+#openRoomDialog label,#joinDialog label,#voiceDialog label{font-size:21px;line-height:1.5;margin:18px 0;font-weight:400;color:#5f747d}
+#openRoomDialog label{width:min(500px,82%);margin:18px auto}
+#openRoomDialog input,#joinDialog input,#voiceDialog input{font-size:21px;min-height:62px;padding:15px 19px;border-radius:16px;background:#f2f1ec;border:1px solid rgba(92,104,103,.14);color:#34495a;box-sizing:border-box}
 #openRoomDialog label input{width:100%;max-width:100%}
-#openRoomDialog .big-btn,#joinDialog .big-btn,#voiceDialog .big-btn,#lineReminderDialog .big-btn,#announceDialog .big-btn{width:100%;min-height:58px;font-size:19px;border-radius:18px;margin-top:12px;font-weight:400;background:linear-gradient(90deg,#b9d9d2,#b7d6e8);color:#fff;border:0;box-sizing:border-box}
-#openRoomDialog .big-btn{display:block;width:min(500px,82%);max-width:100%;margin:20px auto 0}
-#openRoomDialog .soft-wide,#joinDialog .soft-wide,#voiceDialog .soft-wide,#lineReminderDialog .soft-wide{background:#c9d2d5;color:#526a73;border:0}
-#lineReminderDialog .winner-box,#announceDialog .winner-box{background:#f2f1ec;border:1px solid rgba(92,104,103,.12);color:#526a73}
-#openRoomDialog .x,#joinDialog .x,#voiceDialog .x,#lineReminderDialog .x{font-size:32px;right:18px;top:14px;font-weight:400;z-index:20;pointer-events:auto;position:absolute;cursor:pointer;touch-action:manipulation;color:#80939a}
-#createRoomStatus{display:none;width:min(500px,82%);max-width:100%;margin:12px auto 2px;padding:12px 14px;border-radius:14px;background:#c8d9d2;color:#397d70;font-size:15px;font-weight:400;line-height:1.45;text-align:center;box-sizing:border-box}
+#openRoomDialog .big-btn,#joinDialog .big-btn,#voiceDialog .big-btn,#lineReminderDialog .big-btn,#announceDialog .big-btn{width:100%;min-height:62px;font-size:22px;border-radius:18px;margin-top:14px;font-weight:400;background:linear-gradient(90deg,#b9d9d2,#b7d6e8);color:#fff;border:0;box-sizing:border-box}
+#openRoomDialog .big-btn{display:block;width:min(500px,82%);max-width:100%;margin:22px auto 0}
+#openRoomDialog .soft-wide,#joinDialog .soft-wide,#voiceDialog .soft-wide,#lineReminderDialog .soft-wide{font-size:20px;min-height:58px;background:#c9d2d5;color:#526a73;border:0}
+#lineReminderDialog .winner-box,#announceDialog .winner-box{font-size:20px;background:#f2f1ec;border:1px solid rgba(92,104,103,.12);color:#526a73}
+#lineReminderDialog .small-note,#voiceDialog .small-note,#announceDialog p{font-size:18px;line-height:1.6}
+#openRoomDialog .x,#joinDialog .x,#voiceDialog .x,#lineReminderDialog .x{font-size:34px;right:18px;top:14px;font-weight:400;z-index:20;pointer-events:auto;position:absolute;cursor:pointer;touch-action:manipulation;color:#80939a}
+#createRoomStatus{display:none;width:min(500px,82%);max-width:100%;margin:12px auto 2px;padding:12px 14px;border-radius:14px;background:#c8d9d2;color:#397d70;font-size:17px;font-weight:400;line-height:1.45;text-align:center;box-sizing:border-box}
 #createRoomStatus.show{display:block}
 #createRoomStatus.error{background:#e8d1d1;color:#9d5961}
 #createRoomBtn[disabled]{opacity:.72;cursor:wait}
 @media(max-width:640px){
-  #openRoomDialog.dialog,#joinDialog.dialog,#voiceDialog.dialog,#lineReminderDialog.dialog,#announceDialog.dialog{width:calc(100vw - 20px);max-width:calc(100vw - 20px);padding:24px 20px;font-size:16px;border-radius:24px}
+  #openRoomDialog.dialog,#joinDialog.dialog,#voiceDialog.dialog,#lineReminderDialog.dialog,#announceDialog.dialog{width:calc(100vw - 20px);max-width:calc(100vw - 20px);padding:24px 20px;font-size:18px;border-radius:24px}
   #openRoomDialog .choice-dialog-icon{height:180px;margin-bottom:14px;overflow:hidden}
   #openRoomDialog .choice-dialog-icon img{width:min(440px,100%);max-width:100%;max-height:170px;transform:none}
-  #joinDialog h3,#voiceDialog h3,#lineReminderDialog h3{font-size:25px;margin-bottom:18px}
-  #openRoomDialog label,#joinDialog label,#voiceDialog label{font-size:16px;margin:13px 0}
-  #openRoomDialog label{width:88%;margin:13px auto}
-  #openRoomDialog input,#joinDialog input,#voiceDialog input{font-size:17px;min-height:54px}
-  #openRoomDialog .big-btn,#joinDialog .big-btn,#voiceDialog .big-btn,#lineReminderDialog .big-btn,#announceDialog .big-btn{min-height:54px;font-size:18px}
+  #joinDialog h3,#voiceDialog h3,#lineReminderDialog h3,#announceDialog h2{font-size:28px;margin-bottom:20px}
+  #openRoomDialog label,#joinDialog label,#voiceDialog label{font-size:19px;margin:15px 0}
+  #openRoomDialog label{width:88%;margin:15px auto}
+  #openRoomDialog input,#joinDialog input,#voiceDialog input{font-size:20px;min-height:58px}
+  #openRoomDialog .big-btn,#joinDialog .big-btn,#voiceDialog .big-btn,#lineReminderDialog .big-btn,#announceDialog .big-btn{min-height:58px;font-size:21px}
+  #openRoomDialog .soft-wide,#joinDialog .soft-wide,#voiceDialog .soft-wide,#lineReminderDialog .soft-wide{font-size:19px;min-height:54px}
+  #lineReminderDialog .small-note,#voiceDialog .small-note,#announceDialog p{font-size:17px}
   #openRoomDialog .big-btn,#createRoomStatus{width:88%;max-width:88%}
 }
