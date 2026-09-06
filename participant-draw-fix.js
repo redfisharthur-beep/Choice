@@ -14,7 +14,8 @@
 #drawPanel.participant-draw #drawChecks .draw-check.readonly::before{display:none!important;content:none!important}
 #drawPanel.participant-draw #drawChecks .draw-check.readonly input{display:none!important}
 #drawPanel.participant-draw #throwBtn{display:none!important}
-#drawPanel.participant-draw #drawChecks .draw-check.readonly.draw-hit{background:linear-gradient(105deg,#fff1a8 0%,#b9efd5 35%,#afdfff 68%,#ffd4e3 100%)!important;border-color:#fff!important;color:#244f5b!important;font-weight:1000!important;box-shadow:0 0 0 3px rgba(119,191,224,.55),0 8px 28px rgba(115,204,181,.42),0 0 30px rgba(255,218,105,.5)!important;transform:scale(1.02)!important}
+#drawPanel.participant-draw #drawChecks .draw-check.readonly.draw-hit{position:relative!important;z-index:2!important;background:linear-gradient(105deg,#fff1a8 0%,#b9efd5 35%,#afdfff 68%,#ffd4e3 100%)!important;border-color:#fff!important;color:#244f5b!important;font-weight:1000!important;box-shadow:0 0 0 4px rgba(119,191,224,.62),0 10px 30px rgba(115,204,181,.46),0 0 34px rgba(255,218,105,.56)!important;transform:scale(1.025)!important}
+#drawPanel.participant-draw #drawChecks .draw-check.readonly.draw-hit::after{content:'✦'!important;display:block!important;margin-left:auto!important;font-size:28px!important;color:#fff!important;text-shadow:0 1px 8px rgba(71,135,121,.45)!important}
 
 /* Participant mirrors host's active throw as a true fullscreen target. */
 #drawPanel.participant-draw.participant-live-draw #drawHostControls{visibility:hidden!important}
@@ -26,6 +27,7 @@ body.participant-draw-playing .draw-focus-backdrop{display:none!important}
 body.participant-draw-playing .hero-actions,body.participant-draw-playing #flowNav,body.participant-draw-playing .room-head-compact{visibility:hidden!important}
 @media(max-width:600px){
   #drawPanel.participant-draw #drawChecks .draw-check.readonly{font-size:20px!important;min-height:54px!important;padding:10px 14px!important}
+  #drawPanel.participant-draw #drawChecks .draw-check.readonly.draw-hit::after{font-size:23px!important}
   #drawPanel.participant-draw.participant-live-draw .draw-target-wrap{width:min(92vw,72vh)!important}
 }
 `;
@@ -45,13 +47,13 @@ body.participant-draw-playing .hero-actions,body.participant-draw-playing #flowN
     return true;
   }
 
-  // On a normal participant entry, always show the FIRST official result.
-  // A result produced live in this browser session temporarily takes priority after the animation.
+  // On normal participant entry, show the first official result. A result seen live
+  // in this browser session takes priority after that throw finishes.
   function resultName(){
     try{return String(participantLiveResult||data?.firstDrawResult||data?.lastDraw||'').trim()}catch{return participantLiveResult}
   }
 
-  function rebuildParticipantChoices(){
+  function rebuildParticipantChoices(force=false){
     if(restoreHostDrawUi())return;
     const panel=$('#drawPanel'),checks=$('#drawChecks');
     if(!panel||!checks)return;
@@ -59,7 +61,15 @@ body.participant-draw-playing .hero-actions,body.participant-draw-playing #flowN
     const options=(()=>{try{return Array.isArray(data?.options)?data.options:[]}catch{return []}})();
     const hit=resultName();
     const html=options.map(o=>`<div class="draw-check readonly${hit&&String(o.name)===hit?' draw-hit':''}"><span>${esc(o.name)}</span></div>`).join('');
-    if(checks.dataset.participantHtml!==html){checks.innerHTML=html;checks.dataset.participantHtml=html}
+
+    // Core render() can replace #drawChecks after we paint it. Compare the actual DOM,
+    // not only our dataset cache, so the highlighted result is restored immediately.
+    const domHasExpectedHit=!hit||[...checks.querySelectorAll('.draw-check.draw-hit span')].some(el=>el.textContent===hit);
+    const domOptionCount=checks.querySelectorAll('.draw-check').length;
+    if(force||checks.innerHTML!==html||!domHasExpectedHit||domOptionCount!==options.length){
+      checks.innerHTML=html;
+      checks.dataset.participantHtml=html;
+    }
     const throwBtn=$('#throwBtn');
     if(throwBtn)throwBtn.style.setProperty('display','none','important');
   }
@@ -93,7 +103,6 @@ body.participant-draw-playing .hero-actions,body.participant-draw-playing #flowN
         visibleDrawResult=final;
         if(markSeen&&final&&typeof markDrawSeen==='function')markDrawSeen();
 
-        // Keep the hit visible for one second, then close fullscreen target and reveal the result list.
         setTimeout(()=>{
           wheel?.classList.remove('spinning','stopping');dart?.classList.remove('hit');
           if(stage){stage.style.setProperty('display','none','important');stage.style.setProperty('min-height','0','important')}
@@ -101,7 +110,11 @@ body.participant-draw-playing .hero-actions,body.participant-draw-playing #flowN
           panel?.classList.remove('participant-live-draw');
           document.body.classList.remove('participant-draw-playing');
           drawAnimating=false;pendingDrawResult='';drawAnimTimer=null;
-          rebuildParticipantChoices();
+          rebuildParticipantChoices(true);
+          // Core/other wrappers may render once more immediately after the draw message.
+          requestAnimationFrame(()=>rebuildParticipantChoices(true));
+          setTimeout(()=>rebuildParticipantChoices(true),80);
+          setTimeout(()=>rebuildParticipantChoices(true),250);
         },1000);
       },1850);
     };
@@ -115,6 +128,6 @@ body.participant-draw-playing .hero-actions,body.participant-draw-playing #flowN
     installAnimationHook();
     if(tries>1200)clearInterval(timer);
   },250);
-  window.addEventListener('focus',rebuildParticipantChoices);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)rebuildParticipantChoices()});
+  window.addEventListener('focus',()=>rebuildParticipantChoices(true));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)rebuildParticipantChoices(true)});
 })();
