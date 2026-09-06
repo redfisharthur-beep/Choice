@@ -122,6 +122,15 @@ export class ChoiceRoom extends BaseChoiceRoom{
     }
 
     let s=await this.getState();
+    const a=this.attachment(ws);
+
+    if(msg.type==='state:set'&&s.phase==='setup'){
+      s.firstDrawResult=null;
+      s.firstDrawAt=null;
+      s.firstDrawOptionIds=[];
+      this.state=s;
+      await this.persistState();
+    }
 
     if(msg.type==='phase'&&msg.phase==='voting'){
       if(s.phase!=='setup'){
@@ -131,6 +140,9 @@ export class ChoiceRoom extends BaseChoiceRoom{
       if(!s.voteDeadline)s.voteDeadline=new Date(Date.now()+DEFAULT_VOTE_WINDOW_MS).toISOString();
       s.voteFinalizedAt=null;
       s.voteTieIds=[];
+      s.firstDrawResult=null;
+      s.firstDrawAt=null;
+      s.firstDrawOptionIds=[];
       this.state=s;
       await this.persistState();
       return super.webSocketMessage(ws,JSON.stringify(msg));
@@ -147,34 +159,66 @@ export class ChoiceRoom extends BaseChoiceRoom{
     }
 
     if(msg.type==='phase'&&msg.phase==='draw'){
-      if(s.phase==='setup')return super.webSocketMessage(ws,JSON.stringify(msg));
-      if(s.phase!=='closed'){
+      if(s.phase==='setup'){
+        s.firstDrawResult=null;
+        s.firstDrawAt=null;
+        s.firstDrawOptionIds=[];
+        this.state=s;
+        await this.persistState();
+        return super.webSocketMessage(ws,JSON.stringify(msg));
+      }
+      if(s.phase!=='closed'&&s.phase!=='draw'){
         try{ws.send(JSON.stringify({type:'error',message:'目前不能進行抽籤'}))}catch{}
         return;
       }
-      const {max,winners}=voteOutcome(s);
-      if(max<=0||winners.length<2){
-        try{ws.send(JSON.stringify({type:'error',message:'只有最高票平分時才能抽籤'}))}catch{}
-        return;
-      }
-      s.voteTieIds=winners.map(o=>String(o.id));
-      this.state=s;
-      await this.persistState();
-      return super.webSocketMessage(ws,JSON.stringify(msg));
-    }
-
-    if(msg.type==='draw:request'){
-      s=await this.getState();
-      if(s.voteFinalizedAt){
+      if(s.phase==='closed'){
         const {max,winners}=voteOutcome(s);
         if(max<=0||winners.length<2){
           try{ws.send(JSON.stringify({type:'error',message:'只有最高票平分時才能抽籤'}))}catch{}
           return;
         }
-        msg.optionIds=winners.map(o=>String(o.id));
-        return super.webSocketMessage(ws,JSON.stringify(msg));
+        s.voteTieIds=winners.map(o=>String(o.id));
+        s.phase='draw';
+        this.state=s;
+        await this.persistState();
+        await this.broadcastState();
+        return;
       }
-      return super.webSocketMessage(ws,JSON.stringify(msg));
+      return;
+    }
+
+    if(msg.type==='draw:request'){
+      if(!a.isHost){try{ws.send(JSON.stringify({type:'error',message:'只有房主可以抽籤'}))}catch{}return}
+      s=await this.getState();
+      let ids=Array.isArray(msg.optionIds)?msg.optionIds.map(String):[];
+      if(s.voteFinalizedAt){
+        const {max,winners}=voteOutcome(s);
+        if(max<=0||winners.length<2){try{ws.send(JSON.stringify({type:'error',message:'只有最高票平分時才能抽籤'}))}catch{}return}
+        ids=winners.map(o=>String(o.id));
+      }
+      const pool=(Array.isArray(s.options)?s.options:[]).filter(o=>ids.includes(String(o.id)));
+      if(pool.length<2){try{ws.send(JSON.stringify({type:'error',message:'至少勾選 2 個項目'}))}catch{}return}
+
+      const official=!String(s.firstDrawResult||'').trim();
+      s.phase='draw';
+      this.state=s;
+      await this.persistState();
+      this.broadcast({type:'draw:start',optionIds:ids,by:a.name,official});
+      await new Promise(resolve=>setTimeout(resolve,850));
+      const r=crypto.getRandomValues(new Uint32Array(1))[0],pick=pool[r%pool.length];
+      s.lastDraw=pick.name;
+      s.recent=[pick.name,...(s.recent||[])].slice(0,5);
+      if(official){
+        s.firstDrawResult=pick.name;
+        s.firstDrawAt=Date.now();
+        s.firstDrawOptionIds=ids;
+      }
+      this.state=s;
+      await this.persistState();
+      this.broadcast({type:'draw',name:pick.name,optionIds:ids,by:a.name,official,firstDrawResult:s.firstDrawResult||null});
+      await this.broadcastState();
+      if(official)await this.notifyLineSubscribers(pick.name);
+      return;
     }
 
     if(msg.type==='announce'){
@@ -188,6 +232,7 @@ export class ChoiceRoom extends BaseChoiceRoom{
         try{ws.send(JSON.stringify({type:'error',message:'投票結果已由系統自動公告'}))}catch{}
         return;
       }
+      if(s.phase==='draw')return;
     }
 
     return super.webSocketMessage(ws,JSON.stringify(msg));
@@ -205,7 +250,7 @@ export class ChoiceRoom extends BaseChoiceRoom{
     await this.broadcastState();
     const result=finalVoteResult(s);
     this.broadcast({type:'announce',result,automatic:true,tie:s.voteTieIds.length>1});
-    await this.notifyLineSubscribers(result);
+    if(s.voteTieIds.length<2)await this.notifyLineSubscribers(result);
     return true;
   }
 
