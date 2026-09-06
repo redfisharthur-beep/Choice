@@ -170,9 +170,9 @@
     new MutationObserver(()=>queueMicrotask(applyRoomFilter)).observe(roomList,{childList:true,subtree:true});
   }
 
-  const roomView=document.querySelector('#roomView');
-  if(roomView)new MutationObserver(()=>queueMicrotask(applyFlowRules)).observe(roomView,{childList:true,subtree:true,attributes:true,attributeFilter:['class','disabled']});
-  setInterval(applyFlowRules,300);
+  // Avoid observing class/disabled changes here: applyFlowRules itself changes those
+  // attributes and the old observer could recursively retrigger itself and freeze the UI.
+  setInterval(applyFlowRules,1000);
   applyFlowRules();
 
   const qs=new URL(location.href).searchParams,loginResult=qs.get('line_login');
