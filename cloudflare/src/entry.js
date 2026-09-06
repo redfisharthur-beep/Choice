@@ -20,13 +20,19 @@ const sessionSecret=env=>env.LINE_LOGIN_SESSION_SECRET||env.LINE_LOGIN_CHANNEL_S
 const configured=env=>!!(env.LINE_LOGIN_CHANNEL_ID&&env.LINE_LOGIN_CHANNEL_SECRET);
 const DEFAULT_VOTE_WINDOW_MS=7*24*60*60*1000;
 
-function finalVoteResult(state){
+function voteOutcome(state){
   const options=Array.isArray(state?.options)?state.options:[];
   const max=options.reduce((m,o)=>Math.max(m,Math.max(0,Number(o?.votes)||0)),0);
-  if(max<=0)return '本次投票無人投票';
-  const winners=options.filter(o=>(Number(o?.votes)||0)===max).map(o=>String(o?.name||'').trim()).filter(Boolean);
-  if(!winners.length)return '本次投票無人投票';
-  return winners.length===1?`${winners[0]}（${max} 票）`:`${winners.join('、')}（同票 ${max} 票）`;
+  const winners=max>0?options.filter(o=>(Number(o?.votes)||0)===max):[];
+  return {max,winners};
+}
+
+function finalVoteResult(state){
+  const {max,winners}=voteOutcome(state);
+  if(max<=0||!winners.length)return '本次投票無人投票';
+  const names=winners.map(o=>String(o?.name||'').trim()).filter(Boolean);
+  if(!names.length)return '本次投票無人投票';
+  return names.length===1?`${names[0]}（${max} 票）`:`${names.join('、')}（同票 ${max} 票）`;
 }
 
 async function getMessagingBotInfo(env){
@@ -108,29 +114,97 @@ async function handleLineAuth(request,env){
 export class ChoiceRoom extends BaseChoiceRoom{
   async webSocketMessage(ws,message){
     let msg=null;try{msg=JSON.parse(message)}catch{}
-    if(msg?.type==='room:close'){
+    if(!msg)return;
+
+    if(msg.type==='room:close'){
       try{ws.send(JSON.stringify({type:'error',message:'房間會持續保留，可使用左下離開按鈕回首頁'}))}catch{}
       return;
     }
-    if(msg?.type==='phase'&&msg.phase==='voting'){
-      const s=await this.getState();
-      if(!s.voteDeadline){
-        s.voteDeadline=new Date(Date.now()+DEFAULT_VOTE_WINDOW_MS).toISOString();
-        this.state=s;
-        await this.persistState();
+
+    let s=await this.getState();
+
+    if(msg.type==='phase'&&msg.phase==='voting'){
+      if(s.phase!=='setup'){
+        try{ws.send(JSON.stringify({type:'error',message:'目前流程不能重新開始投票'}))}catch{}
+        return;
+      }
+      if(!s.voteDeadline)s.voteDeadline=new Date(Date.now()+DEFAULT_VOTE_WINDOW_MS).toISOString();
+      s.voteFinalizedAt=null;
+      s.voteTieIds=[];
+      this.state=s;
+      await this.persistState();
+      return super.webSocketMessage(ws,JSON.stringify(msg));
+    }
+
+    if(s.phase==='voting'&&msg.type==='phase'&&['setup','closed','draw'].includes(String(msg.phase||''))){
+      if(!this.voteExpired(s)){
+        try{ws.send(JSON.stringify({type:'error',message:'投票截止前不能提前結算、公告或抽籤'}))}catch{}
+        return;
+      }
+      await this.closeVotingForDeadline();
+      s=await this.getState();
+      if(msg.phase!=='draw')return;
+    }
+
+    if(msg.type==='phase'&&msg.phase==='draw'){
+      if(s.phase==='setup')return super.webSocketMessage(ws,JSON.stringify(msg));
+      if(s.phase!=='closed'){
+        try{ws.send(JSON.stringify({type:'error',message:'目前不能進行抽籤'}))}catch{}
+        return;
+      }
+      const {max,winners}=voteOutcome(s);
+      if(max<=0||winners.length<2){
+        try{ws.send(JSON.stringify({type:'error',message:'只有最高票平分時才能抽籤'}))}catch{}
+        return;
+      }
+      s.voteTieIds=winners.map(o=>String(o.id));
+      this.state=s;
+      await this.persistState();
+      return super.webSocketMessage(ws,JSON.stringify(msg));
+    }
+
+    if(msg.type==='draw:request'){
+      s=await this.getState();
+      if(s.voteFinalizedAt){
+        const {max,winners}=voteOutcome(s);
+        if(max<=0||winners.length<2){
+          try{ws.send(JSON.stringify({type:'error',message:'只有最高票平分時才能抽籤'}))}catch{}
+          return;
+        }
+        msg.optionIds=winners.map(o=>String(o.id));
+        return super.webSocketMessage(ws,JSON.stringify(msg));
+      }
+      return super.webSocketMessage(ws,JSON.stringify(msg));
+    }
+
+    if(msg.type==='announce'){
+      s=await this.getState();
+      if(s.phase==='voting'){
+        if(this.voteExpired(s))await this.closeVotingForDeadline();
+        try{ws.send(JSON.stringify({type:'error',message:'投票結果會在截止時間由系統自動公告'}))}catch{}
+        return;
+      }
+      if(s.voteFinalizedAt&&s.phase!=='draw'){
+        try{ws.send(JSON.stringify({type:'error',message:'投票結果已由系統自動公告'}))}catch{}
+        return;
       }
     }
-    return super.webSocketMessage(ws,message);
+
+    return super.webSocketMessage(ws,JSON.stringify(msg));
   }
 
   async closeVotingForDeadline(){
     const s=await this.getState();
     if(s.phase!=='voting'||!this.voteExpired(s))return false;
-    s.phase='closed';this.state=s;
+    const {winners}=voteOutcome(s);
+    s.phase='closed';
+    s.voteFinalizedAt=Date.now();
+    s.voteTieIds=winners.length>1?winners.map(o=>String(o.id)):[];
+    this.state=s;
     await this.persistState();
     await this.broadcastState();
     const result=finalVoteResult(s);
-    this.broadcast({type:'announce',result,automatic:true});
+    this.broadcast({type:'announce',result,automatic:true,tie:s.voteTieIds.length>1});
     await this.notifyLineSubscribers(result);
     return true;
   }
