@@ -41,6 +41,80 @@
     }catch{setLineUi(null)}
   };
 
+  const currentVoteFlow=()=>{
+    try{
+      if(typeof data==='undefined'||!data?.roomCode)return {room:false,host:false,phase:'setup',tie:false};
+      const options=Array.isArray(data.options)?data.options:[];
+      const max=options.reduce((m,o)=>Math.max(m,Math.max(0,Number(o?.votes)||0)),0);
+      const tie=max>0&&options.filter(o=>(Number(o?.votes)||0)===max).length>1;
+      return {room:true,host:typeof isHost!=='undefined'&&!!isHost,phase:String(data.phase||'setup'),tie};
+    }catch{return {room:false,host:false,phase:'setup',tie:false}}
+  };
+
+  const applyFlowRules=()=>{
+    const flow=currentVoteFlow();
+    const nav=document.querySelector('#flowNav');
+    if(!nav)return;
+    const setup=nav.querySelector('[data-step="setup"]'),vote=nav.querySelector('[data-step="vote"]'),analysis=nav.querySelector('[data-step="analysis"]'),draw=nav.querySelector('[data-step="draw"]');
+    const analysisDraw=document.querySelector('#analysisDrawBtn'),announceVote=document.querySelector('#announceVoteBtn');
+    if(!flow.room||!flow.host){
+      [setup,vote,analysis,draw].forEach(b=>{if(b)b.disabled=true});
+      return;
+    }
+    if(flow.phase==='setup'){
+      if(setup)setup.disabled=false;
+      if(vote)vote.disabled=true;
+      if(analysis)analysis.disabled=true;
+      if(draw)draw.disabled=true;
+      if(analysisDraw)analysisDraw.classList.add('hidden');
+      if(announceVote)announceVote.classList.add('hidden');
+      return;
+    }
+    if(flow.phase==='voting'){
+      if(setup)setup.disabled=true;
+      if(vote)vote.disabled=false;
+      if(analysis)analysis.disabled=true;
+      if(draw)draw.disabled=true;
+      if(analysisDraw)analysisDraw.classList.add('hidden');
+      if(announceVote)announceVote.classList.add('hidden');
+      return;
+    }
+    if(flow.phase==='closed'){
+      if(setup)setup.disabled=true;
+      if(vote)vote.disabled=true;
+      if(analysis)analysis.disabled=false;
+      if(draw)draw.disabled=!flow.tie;
+      if(analysisDraw)analysisDraw.classList.toggle('hidden',!flow.tie);
+      if(analysisDraw)analysisDraw.disabled=!flow.tie;
+      if(announceVote)announceVote.classList.add('hidden');
+      return;
+    }
+    if(flow.phase==='draw'){
+      if(setup)setup.disabled=true;
+      if(vote)vote.disabled=true;
+      if(analysis)analysis.disabled=!flow.tie;
+      if(draw)draw.disabled=false;
+      if(analysisDraw)analysisDraw.classList.add('hidden');
+      if(announceVote)announceVote.classList.add('hidden');
+    }
+  };
+
+  document.addEventListener('click',e=>{
+    const target=e.target.closest?.('#flowNav button,#analysisDrawBtn,#announceVoteBtn');
+    if(!target)return;
+    const flow=currentVoteFlow();
+    if(!flow.room||!flow.host)return;
+    let blocked=false;
+    if(flow.phase==='voting')blocked=true;
+    else if(target.id==='announceVoteBtn')blocked=true;
+    else if((target.id==='analysisDrawBtn'||target.dataset?.step==='draw')&&flow.phase==='closed'&&!flow.tie)blocked=true;
+    else if(target.dataset?.step==='analysis'&&flow.phase!=='closed'&&flow.phase!=='draw')blocked=true;
+    if(blocked){
+      e.preventDefault();e.stopImmediatePropagation();
+      showToast(flow.phase==='voting'?'需等待投票截止，系統會自動結算':'只有最高票平分時才能抽籤');
+    }
+  },true);
+
   if(input){
     const saved=localStorage.getItem('choice-display-name')||'';
     if(!input.value)input.value=saved;
@@ -79,13 +153,8 @@
         const title=String(card.querySelector('.room-list-name')?.textContent||'').trim().toLowerCase();
         const code=String(card.dataset.roomCode||'').trim().toLowerCase();
         const match=!q||title.includes(q)||code.includes(q);
-        if(match){
-          card.style.removeProperty('display');
-          card.removeAttribute('aria-hidden');
-        }else{
-          card.style.setProperty('display','none','important');
-          card.setAttribute('aria-hidden','true');
-        }
+        if(match){card.style.removeProperty('display');card.removeAttribute('aria-hidden')}
+        else{card.style.setProperty('display','none','important');card.setAttribute('aria-hidden','true')}
       });
     };
     searchToggle?.addEventListener('click',()=>{
@@ -100,6 +169,11 @@
     searchInput?.addEventListener('keydown',e=>{if(e.key==='Escape'){searchInput.value='';searchWrap.classList.remove('open');applyRoomFilter();searchInput.blur()}});
     new MutationObserver(()=>queueMicrotask(applyRoomFilter)).observe(roomList,{childList:true,subtree:true});
   }
+
+  const roomView=document.querySelector('#roomView');
+  if(roomView)new MutationObserver(()=>queueMicrotask(applyFlowRules)).observe(roomView,{childList:true,subtree:true,attributes:true,attributeFilter:['class','disabled']});
+  setInterval(applyFlowRules,300);
+  applyFlowRules();
 
   const qs=new URL(location.href).searchParams,loginResult=qs.get('line_login');
   if(loginResult){
