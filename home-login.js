@@ -74,11 +74,18 @@
     const searchToggle=searchWrap.querySelector('#roomSearchToggle');
     const searchInput=searchWrap.querySelector('#roomSearchInput');
     const applyRoomFilter=()=>{
-      const q=String(searchInput?.value||'').trim().toLocaleLowerCase('zh-Hant');
+      const q=String(searchInput?.value||'').trim().toLowerCase();
       roomList.querySelectorAll('[data-room-code]').forEach(card=>{
-        const title=String(card.querySelector('.room-list-name')?.textContent||'').toLocaleLowerCase('zh-Hant');
-        const code=String(card.dataset.roomCode||'').toLocaleLowerCase('zh-Hant');
-        card.classList.toggle('room-search-hidden',!!q&&!title.includes(q)&&!code.includes(q));
+        const title=String(card.querySelector('.room-list-name')?.textContent||'').trim().toLowerCase();
+        const code=String(card.dataset.roomCode||'').trim().toLowerCase();
+        const match=!q||title.includes(q)||code.includes(q);
+        if(match){
+          card.style.removeProperty('display');
+          card.removeAttribute('aria-hidden');
+        }else{
+          card.style.setProperty('display','none','important');
+          card.setAttribute('aria-hidden','true');
+        }
       });
     };
     searchToggle?.addEventListener('click',()=>{
@@ -87,8 +94,11 @@
       else if(searchInput){searchInput.value='';applyRoomFilter()}
     });
     searchInput?.addEventListener('input',applyRoomFilter);
+    searchInput?.addEventListener('search',applyRoomFilter);
+    searchInput?.addEventListener('compositionend',applyRoomFilter);
+    searchInput?.addEventListener('keyup',applyRoomFilter);
     searchInput?.addEventListener('keydown',e=>{if(e.key==='Escape'){searchInput.value='';searchWrap.classList.remove('open');applyRoomFilter();searchInput.blur()}});
-    new MutationObserver(applyRoomFilter).observe(roomList,{childList:true,subtree:true});
+    new MutationObserver(()=>queueMicrotask(applyRoomFilter)).observe(roomList,{childList:true,subtree:true});
   }
 
   const qs=new URL(location.href).searchParams,loginResult=qs.get('line_login');
