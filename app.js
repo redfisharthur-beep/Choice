@@ -2,9 +2,11 @@ const cfg=window.CHOICE_CONFIG||{apiBase:'',realtimeEnabled:false,lineOfficialUr
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const makeId=()=>crypto.randomUUID?.()||`${Date.now()}-${Math.random()}`;
 const clientId=localStorage.getItem('choice-client-id')||makeId();localStorage.setItem('choice-client-id',clientId);
+const savedDisplayName=localStorage.getItem('choice-display-name')||'';
 const stateKey='choice-app-v4';
-const blank={title:'今晚吃什麼？',options:[],myVote:null,recent:[],roomCode:null,roomPassword:'',hostToken:'',displayName:'訪客',lastDraw:null,phase:'setup'};
-let data=load(),selectedVote=data.myVote||null,drawSelected=new Set(),roomSocket=null,roomMembers=[],throwing=false,pendingJoinCode='',micStream=null,audioCtx=null,analyser=null,meterRAF=null,isHost=false,leavingRoom=false;
+const blank={title:'今晚吃什麼？',options:[],myVote:null,recent:[],roomCode:null,roomPassword:'',hostToken:'',displayName:savedDisplayName,lastDraw:null,phase:'setup'};
+let data=load(),selectedVote=data.myVote||null,drawSelected=new Set(),roomSocket=null,roomMembers=[],throwing=false,pendingJoinCode='',pendingJoinLocked=false,micStream=null,audioCtx=null,analyser=null,meterRAF=null,isHost=false,leavingRoom=false;
+const persistName=name=>{const n=String(name||'').trim().slice(0,20);data.displayName=n;localStorage.setItem('choice-display-name',n);return n};
 function load(){try{return {...blank,...JSON.parse(localStorage.getItem(stateKey)||'{}')}}catch{return {...blank}}}
 function save(){localStorage.setItem(stateKey,JSON.stringify(data))}
 function api(path){return `${cfg.apiBase||''}${path}`}
@@ -17,13 +19,23 @@ async function readJsonResponse(r){const text=await r.text();if(!text)return {ok
 
 async function loadRoomList(){
   const list=$('#roomList');if(!list||data.roomCode)return;
-  try{const r=await fetch(api('/api/rooms'),{cache:'no-store'}),j=await readJsonResponse(r);if(!r.ok)throw new Error(j.error||'讀取失敗');const rooms=Array.isArray(j.rooms)?j.rooms:[];list.innerHTML=rooms.map(room=>`<button class="room-list-item" type="button" data-room-code="${esc(room.code)}"><span class="room-list-name">${esc(room.title||'未命名房間')}</span><span class="room-list-meta">${room.locked?'🔒':'進入'}</span></button>`).join('')}catch{list.innerHTML=''}
+  try{const r=await fetch(api('/api/rooms'),{cache:'no-store'}),j=await readJsonResponse(r);if(!r.ok)throw new Error(j.error||'讀取失敗');const rooms=Array.isArray(j.rooms)?j.rooms:[];list.innerHTML=rooms.map(room=>`<button class="room-list-item" type="button" data-room-code="${esc(room.code)}" data-locked="${room.locked?'1':'0'}"><span class="room-list-name">${esc(room.title||'未命名房間')}</span><span class="room-list-meta">${room.locked?'🔒':'進入'}</span></button>`).join('')}catch{list.innerHTML=''}
+}
+
+function renderPlayers(){
+  const list=$('#playerList'),status=$('#voteProgressText');if(!list||!status)return;
+  let members=roomMembers;
+  if(data.roomCode&&!members.length&&data.displayName)members=[{clientId,name:data.displayName,isHost,voted:!!data.myVote}];
+  const voted=members.filter(m=>m.voted).length;
+  status.textContent=data.phase==='voting'?`${voted}/${members.length} 已投票`:`${members.length} 人在線`;
+  list.innerHTML=members.map(m=>`<div class="player-chip ${m.isHost?'host':''}"><span class="player-name">${m.isHost?'★ ':''}${esc(m.name||'訪客')}</span><span class="player-vote-state ${m.voted?'done':''}">${data.phase==='voting'?(m.voted?'✓ 已投':'等待'):'在線'}</span></div>`).join('');
 }
 
 function render(){
   $('#homeView').classList.toggle('hidden',!!data.roomCode);$('#roomView').classList.toggle('hidden',!data.roomCode);
   $('#roomTitle').textContent=data.title||'我的 Choice';$('#roomCodeText').textContent=data.roomCode||'——';$('#participantCount').textContent=`${Math.max(1,roomMembers.length)} 人`;
   $('#roleBadge').textContent=isHost?'房主':'參與者';$('#roleBadge').classList.toggle('host',isHost);
+  renderPlayers();
   $('#pollTitleDisplay').textContent=data.title||'投票';
   $('#optionInput').disabled=!isHost||data.phase!=='setup';$('#addOptionBtn').disabled=!isHost||data.phase!=='setup';
   $('#setupOptions').innerHTML=data.options.map(o=>`<span class="setup-chip">${esc(o.name)}${isHost&&data.phase==='setup'?`<button data-remove="${o.id}">×</button>`:''}</span>`).join('')||'<span class="small-note">先加入 2 個以上項目</span>';
@@ -44,11 +56,19 @@ function roomState(){return {title:data.title,options:data.options,recent:data.r
 function send(payload){try{if(roomSocket?.readyState===1)roomSocket.send(JSON.stringify(payload))}catch{}}
 function sync(){if(isHost&&data.phase==='setup')send({type:'state:set',state:roomState()})}
 function applyState(s,myVote=null,hostFlag=null){if(!s)return;data.title=s.title||data.title;data.options=Array.isArray(s.options)?s.options:data.options;data.recent=Array.isArray(s.recent)?s.recent:data.recent;data.lastDraw=s.lastDraw||null;data.phase=s.phase||'setup';if(hostFlag!==null)isHost=!!hostFlag;data.myVote=myVote||null;selectedVote=data.myVote;if(selectedVote&&!data.options.some(o=>o.id===selectedVote))selectedVote=null;save();render();showStep(phaseStep(),true)}
-function clearRoomState(){roomMembers=[];data.roomCode=null;data.roomPassword='';data.hostToken='';data.myVote=null;isHost=false;selectedVote=null;pendingJoinCode='';save();history.replaceState({},'',location.pathname);render();showStep('setup',true);setTimeout(loadRoomList,120)}
+function clearRoomState(){roomMembers=[];data.roomCode=null;data.roomPassword='';data.hostToken='';data.myVote=null;isHost=false;selectedVote=null;pendingJoinCode='';pendingJoinLocked=false;save();history.replaceState({},'',location.pathname);render();showStep('setup',true);setTimeout(loadRoomList,120)}
+
+function openJoinDialog(code,locked=true){
+  pendingJoinCode=String(code||'').toUpperCase();pendingJoinLocked=!!locked;
+  $('#joinNameInput').value=data.displayName||localStorage.getItem('choice-display-name')||'';
+  $('#joinPasswordInput').value='';$('#joinPasswordLabel').classList.toggle('hidden',!pendingJoinLocked);
+  $('#joinDialog').showModal();setTimeout(()=>$('#joinNameInput').focus(),40);
+}
 
 async function createRoom(){
-  const title=$('#roomTopicInput').value.trim()||'我的 Choice',password=$('#roomPasswordInput').value.trim();
-  data={...blank,title,roomPassword:password};selectedVote=null;drawSelected.clear();
+  const name=persistName($('#hostNameInput').value),title=$('#roomTopicInput').value.trim()||'我的 Choice',password=$('#roomPasswordInput').value.trim();
+  if(!name)return toast('請輸入名稱');
+  data={...blank,title,roomPassword:password,displayName:name};selectedVote=null;drawSelected.clear();
   try{
     const r=await fetch(api('/api/rooms'),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password,state:roomState()})});
     const j=await readJsonResponse(r);
@@ -58,7 +78,7 @@ async function createRoom(){
 }
 function connectRoom(){
   if(!data.roomCode)return;if(roomSocket)try{roomSocket.close()}catch{}
-  const u=new URL(api(`/api/rooms/${data.roomCode}/ws`),location.href);u.searchParams.set('clientId',clientId);u.searchParams.set('name',data.displayName);if(data.roomPassword)u.searchParams.set('password',data.roomPassword);if(data.hostToken)u.searchParams.set('hostToken',data.hostToken);u.protocol=u.protocol==='https:'?'wss:':'ws:';
+  const u=new URL(api(`/api/rooms/${data.roomCode}/ws`),location.href);u.searchParams.set('clientId',clientId);u.searchParams.set('name',data.displayName||'訪客');if(data.roomPassword)u.searchParams.set('password',data.roomPassword);if(data.hostToken)u.searchParams.set('hostToken',data.hostToken);u.protocol=u.protocol==='https:'?'wss:':'ws:';
   try{
     roomSocket=new WebSocket(u);
     roomSocket.onopen=()=>send({type:'join'});
@@ -75,12 +95,12 @@ function connectRoom(){
     roomSocket.onclose=e=>{
       roomMembers=[];render();
       if(leavingRoom){leavingRoom=false;return}
-      if(e.code===4001){pendingJoinCode=data.roomCode;data.roomCode=null;data.roomPassword='';data.hostToken='';isHost=false;save();render();$('#joinPasswordInput').value='';$('#joinDialog').showModal();toast('請輸入房間密碼');return}
+      if(e.code===4001){const code=data.roomCode;data.roomCode=null;data.roomPassword='';data.hostToken='';isHost=false;save();render();openJoinDialog(code,true);toast('請輸入房間密碼');return}
       if(e.code===4004||e.code===4005){clearRoomState();if(e.code===4004)toast('房間不存在或已失效');return}
     };
   }catch{toast('連線失敗')}
 }
-function attemptJoin(code,password=''){code=String(code||'').trim().toUpperCase();if(!/^[A-Z0-9]{6}$/.test(code))return toast('房間不存在');data.roomCode=code;data.roomPassword=password;data.hostToken='';isHost=false;pendingJoinCode=code;save();render();connectRoom()}
+function attemptJoin(code,password='',name=''){code=String(code||'').trim().toUpperCase();if(!/^[A-Z0-9]{6}$/.test(code))return toast('房間不存在');const displayName=persistName(name||data.displayName);if(!displayName)return toast('請輸入名稱');data.roomCode=code;data.roomPassword=password;data.hostToken='';data.displayName=displayName;isHost=false;pendingJoinCode=code;save();render();connectRoom()}
 function leaveRoom(){
   const wasHost=isHost;leavingRoom=true;
   if(wasHost&&roomSocket?.readyState===1){send({type:'room:close'});setTimeout(()=>{try{roomSocket?.close()}catch{}roomSocket=null;clearRoomState()},120)}
@@ -88,10 +108,10 @@ function leaveRoom(){
 }
 async function shareRoom(){const u=new URL(location.href);u.searchParams.set('room',data.roomCode);try{if(navigator.share)await navigator.share({title:data.title,text:`加入 Choice：${data.roomCode}`,url:u.href});else{await navigator.clipboard.writeText(u.href);toast('邀請連結已複製')}}catch{}}
 
-$('#openRoomBtn').onclick=()=>$('#openRoomDialog').showModal();
-$('#roomList').onclick=e=>{const b=e.target.closest('[data-room-code]');if(b)attemptJoin(b.dataset.roomCode)};
+$('#openRoomBtn').onclick=()=>{$('#hostNameInput').value=data.displayName||localStorage.getItem('choice-display-name')||'';$('#openRoomDialog').showModal()};
+$('#roomList').onclick=e=>{const b=e.target.closest('[data-room-code]');if(b)openJoinDialog(b.dataset.roomCode,b.dataset.locked==='1')};
 $('#createRoomBtn').onclick=createRoom;
-$('#joinWithPasswordBtn').onclick=()=>{const p=$('#joinPasswordInput').value;$('#joinDialog').close();attemptJoin(pendingJoinCode,p)};$('#shareRoomBtn').onclick=shareRoom;$('#leaveRoomBtn').onclick=leaveRoom;
+$('#joinWithPasswordBtn').onclick=()=>{const name=$('#joinNameInput').value.trim(),p=pendingJoinLocked?$('#joinPasswordInput').value:'';if(!name)return toast('請輸入名稱');$('#joinDialog').close();attemptJoin(pendingJoinCode,p,name)};$('#shareRoomBtn').onclick=shareRoom;$('#leaveRoomBtn').onclick=leaveRoom;
 $$('#flowNav button').forEach(b=>b.onclick=()=>showStep(b.dataset.step));
 
 function addOption(){if(!isHost||data.phase!=='setup')return;const input=$('#optionInput'),name=input.value.trim();if(!name)return;if(data.options.length>=12)return toast('最多 12 個項目');if(data.options.some(o=>o.name===name))return toast('項目重複');const id=makeId();data.options.push({id,name,votes:0});drawSelected.add(id);input.value='';save();render();sync()}
@@ -107,4 +127,4 @@ $('#lineFloat').onclick=e=>{if(!cfg.lineOfficialUrl){e.preventDefault();toast('�
 $('#voiceBtn').onclick=()=>$('#voiceDialog').showModal();$('#micTestBtn').onclick=async()=>{try{if(micStream){stopMic();return}micStream=await navigator.mediaDevices.getUserMedia({audio:true});audioCtx=new AudioContext();const src=audioCtx.createMediaStreamSource(micStream);analyser=audioCtx.createAnalyser();src.connect(analyser);$('#micTestBtn').textContent='停止測試';meter()}catch{toast('無法取得麥克風權限')}};function meter(){if(!analyser)return;const a=new Uint8Array(analyser.frequencyBinCount);analyser.getByteFrequencyData(a);$('#voiceMeterBar').style.width=`${Math.min(100,a.reduce((x,y)=>x+y,0)/a.length*1.4)}%`;meterRAF=requestAnimationFrame(meter)}function stopMic(){if(meterRAF)cancelAnimationFrame(meterRAF);micStream?.getTracks().forEach(t=>t.stop());audioCtx?.close();micStream=audioCtx=analyser=null;$('#voiceMeterBar').style.width='0';$('#micTestBtn').textContent='測試麥克風'}
 $$('[data-close]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
 
-const roomFromUrl=new URL(location.href).searchParams.get('room');if(roomFromUrl&&/^[A-Za-z0-9]{6}$/.test(roomFromUrl)){pendingJoinCode=roomFromUrl.toUpperCase();attemptJoin(pendingJoinCode)}else if(data.roomCode)connectRoom();render();loadRoomList();setInterval(()=>{if(!data.roomCode)loadRoomList()},5000);
+const roomFromUrl=new URL(location.href).searchParams.get('room');if(roomFromUrl&&/^[A-Za-z0-9]{6}$/.test(roomFromUrl)){openJoinDialog(roomFromUrl.toUpperCase(),true)}else if(data.roomCode&&data.displayName)connectRoom();render();loadRoomList();setInterval(()=>{if(!data.roomCode)loadRoomList()},5000);
