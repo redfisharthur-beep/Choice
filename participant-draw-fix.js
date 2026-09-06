@@ -27,66 +27,69 @@ body.participant-draw-playing .draw-focus-backdrop{display:none!important}
     document.head.appendChild(style);
   }
 
+  const amHost=()=>{try{return !!isHost}catch{return false}};
+
+  function restoreHostDrawUi(){
+    if(!amHost())return false;
+    const panel=$('#drawPanel'),controls=$('#drawHostControls'),checks=$('#drawChecks'),throwBtn=$('#throwBtn');
+    panel?.classList.remove('participant-draw','participant-live-draw');
+    document.body.classList.remove('participant-draw-playing');
+    if(controls){controls.style.removeProperty('display');controls.style.removeProperty('visibility');controls.style.removeProperty('opacity')}
+    if(checks){delete checks.dataset.participantHtml;checks.style.removeProperty('display');checks.style.removeProperty('visibility');checks.style.removeProperty('opacity')}
+    if(throwBtn){
+      throwBtn.style.removeProperty('display');
+      throwBtn.classList.remove('hidden');
+      throwBtn.removeAttribute('aria-hidden');
+    }
+    return true;
+  }
+
   function resultName(){
     try{return String(visibleDrawResult||data?.lastDraw||data?.firstDrawResult||'').trim()}catch{return ''}
   }
 
   function rebuildParticipantChoices(){
-    let host=false;
-    try{host=!!isHost}catch{}
-    if(host)return;
+    if(restoreHostDrawUi())return;
     const panel=$('#drawPanel'),checks=$('#drawChecks');
     if(!panel||!checks)return;
     panel.classList.add('participant-draw');
     const options=(()=>{try{return Array.isArray(data?.options)?data.options:[]}catch{return []}})();
     const hit=resultName();
     const html=options.map(o=>`<div class="draw-check readonly${hit&&String(o.name)===hit?' draw-hit':''}"><span>${esc(o.name)}</span></div>`).join('');
-    if(checks.dataset.participantHtml!==html){
-      checks.innerHTML=html;
-      checks.dataset.participantHtml=html;
-    }
+    if(checks.dataset.participantHtml!==html){checks.innerHTML=html;checks.dataset.participantHtml=html}
     const throwBtn=$('#throwBtn');
     if(throwBtn)throwBtn.style.setProperty('display','none','important');
   }
 
   function installAnimationHook(){
     if(window.__choiceParticipantDrawHardHook)return;
-    let host=false;try{host=!!isHost}catch{}
-    if(host||typeof playDrawAnimation!=='function')return;
+    if(amHost()||typeof playDrawAnimation!=='function')return;
     const previous=playDrawAnimation;
     playDrawAnimation=function(result='',markSeen=false){
-      let currentHost=false;try{currentHost=!!isHost}catch{}
-      if(currentHost)return previous(result,markSeen);
+      if(amHost()){restoreHostDrawUi();return previous(result,markSeen)}
       if(drawAnimTimer)clearTimeout(drawAnimTimer);
       drawAnimTimer=null;
       if(result)pendingDrawResult=String(result);
-      drawAnimating=true;
-      visibleDrawResult='';
-      showStep('draw',true);
+      drawAnimating=true;visibleDrawResult='';showStep('draw',true);
       const panel=$('#drawPanel');
       panel?.classList.add('participant-draw','participant-live-draw');
-      document.body.classList.remove('draw-focus-mode');
-      document.body.classList.add('participant-draw-playing');
+      document.body.classList.remove('draw-focus-mode');document.body.classList.add('participant-draw-playing');
       rebuildParticipantChoices();
       const wheel=$('#drawWheel'),dart=$('#drawDart'),stage=$('.draw-stage'),wrap=$('.draw-target-wrap');
       if(stage){stage.style.setProperty('display','grid','important');stage.style.setProperty('min-height','420px','important')}
       if(wrap)wrap.style.setProperty('display','grid','important');
       wheel?.classList.remove('spinning','stopping');dart?.classList.remove('hit');
-      requestAnimationFrame(()=>wheel?.classList.add('spinning'));
-      setTimeout(()=>dart?.classList.add('hit'),850);
+      requestAnimationFrame(()=>wheel?.classList.add('spinning'));setTimeout(()=>dart?.classList.add('hit'),850);
       drawAnimTimer=setTimeout(()=>{
         wheel?.classList.remove('spinning');wheel?.classList.add('stopping');
-        const final=String(pendingDrawResult||result||data?.lastDraw||data?.firstDrawResult||'').trim();
-        visibleDrawResult=final;
+        const final=String(pendingDrawResult||result||data?.lastDraw||data?.firstDrawResult||'').trim();visibleDrawResult=final;
         if(markSeen&&final&&typeof markDrawSeen==='function')markDrawSeen();
         setTimeout(()=>{
           wheel?.classList.remove('spinning','stopping');dart?.classList.remove('hit');
           if(stage){stage.style.setProperty('display','none','important');stage.style.setProperty('min-height','0','important')}
           if(wrap)wrap.style.setProperty('display','none','important');
-          panel?.classList.remove('participant-live-draw');
-          document.body.classList.remove('participant-draw-playing');
-          drawAnimating=false;pendingDrawResult='';drawAnimTimer=null;
-          rebuildParticipantChoices();
+          panel?.classList.remove('participant-live-draw');document.body.classList.remove('participant-draw-playing');
+          drawAnimating=false;pendingDrawResult='';drawAnimTimer=null;rebuildParticipantChoices();
         },1000);
       },1850);
     };
@@ -98,7 +101,7 @@ body.participant-draw-playing .draw-focus-backdrop{display:none!important}
     tries++;
     rebuildParticipantChoices();
     installAnimationHook();
-    if(tries>600)clearInterval(timer);
+    if(tries>1200)clearInterval(timer);
   },250);
   window.addEventListener('focus',rebuildParticipantChoices);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)rebuildParticipantChoices()});
