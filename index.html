@@ -29,6 +29,11 @@
   <section id="roomView" class="room-view hidden">
     <div class="room-head card"><div><span class="eyebrow">ROOM</span><h2 id="roomTitle">我的 Choice</h2><p>房號 <b id="roomCodeText">——</b> · <span id="participantCount">1 人</span> · <span id="roleBadge" class="role-badge">參與者</span></p></div><div class="room-head-actions"><button id="shareRoomBtn" class="soft-btn">分享</button><button id="leaveRoomBtn" class="soft-btn">離開</button></div></div>
 
+    <section class="player-strip card" aria-label="房間玩家">
+      <div class="player-strip-head"><span id="voteProgressText">1 人在線</span></div>
+      <div id="playerList" class="player-list"></div>
+    </section>
+
     <nav id="flowNav" class="flow-nav"><button data-step="setup" class="active">1 設定</button><button data-step="vote">2 投票</button><button data-step="analysis">3 分析</button><button data-step="draw">🎯 抽籤</button></nav>
 
     <section id="setupStep" class="step active"><div class="card panel"><div class="panel-icon">✏️</div><h3>填寫項目</h3><div class="inline-add"><input id="optionInput" maxlength="30" placeholder="輸入一個項目"><button id="addOptionBtn">＋</button></div><div id="setupOptions" class="setup-options"></div><div class="choice-actions"><button id="goVoteBtn" class="mode-choice vote-choice"><span>🗳️</span><b>開始投票</b></button><button id="goDrawBtn" class="mode-choice draw-choice"><span>🎯</span><b>直接抽籤</b></button></div></div></section>
@@ -41,8 +46,8 @@
 <a id="lineFloat" class="line-float" href="https://lin.ee/t5BkC6O" target="_blank" rel="noopener" aria-label="加入 Choice 官方 LINE"><img src="./assets/hero/line.png" alt="LINE"></a>
 <a class="community-float" href="https://line.me/ti/g2/k29Jk_pZmJCCqt5jUZjxOLnv8RNnabWLeuFu4Q?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener" aria-label="加入 Choice LINE 社群"><img src="./assets/hero/chat.png" alt="社群"></a>
 
-<dialog id="openRoomDialog" class="dialog"><button class="x" data-close>×</button><div class="dialog-icon choice-dialog-icon"><img src="./assets/stamp/choice.png" alt="Choice"></div><label>主題<input id="roomTopicInput" maxlength="50"></label><label>密碼<input id="roomPasswordInput" maxlength="20" type="password"></label><button id="createRoomBtn" class="big-btn">建立</button></dialog>
-<dialog id="joinDialog" class="dialog"><button class="x" data-close>×</button><div class="dialog-icon">🔐</div><h3>加入房間</h3><input id="joinPasswordInput" type="password" maxlength="20"><button id="joinWithPasswordBtn" class="big-btn">加入</button></dialog>
+<dialog id="openRoomDialog" class="dialog"><button class="x" data-close>×</button><div class="dialog-icon choice-dialog-icon"><img src="./assets/stamp/choice.png" alt="Choice"></div><label>名稱<input id="hostNameInput" maxlength="20" autocomplete="nickname"></label><label>主題<input id="roomTopicInput" maxlength="50"></label><label>密碼<input id="roomPasswordInput" maxlength="20" type="password"></label><button id="createRoomBtn" class="big-btn">建立</button></dialog>
+<dialog id="joinDialog" class="dialog"><button class="x" data-close>×</button><div class="dialog-icon">👋</div><h3>加入房間</h3><label>名稱<input id="joinNameInput" maxlength="20" autocomplete="nickname"></label><label id="joinPasswordLabel">密碼<input id="joinPasswordInput" type="password" maxlength="20"></label><button id="joinWithPasswordBtn" class="big-btn">加入</button></dialog>
 <dialog id="voiceDialog" class="dialog"><button class="x" data-close>×</button><div class="dialog-icon voice-dialog-icon"><img src="./assets/hero/mic.png" alt="麥克風"></div><h3>房間語音</h3><div class="voice-meter"><i id="voiceMeterBar"></i></div><button id="micTestBtn" class="soft-wide">測試麥克風</button><button id="joinVoiceBtn" class="big-btn" disabled>加入語音</button><p id="voiceStatus" class="small-note">等待 Cloudflare Realtime 綁定</p></dialog>
 <dialog id="announceDialog" class="dialog announce-dialog"><div class="announce-burst">🎉</div><span class="eyebrow">FINAL CHOICE</span><h2 id="announceResult">—</h2><p>決定完成！</p><div class="announce-social"><a href="https://line.me/ti/g2/k29Jk_pZmJCCqt5jUZjxOLnv8RNnabWLeuFu4Q?utm_source=invitation&utm_medium=link_copy&utm_campaign=default" target="_blank" rel="noopener">💬 社群討論</a><a href="https://lin.ee/t5BkC6O" target="_blank" rel="noopener">🔔 接收提醒</a></div><button class="big-btn" data-close>完成</button></dialog>
 
