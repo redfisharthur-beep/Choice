@@ -9,6 +9,8 @@
 
   const getSavedName=()=>String(homeNameInput?.value||localStorage.getItem('choice-display-name')||'').trim().slice(0,20);
   const warnName=()=>{if(typeof window.toast==='function')window.toast('請先在首頁輸入名字');else alert('請先在首頁輸入名字')};
+  const sharedCode=new URL(location.href).searchParams.get('room');
+  if(sharedCode&&/^[A-Za-z0-9]{6}$/.test(sharedCode))joinDialog.dataset.roomCode=sharedCode.toUpperCase();
 
   roomList.onclick=e=>{
     const b=e.target.closest('[data-room-code]');
