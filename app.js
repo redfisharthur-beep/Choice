@@ -16,7 +16,7 @@ function phaseStep(){return data.phase==='voting'?'vote':data.phase==='closed'?'
 
 async function loadRoomList(){
   const list=$('#roomList');if(!list||data.roomCode)return;
-  try{const r=await fetch(api('/api/rooms'),{cache:'no-store'}),j=await r.json();if(!r.ok)throw new Error(j.error||'讀取失敗');const rooms=Array.isArray(j.rooms)?j.rooms:[];$('#roomListCount').textContent=`${rooms.length} 間`;list.innerHTML=rooms.length?rooms.map(room=>`<button class="room-list-item" type="button" data-room-code="${esc(room.code)}"><span class="room-list-name">${esc(room.title||'未命名房間')}</span><span class="room-list-meta">${room.locked?'🔒':'進入'}</span></button>`).join(''):'<div class="room-empty">目前還沒有房間</div>'}catch{$('#roomListCount').textContent='—';list.innerHTML='<div class="room-empty">房間列表連線中…</div>'}
+  try{const r=await fetch(api('/api/rooms'),{cache:'no-store'}),j=await r.json();if(!r.ok)throw new Error(j.error||'讀取失敗');const rooms=Array.isArray(j.rooms)?j.rooms:[];list.innerHTML=rooms.map(room=>`<button class="room-list-item" type="button" data-room-code="${esc(room.code)}"><span class="room-list-name">${esc(room.title||'未命名房間')}</span><span class="room-list-meta">${room.locked?'🔒':'進入'}</span></button>`).join('')}catch{list.innerHTML=''}
 }
 
 function render(){
