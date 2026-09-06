@@ -38,6 +38,8 @@ function updateVoiceUi(){const join=$('#joinVoiceBtn'),mute=$('#muteVoiceBtn'),l
 
 function renderSetupControls(){const text=$('#optionTextMode'),date=$('#optionDateMode'),input=$('#optionInput'),deadline=$('#voteDeadlineInput'),anon=$('#anonymousVoteInput'),repeat=$('#repeatVoteInput'),count=$('#votesPerPersonInput');text?.classList.toggle('active',data.optionMode!=='date');date?.classList.toggle('active',data.optionMode==='date');if(input){input.type=data.optionMode==='date'?'date':'text';input.disabled=!isHost||data.phase!=='setup'}if(deadline&&document.activeElement!==deadline)deadline.value=localDeadlineValue(data.voteDeadline);if(anon)anon.checked=!!data.anonymous;if(repeat)repeat.checked=!!data.repeatVoting;if(count){count.value=String(voteLimit());count.disabled=!isHost||data.phase!=='setup'||!data.repeatVoting}}
 
+function percentRow(o,{button=false,canVote=false}={}){const total=totalVotes(),p=total?Math.round((o.votes||0)/total*100):0,tag=button?'button':'div',attrs=button?` type="button" data-vote="${o.id}" ${canVote?'':'disabled'}`:'';return `<${tag} class="percent-row${button?' vote-option':''}${selectedVote===o.id&&button?' selected':''}"${attrs}><span class="percent-name">${esc(o.name)}</span><span class="percent-track"><span class="percent-fill" style="width:${p}%"></span></span><span class="percent-value">${p}%</span>${button&&voteFxOptionId===o.id?'<img class="vote-choice-fx show" src="./assets/stamp/Check.png" alt="已投票">':''}</${tag}>`}
+
 function render(){
   $('#homeView')?.classList.toggle('hidden',!!data.roomCode);$('#roomView')?.classList.toggle('hidden',!data.roomCode);
   if($('#roomTitle'))$('#roomTitle').textContent=data.title||'我的 Choice';if($('#roomCodeText'))$('#roomCodeText').textContent=data.roomCode||'——';if($('#participantCount'))$('#participantCount').textContent=`${Math.max(1,roomMembers.length)} 人`;if($('#roleBadge'))$('#roleBadge').classList.toggle('host',isHost);$('#roomVotedBadge')?.classList.toggle('show',votesUsed>0);
@@ -47,10 +49,10 @@ function render(){
   if($('#setupOptions'))$('#setupOptions').innerHTML=data.options.map(o=>`<span class="setup-chip">${esc(o.name)}${isHost&&data.phase==='setup'?`<button data-remove="${o.id}">×</button>`:''}</span>`).join('');
   $('#goVoteBtn')?.classList.toggle('hidden',!isHost||data.phase!=='setup');$('#goDrawBtn')?.classList.toggle('hidden',!isHost||data.phase!=='setup');
   const expired=voteExpired(),limit=voteLimit(),remaining=Math.max(0,limit-votesUsed),canVote=data.phase==='voting'&&!expired&&remaining>0;
-  if($('#voteOptions'))$('#voteOptions').innerHTML=data.options.map(o=>`<button class="vote-option ${selectedVote===o.id?'selected':''}" data-vote="${o.id}" ${canVote?'':'disabled'}>${esc(o.name)} · ${o.votes||0}票${voteFxOptionId===o.id?'<img class="vote-choice-fx show" src="./assets/stamp/Check.png" alt="已投票">':''}</button>`).join('');
+  if($('#voteOptions'))$('#voteOptions').innerHTML=data.options.map(o=>percentRow(o,{button:true,canVote})).join('');
   if($('#voteBtn')){$('#voteBtn').disabled=!selectedVote||data.options.length<2||!canVote;$('#voteBtn').textContent=data.repeatVoting?`蓋章投票（剩 ${remaining} 票）`:'蓋章投票'}
   if($('#voteDeadlineText'))$('#voteDeadlineText').textContent=data.voteDeadline?`${expired?'已截止':'截止'}：${new Date(data.voteDeadline).toLocaleString('zh-TW')}`:'';
-  const total=totalVotes();if($('#chartList'))$('#chartList').innerHTML=data.options.map(o=>{const p=total?Math.round((o.votes||0)/total*100):0;return `<div class="bar-row"><div class="bar-label">${esc(o.name)}</div><div class="bar-track"><div class="bar-fill" style="width:${p}%"></div></div><div class="bar-value">${p}%</div></div>`}).join('')||'<p class="small-note">尚未投票</p>';
+  if($('#chartList'))$('#chartList').innerHTML=data.options.map(o=>percentRow(o)).join('')||'<p class="small-note">尚未投票</p>';
   $('#analysisDrawBtn')?.classList.toggle('hidden',!isHost);$('#announceVoteBtn')?.classList.toggle('hidden',!isHost);
   if(!drawSelected.size)data.options.forEach(o=>drawSelected.add(o.id));for(const id of [...drawSelected])if(!data.options.some(o=>o.id===id))drawSelected.delete(id);
   if($('#drawChecks'))$('#drawChecks').innerHTML=data.options.map(o=>`<label class="draw-check"><input type="checkbox" data-draw="${o.id}" ${drawSelected.has(o.id)?'checked':''} ${!isHost?'disabled':''}>${esc(o.name)}</label>`).join('');
