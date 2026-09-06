@@ -2,6 +2,7 @@
   "name": "choice-app",
   "private": true,
   "scripts": {
-    "deploy": "cd cloudflare && npm install && npm run deploy"
+    "deploy": "npx wrangler@4 deploy --config cloudflare/wrangler.jsonc",
+    "version": "npx wrangler@4 versions upload --config cloudflare/wrangler.jsonc"
   }
 }
