@@ -1,28 +1,66 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#f8fbff" />
-  <title>Choice｜投票 × 分析 × 射鏢抽籤</title>
-  <meta name="description" content="自己填選項後，自由選擇投票分析，或直接用射鏢抽籤做決定。" />
-  <link rel="stylesheet" href="./styles.css" />
-  <link rel="stylesheet" href="./multiplayer.css" />
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f8fffc"><title>Choice｜一起決定</title>
+<meta name="description" content="開房、投票、分析，或直接射鏢抽籤。">
+<link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <div class="bg-blob blob-a"></div><div class="bg-blob blob-b"></div><div class="bg-blob blob-c"></div>
-  <header class="topbar"><a class="brand" href="#" aria-label="Choice 首頁"><span class="brand-mark">✓</span><span><b>Choice</b><small>一起選，讓決定變好玩</small></span></a><div class="top-actions"><button id="roomBtn" class="icon-btn" type="button" title="多人房間">👥<span>房間</span></button><button id="voiceBtn" class="icon-btn" type="button" title="語音聊天">🎙️<span>語音</span></button><button id="lineLoginBtn" class="line-btn" type="button"><span class="line-dot">LINE</span><span id="loginLabel">登入</span></button></div></header>
-  <main class="app-shell">
-    <section id="roomStrip" class="room-strip card"><div class="room-status"><span id="connectionDot" class="connection-dot offline"></span><div><span class="tiny-label">MULTIPLAYER ROOM</span><b id="roomStatusText">單機模式</b></div></div><div id="roomInfo" class="room-info hidden"><span>房號 <b id="roomCodeText">—</b></span><span id="participantCount">1 人在線</span></div><div class="room-actions"><button id="createRoomQuickBtn" class="mini-btn" type="button">＋ 建立房間</button><button id="shareRoomBtn" class="mini-btn hidden" type="button">分享邀請</button><button id="leaveRoomBtn" class="mini-btn danger hidden" type="button">離開</button></div></section>
-    <section class="hero-card"><div class="hero-copy"><span class="eyebrow">MAKE A CHOICE, HAVE SOME FUN!</span><h1>今天，要選哪一個？</h1><p>先建立選項，再自由決定要「投票＋分析」，或完全不投票、直接用射鏢抽籤。多人房間開啟後，所有人的選項與票數會即時同步。</p><div class="hero-chips"><span>🗳️ 投票＋分析</span><span>🎯 直接射鏢抽籤</span><span>👥 多人即時房間</span></div></div><div class="hero-art" aria-hidden="true"><div class="mini-target"><i></i><i></i><i></i><b>🎯</b></div><div class="float-card card-one">🍓<b>草莓鬆餅</b></div><div class="float-card card-two">🌿<b>森林野餐</b></div><div class="float-card card-three">🐣<b>一起決定</b></div></div></section>
-    <nav class="mode-tabs" aria-label="功能切換"><button class="mode-tab active" data-view="vote">🗳️ 投票</button><button class="mode-tab" data-view="analysis">📊 投票分析</button><button class="mode-tab" data-view="roulette">🎯 射鏢抽籤</button></nav>
-    <section id="voteView" class="view active"><div class="section-head"><div><span class="section-kicker">SETUP</span><h2>先建立今天的選項</h2></div><button id="resetBtn" class="text-btn" type="button">重新開始</button></div><div class="composer card"><div class="field grow"><label for="pollTitle">主題</label><input id="pollTitle" maxlength="50" value="今天晚餐吃什麼？" placeholder="輸入主題" /></div><div class="field grow"><label for="optionInput">新增選項</label><div class="inline-input"><input id="optionInput" maxlength="30" placeholder="例如：火鍋、燒肉、義大利麵" /><button id="addOptionBtn" class="primary-btn" type="button">＋ 加入</button></div></div></div><div id="voteArea" class="card vote-card"><div class="poll-title-row"><div><span class="tiny-label">投票模式</span><h3 id="pollTitleDisplay">今天晚餐吃什麼？</h3></div><span id="voteCount" class="count-pill">0 票</span></div><div id="optionsGrid" class="options-grid"></div><p class="hint">想投票時，點選一個選項後按「蓋章投票」。如果不想投票，可直接切到「射鏢抽籤」，使用同一組選項立即抽籤。</p><button id="voteBtn" class="stamp-btn" type="button" disabled><span class="stamp-icon">✓</span><span>蓋章投票！</span></button><div id="stampFx" class="stamp-fx" aria-hidden="true">CHOICE!</div></div></section>
-    <section id="analysisView" class="view"><div class="section-head"><div><span class="section-kicker">VOTE ANALYSIS</span><h2>投票結果分析</h2></div><span id="analysisTotal" class="count-pill">0 票</span></div><div class="analysis-layout"><div class="card chart-card"><div id="chartList" class="chart-list"></div></div><div class="card insight-card"><span class="insight-emoji">🔎</span><h3>Choice 小分析</h3><div id="insightText" class="insight-copy">目前還沒有投票。這一頁只分析投票結果；若你不想投票，可直接使用射鏢抽籤。</div><button class="secondary-btn jump-roulette" type="button">改用隨機決定：射鏢抽籤 🎯</button></div></div></section>
-    <section id="rouletteView" class="view"><div class="section-head"><div><span class="section-kicker">RANDOM DRAW</span><h2>射鏢抽籤</h2></div><span class="soft-pill">可直接使用，不必先投票</span></div><div class="roulette-layout"><div class="card board-card"><div class="board-wrap"><div id="dartBoard" class="dart-board"></div><div id="dart" class="dart" aria-hidden="true">➳</div></div><button id="throwBtn" class="throw-btn" type="button">🎯 射一鏢！</button><p class="hint centered">直接使用目前建立的所有選項進行隨機抽籤；每個選項機率相同，也不會改變任何投票統計。</p></div><div class="card result-card"><div class="mascot">🐰</div><span class="tiny-label">RANDOM CHOICE</span><h3 id="rouletteResult">準備好了嗎？</h3><p id="rouletteSub">不用投票也可以，按下「射一鏢」就直接決定。</p><div id="recentResults" class="recent-results"></div></div></div></section>
-  </main>
-  <dialog id="roomDialog" class="dialog room-dialog"><button class="dialog-close" aria-label="關閉">×</button><div class="dialog-icon">👥</div><h3>多人一起選</h3><p>建立房間後，把連結或 6 位房號分享給朋友。所有人的選項與投票會在同一房間同步。</p><div class="room-choice-grid"><button id="createRoomBtn" class="dialog-action" type="button"><b>＋ 建立新房間</b><span>由你先建立選項再邀請大家</span></button><div class="join-box"><label for="joinRoomInput">加入既有房間</label><div class="inline-input"><input id="joinRoomInput" maxlength="6" placeholder="輸入 6 位房號" autocomplete="off" /><button id="joinRoomBtn" class="primary-btn" type="button">加入</button></div></div></div><div id="participantList" class="participant-list"></div></dialog>
-  <dialog id="voiceDialog" class="dialog"><button class="dialog-close" aria-label="關閉">×</button><div class="dialog-icon">🎙️</div><h3>房間語音</h3><p id="voiceDescription">可先測試麥克風權限；正式多人語音會在 Cloudflare Realtime 綁定後啟用。</p><div class="voice-meter"><i id="voiceMeterBar"></i></div><div class="voice-controls"><button id="micTestBtn" class="secondary-btn" type="button">測試麥克風</button><button id="joinVoiceBtn" class="primary-wide" type="button" disabled>加入房間語音</button></div><div id="voiceStatus" class="status-box"><b>目前狀態</b><span>尚未啟用麥克風</span></div></dialog>
-  <dialog id="lineDialog" class="dialog"><button class="dialog-close" aria-label="關閉">×</button><div class="dialog-icon line">LINE</div><h3>LINE 登入</h3><p>登入後可顯示名稱與頭像，也能讓多人房間辨識參與者。Channel Secret 只會存 Cloudflare，不會寫進前端。</p><button id="startLineLoginBtn" class="line-login-large" type="button">使用 LINE 登入</button><div id="lineStatus" class="status-box"><b>串接狀態</b><span>等待 Cloudflare 環境變數與 Callback URL</span></div></dialog>
-  <div id="toast" class="toast" role="status" aria-live="polite"></div><script src="./config.js"></script><script src="./app.js"></script>
-</body>
-</html>
+<header class="topbar">
+  <a class="brand" href="#"><span class="logo">✓</span><b>Choice</b></a>
+  <div class="top-actions"><button id="voiceBtn" class="round-btn" title="語音">🎙️</button><button id="lineOfficialBtn" class="line-btn">LINE@</button></div>
+</header>
+
+<main class="shell">
+  <section id="homeView" class="home-view">
+    <div class="hero card">
+      <div class="hero-copy"><span class="eyebrow">MAKE A CHOICE</span><h1>一起選，<br>更好玩。</h1><p>開一間房，投票或直接抽籤。</p><button id="openRoomBtn" class="big-btn">＋ 開房</button></div>
+      <div class="hero-art" aria-hidden="true"><div class="target-pop">🎯</div><div class="stamp-pop">✓</div><div class="bubble b1">🍓</div><div class="bubble b2">🌿</div><div class="bubble b3">⭐</div></div>
+    </div>
+    <div class="join-lite"><span>有房號？</span><input id="quickJoinCode" maxlength="6" placeholder="ABC123"><button id="quickJoinBtn">加入</button></div>
+  </section>
+
+  <section id="roomView" class="room-view hidden">
+    <div class="room-head card"><div><span class="eyebrow">ROOM</span><h2 id="roomTitle">我的 Choice</h2><p>房號 <b id="roomCodeText">——</b> · <span id="participantCount">1 人</span></p></div><div class="room-head-actions"><button id="shareRoomBtn" class="soft-btn">分享</button><button id="leaveRoomBtn" class="soft-btn">離開</button></div></div>
+
+    <nav id="flowNav" class="flow-nav">
+      <button data-step="setup" class="active">1 設定</button><button data-step="vote">2 投票</button><button data-step="analysis">3 分析</button><button data-step="draw">🎯 抽籤</button>
+    </nav>
+
+    <section id="setupStep" class="step active">
+      <div class="card panel">
+        <div class="panel-icon">✏️</div><h3>填寫項目</h3>
+        <div class="inline-add"><input id="optionInput" maxlength="30" placeholder="輸入一個項目"><button id="addOptionBtn">＋</button></div>
+        <div id="setupOptions" class="setup-options"></div>
+        <div class="choice-actions"><button id="goVoteBtn" class="mode-choice vote-choice"><span>🗳️</span><b>進行投票</b></button><button id="goDrawBtn" class="mode-choice draw-choice"><span>🎯</span><b>直接抽籤</b></button></div>
+      </div>
+    </section>
+
+    <section id="voteStep" class="step">
+      <div class="card panel"><div class="panel-icon">🗳️</div><h3 id="pollTitleDisplay">投票</h3><div id="voteOptions" class="vote-options"></div><button id="voteBtn" class="big-btn" disabled>蓋章投票</button><div id="stampFx" class="stamp-fx">✓</div><button id="showAnalysisBtn" class="text-link">查看結果 →</button></div>
+    </section>
+
+    <section id="analysisStep" class="step">
+      <div class="card panel"><div class="panel-icon">📊</div><h3>投票結果</h3><div id="chartList" class="chart-list"></div><div id="insightText" class="winner-box">尚未投票</div><button id="analysisDrawBtn" class="soft-wide">再用抽籤決定 🎯</button><button id="announceVoteBtn" class="big-btn">公告決定</button></div>
+    </section>
+
+    <section id="drawStep" class="step">
+      <div class="card panel draw-panel"><div><div class="panel-icon">🎯</div><h3>勾選要抽的項目</h3><div id="drawChecks" class="draw-checks"></div></div><div class="draw-stage"><div class="dartboard" id="dartBoard"><span>🎯</span></div><div id="dart" class="dart">➳</div><button id="throwBtn" class="big-btn">射一鏢！</button><div id="drawResult" class="draw-result">準備好了嗎？</div><button id="announceDrawBtn" class="big-btn hidden">公告決定</button></div></div>
+    </section>
+  </section>
+</main>
+
+<a id="lineFloat" class="line-float" href="#" aria-label="加入 Choice 官方 LINE"><span>LINE</span><b>加入 Choice</b></a>
+
+<dialog id="openRoomDialog" class="dialog"><button class="x" data-close>×</button><div class="dialog-icon">🏠</div><h3>開一間 Choice</h3><label>主題<input id="roomTopicInput" maxlength="50" placeholder="例如：今晚吃什麼？"></label><label>房間密碼<input id="roomPasswordInput" maxlength="20" type="password" placeholder="可留空"></label><label class="checkline"><input id="noPasswordCheck" type="checkbox" checked> 無密碼</label><button id="createRoomBtn" class="big-btn">建立房間</button></dialog>
+
+<dialog id="joinDialog" class="dialog"><button class="x" data-close>×</button><div class="dialog-icon">🔐</div><h3>加入房間</h3><input id="joinPasswordInput" type="password" maxlength="20" placeholder="輸入房間密碼"><button id="joinWithPasswordBtn" class="big-btn">加入</button></dialog>
+
+<dialog id="voiceDialog" class="dialog"><button class="x" data-close>×</button><div class="dialog-icon">🎙️</div><h3>房間語音</h3><div class="voice-meter"><i id="voiceMeterBar"></i></div><button id="micTestBtn" class="soft-wide">測試麥克風</button><button id="joinVoiceBtn" class="big-btn" disabled>加入語音</button><p id="voiceStatus" class="small-note">等待 Cloudflare Realtime 綁定</p></dialog>
+
+<dialog id="announceDialog" class="dialog announce-dialog"><div class="announce-burst">🎉</div><span class="eyebrow">FINAL CHOICE</span><h2 id="announceResult">—</h2><p>決定完成！</p><button class="big-btn" data-close>完成</button></dialog>
+
+<div id="toast" class="toast"></div>
+<script src="./config.js"></script><script src="./app.js"></script>
+</body></html>
