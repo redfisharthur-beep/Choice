@@ -3,6 +3,7 @@
   const lineBtn=document.querySelector('#lineLoginBtn');
   const openRoomBtn=document.querySelector('#openRoomBtn');
   const toastEl=document.querySelector('#toast');
+  const roomList=document.querySelector('#roomList');
   let lineUser=null;
 
   const showToast=text=>{if(!toastEl)return;toastEl.textContent=text;toastEl.classList.add('show');clearTimeout(showToast.t);showToast.t=setTimeout(()=>toastEl.classList.remove('show'),2200)};
@@ -64,6 +65,31 @@
       location.assign('/api/auth/line/start');
     }catch{showToast('LINE Login 目前無法連線')}
   };
+
+  if(roomList){
+    const searchWrap=document.createElement('div');
+    searchWrap.className='room-search';
+    searchWrap.innerHTML='<button id="roomSearchToggle" class="room-search-toggle" type="button" aria-label="搜尋房間" title="搜尋房間"><img src="./assets/hero/search.png" alt="搜尋"></button><input id="roomSearchInput" class="room-search-input" type="search" maxlength="40" placeholder="輸入房間關鍵字" aria-label="輸入房間關鍵字">';
+    roomList.before(searchWrap);
+    const searchToggle=searchWrap.querySelector('#roomSearchToggle');
+    const searchInput=searchWrap.querySelector('#roomSearchInput');
+    const applyRoomFilter=()=>{
+      const q=String(searchInput?.value||'').trim().toLocaleLowerCase('zh-Hant');
+      roomList.querySelectorAll('[data-room-code]').forEach(card=>{
+        const title=String(card.querySelector('.room-list-name')?.textContent||'').toLocaleLowerCase('zh-Hant');
+        const code=String(card.dataset.roomCode||'').toLocaleLowerCase('zh-Hant');
+        card.classList.toggle('room-search-hidden',!!q&&!title.includes(q)&&!code.includes(q));
+      });
+    };
+    searchToggle?.addEventListener('click',()=>{
+      const open=searchWrap.classList.toggle('open');
+      if(open)setTimeout(()=>searchInput?.focus(),40);
+      else if(searchInput){searchInput.value='';applyRoomFilter()}
+    });
+    searchInput?.addEventListener('input',applyRoomFilter);
+    searchInput?.addEventListener('keydown',e=>{if(e.key==='Escape'){searchInput.value='';searchWrap.classList.remove('open');applyRoomFilter();searchInput.blur()}});
+    new MutationObserver(applyRoomFilter).observe(roomList,{childList:true,subtree:true});
+  }
 
   const qs=new URL(location.href).searchParams,loginResult=qs.get('line_login');
   if(loginResult){
