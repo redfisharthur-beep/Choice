@@ -10,9 +10,13 @@ export default{
   async fetch(request,env){
     const url=new URL(request.url);if(request.method==='OPTIONS'&&url.pathname.startsWith('/api/'))return new Response(null,{headers:H});
     if(url.pathname==='/api/health')return json({ok:true,service:'choice-realtime'});
+    if(url.pathname==='/api/rooms'&&request.method==='GET'){
+      const id=env.CHOICE_ROOMS.idFromName('__CHOICE_DIRECTORY__'),stub=env.CHOICE_ROOMS.get(id);return stub.fetch('https://room.local/directory/list');
+    }
     if(url.pathname==='/api/rooms'&&request.method==='POST'){
-      const body=await request.json().catch(()=>({}));const room=code(),hostToken=crypto.randomUUID(),id=env.CHOICE_ROOMS.idFromName(room),stub=env.CHOICE_ROOMS.get(id);
-      await stub.fetch('https://room.local/init',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({state:body.state||{},passwordHash:await hash(body.password||''),hostToken})});
+      const body=await request.json().catch(()=>({}));const room=code(),hostToken=crypto.randomUUID(),id=env.CHOICE_ROOMS.idFromName(room),stub=env.CHOICE_ROOMS.get(id),password=String(body.password||''),title=String(body.state?.title||'未命名房間').slice(0,50);
+      await stub.fetch('https://room.local/init',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({state:body.state||{},passwordHash:await hash(password),hostToken})});
+      const dir=env.CHOICE_ROOMS.get(env.CHOICE_ROOMS.idFromName('__CHOICE_DIRECTORY__'));await dir.fetch('https://room.local/directory/register',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code:room,title,locked:!!password,createdAt:Date.now()})});
       return json({code:room,hostToken});
     }
     const m=url.pathname.match(/^\/api\/rooms\/([A-Z0-9]{6})(\/ws)?$/i);if(m){const id=env.CHOICE_ROOMS.idFromName(m[1].toUpperCase()),stub=env.CHOICE_ROOMS.get(id),forward=new URL(request.url);forward.hostname='room.local';forward.pathname=m[2]?'/ws':'/state';return stub.fetch(new Request(forward,request))}
@@ -37,6 +41,12 @@ export class ChoiceRoom extends DurableObject{
   async recomputeVotes(){const s=await this.getState(),ballots=await this.getBallots(),counts={};for(const id of Object.values(ballots))counts[id]=(counts[id]||0)+1;s.options=s.options.map(o=>({...o,votes:counts[o.id]||0}));await this.persistState()}
   async fetch(request){
     const url=new URL(request.url);
+    if(url.pathname==='/directory/list'){
+      const now=Date.now(),maxAge=6*60*60*1000;let rooms=await this.ctx.storage.get('directoryRooms')||[];rooms=rooms.filter(r=>now-Number(r.createdAt||0)<maxAge).slice(0,30);await this.ctx.storage.put('directoryRooms',rooms);return json({rooms});
+    }
+    if(url.pathname==='/directory/register'&&request.method==='POST'){
+      const body=await request.json().catch(()=>({}));let rooms=await this.ctx.storage.get('directoryRooms')||[];const item={code:String(body.code||'').slice(0,6).toUpperCase(),title:String(body.title||'未命名房間').slice(0,50),locked:!!body.locked,createdAt:Number(body.createdAt)||Date.now()};rooms=[item,...rooms.filter(r=>r.code!==item.code)].slice(0,50);await this.ctx.storage.put('directoryRooms',rooms);return json({ok:true});
+    }
     if(url.pathname==='/init'&&request.method==='POST'){
       const body=await request.json().catch(()=>({}));this.state={title:String(body.state?.title||'未命名主題').slice(0,50),options:cleanOptions(body.state?.options),recent:[],lastDraw:null,phase:'setup'};this.passwordHash=String(body.passwordHash||'');this.hostToken=String(body.hostToken||'');this.ballots={};
       await this.ctx.storage.put({roomState:this.state,passwordHash:this.passwordHash,hostToken:this.hostToken,ballots:this.ballots});return json({ok:true})
@@ -72,8 +82,7 @@ export class ChoiceRoom extends DurableObject{
     if(msg.type==='vote'){
       if(s.phase!=='voting')return ws.send(JSON.stringify({type:'error',message:'目前沒有開放投票'}));
       const optionId=String(msg.optionId||'');if(!s.options.some(o=>o.id===optionId))return;
-      const ballots=await this.getBallots();ballots[a.clientId]=optionId;this.ballots=ballots;await this.ctx.storage.put('ballots',ballots);await this.recomputeVotes();await this.broadcastState();
-      ws.send(JSON.stringify({type:'vote:ack',optionId}));return;
+      const ballots=await this.getBallots();ballots[a.clientId]=optionId;this.ballots=ballots;await this.ctx.storage.put('ballots',ballots);await this.recomputeVotes();await this.broadcastState();ws.send(JSON.stringify({type:'vote:ack',optionId}));return;
     }
     if(msg.type==='draw:request'){
       if(!a.isHost)return ws.send(JSON.stringify({type:'error',message:'只有房主可以抽籤'}));
