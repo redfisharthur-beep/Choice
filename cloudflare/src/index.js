@@ -8,20 +8,33 @@ const cleanOptions=options=>Array.isArray(options)?options.slice(0,12).map(o=>({
 
 export default{
   async fetch(request,env){
-    const url=new URL(request.url);if(request.method==='OPTIONS'&&url.pathname.startsWith('/api/'))return new Response(null,{headers:H});
-    if(url.pathname==='/api/health')return json({ok:true,service:'choice-realtime'});
-    if(url.pathname==='/api/rooms'&&request.method==='GET'){
-      const id=env.CHOICE_ROOMS.idFromName('__CHOICE_DIRECTORY__'),stub=env.CHOICE_ROOMS.get(id);return stub.fetch('https://room.local/directory/list');
+    const url=new URL(request.url);
+    try{
+      if(request.method==='OPTIONS'&&url.pathname.startsWith('/api/'))return new Response(null,{headers:H});
+      if(url.pathname==='/api/health')return json({ok:true,service:'choice-realtime'});
+      if(url.pathname==='/api/rooms'&&request.method==='GET'){
+        const id=env.CHOICE_ROOMS.idFromName('__CHOICE_DIRECTORY__'),stub=env.CHOICE_ROOMS.get(id);
+        try{return await stub.fetch('https://room.local/directory/list')}catch{return json({rooms:[]})}
+      }
+      if(url.pathname==='/api/rooms'&&request.method==='POST'){
+        if(!env.CHOICE_ROOMS)return json({error:'CHOICE_ROOMS binding unavailable'},500);
+        const body=await request.json().catch(()=>({}));
+        const room=code(),hostToken=crypto.randomUUID(),id=env.CHOICE_ROOMS.idFromName(room),stub=env.CHOICE_ROOMS.get(id),password=String(body.password||''),title=String(body.state?.title||'未命名房間').slice(0,50);
+        const initResponse=await stub.fetch('https://room.local/init',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({state:body.state||{},passwordHash:await hash(password),hostToken})});
+        if(!initResponse.ok){const text=await initResponse.text().catch(()=>'');return json({error:text||'Room initialization failed'},500)}
+        try{
+          const dir=env.CHOICE_ROOMS.get(env.CHOICE_ROOMS.idFromName('__CHOICE_DIRECTORY__'));
+          await dir.fetch('https://room.local/directory/register',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code:room,title,locked:!!password,createdAt:Date.now()})});
+        }catch(err){console.error('directory register failed',err)}
+        return json({ok:true,code:room,hostToken});
+      }
+      const m=url.pathname.match(/^\/api\/rooms\/([A-Z0-9]{6})(\/ws)?$/i);if(m){const id=env.CHOICE_ROOMS.idFromName(m[1].toUpperCase()),stub=env.CHOICE_ROOMS.get(id),forward=new URL(request.url);forward.hostname='room.local';forward.pathname=m[2]?'/ws':'/state';return stub.fetch(new Request(forward,request))}
+      if(url.pathname.startsWith('/api/'))return json({error:'Not found'},404);
+      return env.ASSETS.fetch(request);
+    }catch(err){
+      console.error('choice worker error',err);
+      return json({error:err?.message||'Worker error'},500);
     }
-    if(url.pathname==='/api/rooms'&&request.method==='POST'){
-      const body=await request.json().catch(()=>({}));const room=code(),hostToken=crypto.randomUUID(),id=env.CHOICE_ROOMS.idFromName(room),stub=env.CHOICE_ROOMS.get(id),password=String(body.password||''),title=String(body.state?.title||'未命名房間').slice(0,50);
-      await stub.fetch('https://room.local/init',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({state:body.state||{},passwordHash:await hash(password),hostToken})});
-      const dir=env.CHOICE_ROOMS.get(env.CHOICE_ROOMS.idFromName('__CHOICE_DIRECTORY__'));await dir.fetch('https://room.local/directory/register',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({code:room,title,locked:!!password,createdAt:Date.now()})});
-      return json({code:room,hostToken});
-    }
-    const m=url.pathname.match(/^\/api\/rooms\/([A-Z0-9]{6})(\/ws)?$/i);if(m){const id=env.CHOICE_ROOMS.idFromName(m[1].toUpperCase()),stub=env.CHOICE_ROOMS.get(id),forward=new URL(request.url);forward.hostname='room.local';forward.pathname=m[2]?'/ws':'/state';return stub.fetch(new Request(forward,request))}
-    if(url.pathname.startsWith('/api/'))return json({error:'Not found'},404);
-    return env.ASSETS.fetch(request);
   }
 };
 
@@ -41,24 +54,26 @@ export class ChoiceRoom extends DurableObject{
   async recomputeVotes(){const s=await this.getState(),ballots=await this.getBallots(),counts={};for(const id of Object.values(ballots))counts[id]=(counts[id]||0)+1;s.options=s.options.map(o=>({...o,votes:counts[o.id]||0}));await this.persistState()}
   async fetch(request){
     const url=new URL(request.url);
-    if(url.pathname==='/directory/list'){
-      const now=Date.now(),maxAge=6*60*60*1000;let rooms=await this.ctx.storage.get('directoryRooms')||[];rooms=rooms.filter(r=>now-Number(r.createdAt||0)<maxAge).slice(0,30);await this.ctx.storage.put('directoryRooms',rooms);return json({rooms});
-    }
-    if(url.pathname==='/directory/register'&&request.method==='POST'){
-      const body=await request.json().catch(()=>({}));let rooms=await this.ctx.storage.get('directoryRooms')||[];const item={code:String(body.code||'').slice(0,6).toUpperCase(),title:String(body.title||'未命名房間').slice(0,50),locked:!!body.locked,createdAt:Number(body.createdAt)||Date.now()};rooms=[item,...rooms.filter(r=>r.code!==item.code)].slice(0,50);await this.ctx.storage.put('directoryRooms',rooms);return json({ok:true});
-    }
-    if(url.pathname==='/init'&&request.method==='POST'){
-      const body=await request.json().catch(()=>({}));this.state={title:String(body.state?.title||'未命名主題').slice(0,50),options:cleanOptions(body.state?.options),recent:[],lastDraw:null,phase:'setup'};this.passwordHash=String(body.passwordHash||'');this.hostToken=String(body.hostToken||'');this.ballots={};
-      await this.ctx.storage.put({roomState:this.state,passwordHash:this.passwordHash,hostToken:this.hostToken,ballots:this.ballots});return json({ok:true})
-    }
-    if(url.pathname==='/state'){if(!await this.authorized(url))return json({error:'password required'},401);return json({state:await this.getState(),members:this.members()})}
-    if(url.pathname==='/ws'){
-      if(request.headers.get('Upgrade')!=='websocket')return new Response('Expected websocket',{status:426});
-      if(!await this.authorized(url)){const pair=new WebSocketPair();pair[1].accept();pair[1].close(4001,'password required');return new Response(null,{status:101,webSocket:pair[0]})}
-      const pair=new WebSocketPair(),client=pair[0],server=pair[1],clientId=url.searchParams.get('clientId')||crypto.randomUUID(),name=(url.searchParams.get('name')||'訪客').slice(0,30),isHost=await this.isHostUrl(url);
-      server.serializeAttachment({clientId,name,isHost});this.ctx.acceptWebSocket(server);await this.sendSnapshot(server);this.broadcastMembers();return new Response(null,{status:101,webSocket:client})
-    }
-    return new Response('Not found',{status:404})
+    try{
+      if(url.pathname==='/directory/list'){
+        const now=Date.now(),maxAge=6*60*60*1000;let rooms=await this.ctx.storage.get('directoryRooms')||[];rooms=rooms.filter(r=>now-Number(r.createdAt||0)<maxAge).slice(0,30);await this.ctx.storage.put('directoryRooms',rooms);return json({rooms});
+      }
+      if(url.pathname==='/directory/register'&&request.method==='POST'){
+        const body=await request.json().catch(()=>({}));let rooms=await this.ctx.storage.get('directoryRooms')||[];const item={code:String(body.code||'').slice(0,6).toUpperCase(),title:String(body.title||'未命名房間').slice(0,50),locked:!!body.locked,createdAt:Number(body.createdAt)||Date.now()};rooms=[item,...rooms.filter(r=>r.code!==item.code)].slice(0,50);await this.ctx.storage.put('directoryRooms',rooms);return json({ok:true});
+      }
+      if(url.pathname==='/init'&&request.method==='POST'){
+        const body=await request.json().catch(()=>({}));this.state={title:String(body.state?.title||'未命名主題').slice(0,50),options:cleanOptions(body.state?.options),recent:[],lastDraw:null,phase:'setup'};this.passwordHash=String(body.passwordHash||'');this.hostToken=String(body.hostToken||'');this.ballots={};
+        await this.ctx.storage.put({roomState:this.state,passwordHash:this.passwordHash,hostToken:this.hostToken,ballots:this.ballots});return json({ok:true});
+      }
+      if(url.pathname==='/state'){if(!await this.authorized(url))return json({error:'password required'},401);return json({state:await this.getState(),members:this.members()})}
+      if(url.pathname==='/ws'){
+        if(request.headers.get('Upgrade')!=='websocket')return new Response('Expected websocket',{status:426});
+        if(!await this.authorized(url)){const pair=new WebSocketPair();pair[1].accept();pair[1].close(4001,'password required');return new Response(null,{status:101,webSocket:pair[0]})}
+        const pair=new WebSocketPair(),client=pair[0],server=pair[1],clientId=url.searchParams.get('clientId')||crypto.randomUUID(),name=(url.searchParams.get('name')||'訪客').slice(0,30),isHost=await this.isHostUrl(url);
+        server.serializeAttachment({clientId,name,isHost});this.ctx.acceptWebSocket(server);await this.sendSnapshot(server);this.broadcastMembers();return new Response(null,{status:101,webSocket:client})
+      }
+      return json({error:'Not found'},404);
+    }catch(err){console.error('choice room error',err);return json({error:err?.message||'Room error'},500)}
   }
   members(){return this.ctx.getWebSockets().map(ws=>this.attachment(ws)).map(x=>({clientId:x.clientId,name:x.name,isHost:!!x.isHost}))}
   broadcast(payload,except=null){const text=JSON.stringify(payload);for(const ws of this.ctx.getWebSockets())if(ws!==except)try{ws.send(text)}catch{}}
