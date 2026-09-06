@@ -88,14 +88,7 @@ export class ChoiceRoom extends DurableObject{
       if(url.pathname==='/directory/list'){
         const now=Date.now();let rooms=await this.ctx.storage.get('directoryRooms')||[];
         const candidates=rooms.slice(0,50);
-        const checked=await Promise.all(candidates.map(async room=>{
-          try{
-            const stub=this.env.CHOICE_ROOMS.get(this.env.CHOICE_ROOMS.idFromName(String(room.code||'').toUpperCase()));
-            const r=await stub.fetch('https://room.local/exists');
-            const j=await r.json().catch(()=>({exists:false}));
-            return j.exists?room:null;
-          }catch{return null}
-        }));
+        const checked=await Promise.all(candidates.map(async room=>{try{const stub=this.env.CHOICE_ROOMS.get(this.env.CHOICE_ROOMS.idFromName(String(room.code||'').toUpperCase()));const r=await stub.fetch('https://room.local/exists');const j=await r.json().catch(()=>({exists:false}));return j.exists?room:null}catch{return null}}));
         rooms=checked.filter(Boolean).filter(r=>now-Number(r.createdAt||0)<24*60*60*1000).slice(0,30);await this.ctx.storage.put('directoryRooms',rooms);return json({rooms});
       }
       if(url.pathname==='/directory/register'&&request.method==='POST'){const body=await request.json().catch(()=>({}));let rooms=await this.ctx.storage.get('directoryRooms')||[];const item={code:String(body.code||'').slice(0,6).toUpperCase(),title:String(body.title||'未命名房間').slice(0,50),locked:!!body.locked,createdAt:Number(body.createdAt)||Date.now()};rooms=[item,...rooms.filter(r=>r.code!==item.code)].slice(0,50);await this.ctx.storage.put('directoryRooms',rooms);return json({ok:true})}
@@ -129,7 +122,15 @@ export class ChoiceRoom extends DurableObject{
     if(msg.type==='state:set'){if(!a.isHost||s.phase!=='setup')return ws.send(JSON.stringify({type:'error',message:'只有房主可在設定階段修改內容'}));const next=msg.state||{},oldIds=s.options.map(o=>o.id).join('|'),newOptions=cleanOptions(next.options),newIds=newOptions.map(o=>o.id).join('|');s.title=String(next.title||'未命名主題').slice(0,50);s.options=newOptions.map(o=>({...o,votes:0}));s.lastDraw=null;s.recent=[];this.state=s;if(oldIds!==newIds){this.ballots={};await this.ctx.storage.put('ballots',this.ballots);for(const socket of this.ctx.getWebSockets()){const sa=this.attachment(socket);socket.serializeAttachment({...sa,voted:false})}this.broadcastMembers()}await this.persistState();await this.broadcastState();return}
     if(msg.type==='phase'){if(!a.isHost)return ws.send(JSON.stringify({type:'error',message:'只有房主可以控制流程'}));const phase=String(msg.phase||'');if(!['setup','voting','closed','draw'].includes(phase))return;if(phase==='voting'){if(s.options.length<2)return ws.send(JSON.stringify({type:'error',message:'至少需要 2 個項目'}));s.phase='voting';this.state=s;await this.resetVotes();this.broadcastMembers()}else{s.phase=phase;this.state=s;await this.persistState()}await this.broadcastState();return}
     if(msg.type==='vote'){if(s.phase!=='voting')return ws.send(JSON.stringify({type:'error',message:'目前沒有開放投票'}));const optionId=String(msg.optionId||'');if(!s.options.some(o=>o.id===optionId))return;const ballots=await this.getBallots();ballots[a.clientId]=optionId;this.ballots=ballots;await this.ctx.storage.put('ballots',ballots);ws.serializeAttachment({...a,voted:true});await this.recomputeVotes();await this.broadcastState();this.broadcastMembers();ws.send(JSON.stringify({type:'vote:ack',optionId}));return}
-    if(msg.type==='draw:request'){if(!a.isHost)return ws.send(JSON.stringify({type:'error',message:'只有房主可以抽籤'}));const ids=Array.isArray(msg.optionIds)?msg.optionIds.map(String):[],pool=s.options.filter(o=>ids.includes(o.id));if(pool.length<2)return ws.send(JSON.stringify({type:'error',message:'至少勾選 2 個項目'}));const r=crypto.getRandomValues(new Uint32Array(1))[0],pick=pool[r%pool.length];s.lastDraw=pick.name;s.recent=[pick.name,...(s.recent||[])].slice(0,5);s.phase='draw';this.state=s;await this.persistState();await this.broadcastState();this.broadcast({type:'draw',name:pick.name,by:a.name});return}
+    if(msg.type==='draw:request'){
+      if(!a.isHost)return ws.send(JSON.stringify({type:'error',message:'只有房主可以抽籤'}));
+      const ids=Array.isArray(msg.optionIds)?msg.optionIds.map(String):[],pool=s.options.filter(o=>ids.includes(o.id));if(pool.length<2)return ws.send(JSON.stringify({type:'error',message:'至少勾選 2 個項目'}));
+      s.phase='draw';s.lastDraw=null;this.state=s;await this.persistState();
+      this.broadcast({type:'draw:start',optionIds:ids,by:a.name});
+      await new Promise(resolve=>setTimeout(resolve,850));
+      const r=crypto.getRandomValues(new Uint32Array(1))[0],pick=pool[r%pool.length];s.lastDraw=pick.name;s.recent=[pick.name,...(s.recent||[])].slice(0,5);this.state=s;await this.persistState();
+      this.broadcast({type:'draw',name:pick.name,optionIds:ids,by:a.name});await this.broadcastState();return;
+    }
     if(msg.type==='announce'&&msg.result){if(!a.isHost)return ws.send(JSON.stringify({type:'error',message:'只有房主可以公告結果'}));const result=String(msg.result).slice(0,30);this.broadcast({type:'announce',result});await this.notifyLineSubscribers(result);return}
   }
   async webSocketClose(ws){const a=this.attachment(ws);if(a.voice)this.broadcast({type:'voice:left',clientId:a.clientId},ws);this.broadcastMembers();if(a.isHost)await this.removeFromDirectory()}
