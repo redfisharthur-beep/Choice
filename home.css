@@ -134,3 +134,20 @@ body:has(#homeLoginPage:not(.hidden)) .hero-action-btn:hover{background:transpar
   #homeLoginPage:focus-within .home-login-row{left:calc(50% + 5px)!important;top:calc(67.2% + 10px)!important;width:74%!important}
   #homeLoginPage:focus-within .home-login-image-btn{display:block!important}
 }
+
+/* Non-home pages: fixed Morandi action tray + independently scrollable content. */
+body:not(:has(#homeLoginPage:not(.hidden))){height:auto!important;min-height:100dvh!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior-y:auto!important;-webkit-overflow-scrolling:touch!important}
+body:not(:has(#homeLoginPage:not(.hidden))) .hero-actions{position:fixed!important;top:0!important;left:50%!important;transform:translateX(-50%)!important;width:min(var(--home-width),calc(100% - 24px))!important;margin:0!important;padding:10px 18px 12px!important;gap:42px!important;background:rgba(204,215,207,.96)!important;border:1px solid rgba(112,133,124,.14)!important;border-radius:0 0 26px 26px!important;box-shadow:0 8px 24px rgba(74,88,82,.12)!important;backdrop-filter:blur(12px)!important;-webkit-backdrop-filter:blur(12px)!important;z-index:100!important}
+body:not(:has(#homeLoginPage:not(.hidden))) .hero-actions::after{display:none!important}
+body:not(:has(#homeLoginPage:not(.hidden))) .hero-action-btn{width:58px!important;height:58px!important;background:rgba(255,255,255,.24)!important;border-radius:18px!important;box-shadow:none!important}
+body:not(:has(#homeLoginPage:not(.hidden))) .hero-action-btn img{width:52px!important;height:52px!important}
+body:not(:has(#homeLoginPage:not(.hidden))) .hero-mic-btn img{width:56px!important;height:56px!important}
+body:not(:has(#homeLoginPage:not(.hidden))) .shell{height:auto!important;min-height:calc(100dvh + 1px)!important;overflow:visible!important;margin-top:92px!important;margin-bottom:64px!important}
+body:not(:has(#homeLoginPage:not(.hidden))) #homeView,body:not(:has(#homeLoginPage:not(.hidden))) .room-view{height:auto!important;min-height:0!important;overflow:visible!important}
+@media(max-width:600px){
+  body:not(:has(#homeLoginPage:not(.hidden))) .hero-actions{width:calc(100% - 16px)!important;padding:8px 12px 10px!important;gap:24px!important;border-radius:0 0 22px 22px!important}
+  body:not(:has(#homeLoginPage:not(.hidden))) .hero-action-btn{width:54px!important;height:54px!important;border-radius:17px!important}
+  body:not(:has(#homeLoginPage:not(.hidden))) .hero-action-btn img{width:48px!important;height:48px!important}
+  body:not(:has(#homeLoginPage:not(.hidden))) .hero-mic-btn img{width:52px!important;height:52px!important}
+  body:not(:has(#homeLoginPage:not(.hidden))) .shell{margin-top:82px!important;margin-bottom:48px!important}
+}
