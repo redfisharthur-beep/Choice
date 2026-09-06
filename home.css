@@ -28,7 +28,7 @@ body{background:linear-gradient(180deg,#eef1ee 0%,#e8ece9 100%)!important;font-s
 .home-page.hidden{display:none!important}
 .home-login-page{position:relative!important;overflow:hidden!important;background:linear-gradient(180deg,#dfd9d0 0%,#ddd5ca 56%,#d7d4cc 100%)!important;border-radius:0!important;padding:0!important;box-sizing:border-box!important;min-height:100dvh!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;gap:0!important;box-shadow:none!important}
 .home-login-page::before,.home-login-page::after{display:none!important}
-.home-hero-image{display:block!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center top!important;margin:0!important;filter:none!important;animation:none!important;position:absolute!important;inset:0!important;z-index:1!important;pointer-events:none!important}
+.home-hero-image{display:block!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;object-fit:fill!important;object-position:center top!important;margin:0!important;filter:none!important;animation:none!important;position:absolute!important;inset:0!important;z-index:1!important;pointer-events:none!important}
 .home-login-row{position:absolute!important;left:calc(50% + 5px)!important;top:calc(67.2% + 10px)!important;transform:translateX(-50%)!important;width:min(430px,61%)!important;display:grid!important;grid-template-columns:minmax(0,1fr) 24%!important;gap:2%!important;margin:0!important;z-index:6!important;align-items:stretch!important}
 .home-name-input{width:100%!important;height:70px!important;padding:0 12px!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;color:#536b78!important;font-size:18px!important;text-align:center!important;outline:none!important}
 .home-name-input:focus{border:0!important;background:transparent!important;box-shadow:none!important;outline:none!important}
@@ -67,7 +67,7 @@ body{background:linear-gradient(180deg,#eef1ee 0%,#e8ece9 100%)!important;font-s
 /* Only the actual login page is viewport-locked. */
 body:has(#homeView:not(.hidden) #homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))){height:100dvh!important;overflow:hidden!important;overscroll-behavior:none!important}
 body:has(#homeView:not(.hidden) #homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .shell{width:100%!important;max-width:none!important;height:100dvh!important;margin:0!important;padding:0!important;overflow:hidden!important}
-body:has(#homeView:not(.hidden) #homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{position:absolute!important;top:38px!important;left:50%!important;transform:translateX(-50%)!important;width:min(430px,72vw)!important;margin:0!important;padding:0!important;gap:26px!important;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;z-index:20!important}
+body:has(#homeView:not(.hidden) #homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{position:absolute!important;top:40px!important;left:50%!important;transform:translateX(-50%)!important;width:min(430px,72vw)!important;margin:0!important;padding:0!important;gap:26px!important;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;z-index:20!important}
 body:has(#homeView:not(.hidden) #homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-action-btn{background:transparent!important;box-shadow:none!important;border-radius:0!important}
 
 /* Lobby and room screens always scroll; the three actions stay in a separate Morandi tray. */
@@ -84,7 +84,7 @@ body:has(#homeLobbyPage:not(.hidden)) #homeView,body:has(#roomView:not(.hidden))
   #homeLoginPage .home-name-input{height:64px!important;font-size:16px!important;padding:0 8px!important}
   #homeLoginPage .home-line-login{height:64px!important;transform:translateX(10px)!important}
   #homeLoginPage .home-login-image-btn{top:84%!important;width:48%!important;height:10%!important;min-height:64px!important}
-  body:has(#homeView:not(.hidden) #homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{top:36px!important;width:62vw!important;gap:18px!important}
+  body:has(#homeView:not(.hidden) #homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{top:38px!important;width:62vw!important;gap:18px!important}
   body:has(#homeLobbyPage:not(.hidden)) .shell,body:has(#roomView:not(.hidden)) .shell{margin-top:84px!important;margin-bottom:56px!important}
   body:has(#homeLobbyPage:not(.hidden)) .hero-actions,body:has(#roomView:not(.hidden)) .hero-actions{top:6px!important;width:calc(100% - 14px)!important;padding:8px 12px 10px!important;gap:24px!important;border-radius:20px!important}
   .room-head-compact h2{font-size:23px!important}
