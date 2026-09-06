@@ -8,7 +8,7 @@ window.addEventListener('load',()=>{
   const loginGoBtn=document.querySelector('#homeLoginGoBtn');
   const loginGoImg=loginGoBtn?.querySelector('img');
   if(loginGoImg){
-    loginGoImg.src='./assets/hero/go.png?v=202609062154';
+    loginGoImg.src='./assets/hero/go-new.png?v=202609062154';
     loginGoImg.alt='GO';
   }
 
