@@ -12,10 +12,10 @@ const hmac=async(secret,value)=>{const key=await crypto.subtle.importKey('raw',e
 const safeEqual=(a,b)=>{a=String(a||'');b=String(b||'');if(a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0};
 const signPayload=async(payload,secret)=>{const body=base64Url(enc.encode(JSON.stringify(payload)));return `${body}.${await hmac(secret,body)}`};
 const verifyPayload=async(token,secret)=>{try{const [body,sig,...rest]=String(token||'').split('.');if(!body||!sig||rest.length)return null;const expected=await hmac(secret,body);if(!safeEqual(sig,expected))return null;return JSON.parse(dec.decode(fromBase64Url(body)))}catch{return null}};
-const parseCookies=request=>Object.fromEntries(String(request.headers.get('cookie')||'').split(';').map(v=>v.trim()).filter(Boolean).map(v=>{const i=v.indexOf('=');return i<0?[v,'']:[v.slice(0,i),decodeURIComponent(v.slice(i+1))]}));
-const cookie=(name,value,maxAge,httpOnly=true)=>`${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAge}; SameSite=Lax; Secure${httpOnly?'; HttpOnly':''}`;
+const parseCookies=request=>{try{return Object.fromEntries(String(request.headers.get('cookie')||'').split(';').map(v=>v.trim()).filter(Boolean).map(v=>{const i=v.indexOf('=');return i<0?[v,'']:[v.slice(0,i),decodeURIComponent(v.slice(i+1))]}))}catch{return {}}};
+const cookie=(name,value,maxAge)=>`${name}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAge}; SameSite=Lax; Secure; HttpOnly`;
 const clearCookie=name=>`${name}=; Path=/; Max-Age=0; SameSite=Lax; Secure; HttpOnly`;
-const redirect=(location,cookies=[])=>new Response(null,{status:302,headers:[['location',location],...cookies.map(v=>['set-cookie',v]) ]});
+const redirect=(location,cookies=[])=>{const headers=new Headers({'location':location,'cache-control':'no-store'});for(const value of cookies)headers.append('set-cookie',value);return new Response(null,{status:302,headers})};
 const sessionSecret=env=>env.LINE_LOGIN_SESSION_SECRET||env.LINE_LOGIN_CHANNEL_SECRET||'';
 const configured=env=>!!(env.LINE_LOGIN_CHANNEL_ID&&env.LINE_LOGIN_CHANNEL_SECRET);
 
@@ -29,7 +29,7 @@ async function handleLineAuth(request,env){
   if(path==='/api/auth/me'&&request.method==='GET'){
     if(!secret)return json({authenticated:false});
     const session=await verifyPayload(cookies.choice_line_session,secret);
-    if(!session||Number(session.exp||0)<Date.now())return json({authenticated:false},{valueOf(){return 200}}.valueOf(),{'set-cookie':clearCookie('choice_line_session')});
+    if(!session||Number(session.exp||0)<Date.now())return json({authenticated:false},200,{'set-cookie':clearCookie('choice_line_session')});
     return json({authenticated:true,user:{userId:session.userId,displayName:session.displayName,pictureUrl:session.pictureUrl||''}});
   }
 
