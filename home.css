@@ -336,12 +336,10 @@ body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has
 body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .hero-actions{
   position:fixed!important;
   top:8px!important;
-  left:50%!important;
-  width:min(250px,64vw)!important;
-  height:64px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
+  left:calc(50% + 92px)!important;
+  width:auto!important;
+  height:auto!important;
+  display:block!important;
   padding:0!important;
   margin:0!important;
   transform:translateX(-50%)!important;
@@ -355,28 +353,34 @@ body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .hero-ac
 body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) #voiceBtn,
 body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) #lineReminderBtn{display:none!important;}
 body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .hero-actions > a.hero-action-btn{
-  width:58px!important;
-  height:58px!important;
+  width:auto!important;
+  height:auto!important;
+  display:block!important;
+  padding:0!important;
   border:0!important;
   border-radius:0!important;
   background:transparent!important;
   box-shadow:none!important;
+  overflow:visible!important;
 }
 body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .hero-actions > a.hero-action-btn img{
-  width:54px!important;
-  height:54px!important;
+  display:block!important;
+  width:66px!important;
+  height:66px!important;
+  max-width:none!important;
+  max-height:none!important;
   object-fit:contain!important;
 }
 body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) #homeBackBtn{
   position:fixed!important;
-  top:11px!important;
-  left:calc(50% - 104px)!important;
-  width:58px!important;
-  height:58px!important;
-  display:grid!important;
-  place-items:center!important;
+  top:8px!important;
+  left:calc(50% - 92px)!important;
+  width:auto!important;
+  height:auto!important;
+  display:block!important;
   padding:0!important;
   margin:0!important;
+  transform:translateX(-50%)!important;
   border:0!important;
   border-radius:0!important;
   background:transparent!important;
@@ -384,8 +388,15 @@ body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) #homeBac
   z-index:1002!important;
   overflow:visible!important;
 }
-#homeBackBtn img{display:block!important;width:54px!important;height:54px!important;object-fit:contain!important;}
-body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .shell{margin-top:82px!important;}
+#homeBackBtn img{
+  display:block!important;
+  width:66px!important;
+  height:66px!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+}
+body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .shell{margin-top:86px!important;}
 body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .home-lobby-top{padding-top:18px!important;}
 
 /* Vertical Morandi room cards */
@@ -400,9 +411,9 @@ body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .home-lo
   width:100%!important;
   min-height:68px!important;
   display:grid!important;
-  grid-template-columns:minmax(54px,1fr) minmax(0,2.2fr) minmax(74px,1fr)!important;
+  grid-template-columns:1fr!important;
   align-items:center!important;
-  gap:10px!important;
+  gap:0!important;
   padding:14px 18px!important;
   margin:0!important;
   border:1px solid rgba(95,112,106,.18)!important;
@@ -418,7 +429,7 @@ body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .home-lo
 #roomList .room-list-item:nth-child(6n+5){background:#e3ece8!important;}
 #roomList .room-list-item:nth-child(6n+6){background:#eee5ea!important;}
 #roomList .room-list-name{
-  grid-column:2!important;
+  grid-column:1!important;
   width:100%!important;
   min-width:0!important;
   text-align:center!important;
@@ -427,17 +438,7 @@ body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .home-lo
   overflow:hidden!important;
   text-overflow:ellipsis!important;
 }
-#roomList .room-list-author{
-  grid-column:3!important;
-  justify-self:end!important;
-  max-width:100%!important;
-  padding-left:6px!important;
-  color:#7d8c90!important;
-  font-size:14px!important;
-  white-space:nowrap!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-}
+#roomList .room-list-author{display:none!important;}
 #roomList .room-list-meta{position:absolute!important;left:12px!important;right:auto!important;}
 
 /* ---------- room/list screens scroll normally ---------- */
@@ -475,12 +476,24 @@ body:has(#roomView.hidden) .room-view.hidden{display:none!important;}
   body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-action-btn{width:54px!important;height:54px!important;}
   body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-action-btn img{width:50px!important;height:50px!important;}
 
-  body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .hero-actions{top:6px!important;width:62vw!important;height:58px!important;}
-  body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) #homeBackBtn{top:8px!important;left:calc(50% - 96px)!important;width:54px!important;height:54px!important;}
-  body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) #homeBackBtn img{width:50px!important;height:50px!important;}
-  body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .hero-actions > a.hero-action-btn{width:54px!important;height:54px!important;}
-  body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .hero-actions > a.hero-action-btn img{width:50px!important;height:50px!important;}
-  body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .shell{margin-top:76px!important;}
+  body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .hero-actions{
+    top:6px!important;
+    left:calc(50% + 88px)!important;
+    width:auto!important;
+    height:auto!important;
+  }
+  body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) #homeBackBtn{
+    top:6px!important;
+    left:calc(50% - 88px)!important;
+    width:auto!important;
+    height:auto!important;
+  }
+  body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) #homeBackBtn img,
+  body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .hero-actions > a.hero-action-btn img{
+    width:64px!important;
+    height:64px!important;
+  }
+  body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .shell{margin-top:82px!important;}
 
   .room-search{min-height:54px!important;margin-bottom:12px!important;gap:8px!important;}
   .room-search-toggle{width:54px!important;height:54px!important;min-width:54px!important;max-width:54px!important;min-height:54px!important;max-height:54px!important;flex-basis:54px!important;}
@@ -488,7 +501,6 @@ body:has(#roomView.hidden) .room-view.hidden{display:none!important;}
   .room-search.open .room-search-input{width:calc(100% - 62px)!important;}
 
   #roomList{gap:10px!important;}
-  #roomList .room-list-item{min-height:64px!important;padding:13px 14px!important;border-radius:16px!important;grid-template-columns:minmax(40px,.8fr) minmax(0,2.2fr) minmax(64px,1fr)!important;}
+  #roomList .room-list-item{min-height:64px!important;padding:13px 14px!important;border-radius:16px!important;grid-template-columns:1fr!important;}
   #roomList .room-list-name{font-size:17px!important;}
-  #roomList .room-list-author{font-size:13px!important;}
 }
