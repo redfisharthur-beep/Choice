@@ -373,7 +373,7 @@ body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .hero-ac
 }
 body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) #homeBackBtn{
   position:fixed!important;
-  top:-2px!important;
+  top:-7px!important;
   left:calc(50% - 92px)!important;
   width:auto!important;
   height:auto!important;
@@ -483,7 +483,7 @@ body:has(#roomView.hidden) .room-view.hidden{display:none!important;}
     height:auto!important;
   }
   body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) #homeBackBtn{
-    top:-4px!important;
+    top:-9px!important;
     left:calc(50% - 88px)!important;
     width:auto!important;
     height:auto!important;
