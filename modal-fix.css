@@ -2,8 +2,8 @@
 #openRoomDialog.dialog,#joinDialog.dialog,#voiceDialog.dialog,#lineReminderDialog.dialog,#announceDialog.dialog{width:min(620px,calc(100vw - 32px));max-width:calc(100vw - 32px);padding:clamp(28px,3vw,46px);border-radius:30px;font-size:20px;background:#ddd5ca;color:#34495a;border:1px solid rgba(92,104,103,.16);box-shadow:0 24px 60px rgba(67,76,74,.22);box-sizing:border-box;overflow-x:hidden}
 #openRoomDialog::backdrop,#joinDialog::backdrop,#voiceDialog::backdrop,#lineReminderDialog::backdrop,#announceDialog::backdrop{background:rgba(91,99,96,.42);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 #openRoomDialog .dialog-icon,#joinDialog .dialog-icon,#voiceDialog .dialog-icon,#lineReminderDialog .dialog-icon{line-height:1}
-#openRoomDialog .choice-dialog-icon{width:100%;height:220px;display:flex;justify-content:center;align-items:center;margin:0 0 18px;padding:0;overflow:hidden;pointer-events:none;box-sizing:border-box}
-#openRoomDialog .choice-dialog-icon img{display:block;width:min(560px,100%);max-width:100%;height:auto;max-height:220px;object-fit:contain;transform:scale(1.34);transform-origin:center;pointer-events:none}
+#openRoomDialog .choice-dialog-icon{width:100%;height:180px;display:flex;justify-content:center;align-items:center;margin:0 0 18px;padding:0 18px;overflow:visible;pointer-events:none;box-sizing:border-box}
+#openRoomDialog .choice-dialog-icon img{display:block;width:min(500px,88%);max-width:88%;height:auto;max-height:170px;object-fit:contain;transform:none;transform-origin:center;pointer-events:none}
 #voiceDialog .voice-dialog-icon,#lineReminderDialog .voice-dialog-icon{width:84px;height:84px;display:grid;place-items:center;margin-bottom:12px}
 #voiceDialog .voice-dialog-icon img,#lineReminderDialog .voice-dialog-icon img{width:74px;height:74px;object-fit:contain}
 #joinDialog .dialog-icon{font-size:58px}
@@ -24,8 +24,8 @@
 #createRoomBtn[disabled]{opacity:.72;cursor:wait}
 @media(max-width:640px){
   #openRoomDialog.dialog,#joinDialog.dialog,#voiceDialog.dialog,#lineReminderDialog.dialog,#announceDialog.dialog{width:calc(100vw - 20px);max-width:calc(100vw - 20px);padding:24px 20px;font-size:18px;border-radius:24px}
-  #openRoomDialog .choice-dialog-icon{height:180px;margin-bottom:14px;overflow:hidden}
-  #openRoomDialog .choice-dialog-icon img{width:min(470px,100%);max-width:100%;max-height:178px;transform:scale(1.32);transform-origin:center}
+  #openRoomDialog .choice-dialog-icon{height:150px;margin-bottom:14px;padding:0 12px;overflow:visible}
+  #openRoomDialog .choice-dialog-icon img{width:86%;max-width:86%;max-height:145px;transform:none;transform-origin:center}
   #joinDialog h3,#voiceDialog h3,#lineReminderDialog h3,#announceDialog h2{font-size:28px;margin-bottom:20px}
   #openRoomDialog label,#joinDialog label,#voiceDialog label{font-size:19px;margin:15px 0}
   #openRoomDialog label{width:88%;margin:15px auto}
