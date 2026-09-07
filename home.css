@@ -390,8 +390,8 @@ body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) #homeBac
 }
 #homeBackBtn img{
   display:block!important;
-  width:80px!important;
-  height:80px!important;
+  width:90px!important;
+  height:90px!important;
   max-width:none!important;
   max-height:none!important;
   object-fit:contain!important;
@@ -489,8 +489,8 @@ body:has(#roomView.hidden) .room-view.hidden{display:none!important;}
     height:auto!important;
   }
   body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) #homeBackBtn img{
-    width:80px!important;
-    height:80px!important;
+    width:90px!important;
+    height:90px!important;
   }
   body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .hero-actions > a.hero-action-btn img{
     width:60px!important;
