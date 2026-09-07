@@ -110,7 +110,7 @@ body{
 #homeLoginPage .home-login-row{
   position:absolute!important;
   left:50%!important;
-  top:67.3%!important;
+  top:calc(67.3% + 5px)!important;
   transform:translateX(-50%)!important;
   width:74%!important;
   max-width:520px!important;
@@ -133,6 +133,7 @@ body{
   color:#536b78!important;
   font-size:17px!important;
   text-align:center!important;
+  transform:translateX(-5px)!important;
 }
 #homeLoginPage .home-name-input:focus{border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;}
 #homeLoginPage .home-name-input::placeholder{color:rgba(83,107,120,.48)!important;}
@@ -144,7 +145,7 @@ body{
   border-radius:0!important;
   background:transparent!important;
   box-shadow:none!important;
-  transform:translateX(10px)!important;
+  transform:translateX(15px)!important;
   cursor:pointer!important;
 }
 #homeLoginPage .home-line-login img{display:none!important;}
@@ -185,7 +186,7 @@ body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has
 }
 body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{
   position:fixed!important;
-  top:40px!important;
+  top:43px!important;
   width:auto!important;
   padding:0!important;
   gap:0!important;
@@ -290,11 +291,13 @@ body:has(#roomView.hidden) .room-view.hidden{display:none!important;}
   .shell{width:calc(100% - 16px)!important;margin-top:84px!important;}
 
   #homeLoginPage .home-hero-image{object-fit:cover!important;object-position:center center!important;}
-  #homeLoginPage .home-login-row{top:67.3%!important;width:76%!important;}
+  #homeLoginPage .home-login-row{top:calc(67.3% + 5px)!important;width:76%!important;}
   #homeLoginPage .home-name-input,#homeLoginPage .home-line-login{height:62px!important;}
+  #homeLoginPage .home-name-input{transform:translateX(-5px)!important;}
+  #homeLoginPage .home-line-login{transform:translateX(15px)!important;}
   #homeLoginPage .home-login-image-btn{top:83.7%!important;width:50%!important;height:10.5%!important;}
 
-  body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{top:42px!important;}
+  body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{top:45px!important;}
   body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-action-btn{width:54px!important;height:54px!important;}
   body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-action-btn img{width:50px!important;height:50px!important;}
 }
