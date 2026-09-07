@@ -266,6 +266,78 @@ body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has
   background:#c9d2d5!important;
 }
 
+/* Room search: keep the magnifier compact and never let the source image expand the layout. */
+.room-search{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:10px!important;
+  width:100%!important;
+  min-height:72px!important;
+  margin:0 auto 12px!important;
+  padding:0!important;
+  overflow:visible!important;
+}
+.room-search-toggle{
+  appearance:none!important;
+  -webkit-appearance:none!important;
+  width:68px!important;
+  height:68px!important;
+  min-width:68px!important;
+  max-width:68px!important;
+  min-height:68px!important;
+  max-height:68px!important;
+  flex:0 0 68px!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:20px!important;
+  background:rgba(255,255,255,.42)!important;
+  box-shadow:none!important;
+  overflow:hidden!important;
+  cursor:pointer!important;
+}
+.room-search-toggle img{
+  display:block!important;
+  width:60px!important;
+  height:60px!important;
+  min-width:60px!important;
+  max-width:60px!important;
+  min-height:60px!important;
+  max-height:60px!important;
+  object-fit:contain!important;
+  margin:0!important;
+  padding:0!important;
+  transform:none!important;
+}
+.room-search-input{
+  width:0!important;
+  max-width:0!important;
+  height:56px!important;
+  min-height:56px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:18px!important;
+  background:rgba(255,255,255,.82)!important;
+  color:#536b78!important;
+  font-size:17px!important;
+  text-align:center!important;
+  opacity:0!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
+  transition:max-width .18s ease,width .18s ease,opacity .18s ease,padding .18s ease!important;
+}
+.room-search.open .room-search-input{
+  width:min(520px,calc(100% - 82px))!important;
+  max-width:520px!important;
+  padding:0 16px!important;
+  border:1px solid rgba(91,108,102,.12)!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+
 /* ---------- room/list screens scroll normally ---------- */
 body:has(#homeLobbyPage:not(.hidden)),body:has(#roomView:not(.hidden)){
   height:auto!important;
@@ -300,4 +372,9 @@ body:has(#roomView.hidden) .room-view.hidden{display:none!important;}
   body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{top:45px!important;}
   body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-action-btn{width:54px!important;height:54px!important;}
   body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-action-btn img{width:50px!important;height:50px!important;}
+
+  .room-search{min-height:68px!important;margin-bottom:10px!important;}
+  .room-search-toggle{width:64px!important;height:64px!important;min-width:64px!important;max-width:64px!important;min-height:64px!important;max-height:64px!important;flex-basis:64px!important;border-radius:18px!important;}
+  .room-search-toggle img{width:56px!important;height:56px!important;min-width:56px!important;max-width:56px!important;min-height:56px!important;max-height:56px!important;}
+  .room-search.open .room-search-input{width:calc(100% - 76px)!important;}
 }
