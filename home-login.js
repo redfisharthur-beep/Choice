@@ -4,6 +4,7 @@
   const openRoomBtn=document.querySelector('#openRoomBtn');
   const toastEl=document.querySelector('#toast');
   const roomList=document.querySelector('#roomList');
+  const backBtn=document.querySelector('#homeBackBtn');
   let lineUser=null;
 
   const showToast=text=>{if(!toastEl)return;toastEl.textContent=text;toastEl.classList.add('show');clearTimeout(showToast.t);showToast.t=setTimeout(()=>toastEl.classList.remove('show'),2200)};
@@ -76,12 +77,18 @@
   if(input){const saved=localStorage.getItem('choice-display-name')||'';if(!input.value)input.value=saved;input.addEventListener('input',()=>syncName(input.value));input.addEventListener('change',()=>syncName(input.value))}
   if(openRoomBtn){const original=openRoomBtn.onclick;openRoomBtn.onclick=e=>{const name=syncName(input?.value||'');if(!name){showToast('請先輸入名字');input?.focus();return}if(typeof original==='function')return original.call(openRoomBtn,e)}}
   if(lineBtn)lineBtn.onclick=async()=>{if(lineUser){showToast(`已使用 LINE 登入：${lineUser.displayName}`);return}try{const r=await fetch('/api/auth/line/status',{cache:'no-store',credentials:'same-origin'}),j=await r.json();if(!j.configured){showToast('LINE Login 尚未完成後台設定');return}location.assign('/api/auth/line/start')}catch{showToast('LINE Login 目前無法連線')}};
+  if(backBtn){backBtn.textContent='';const img=document.createElement('img');img.src='./assets/hero/return.png';img.alt='返回';backBtn.appendChild(img)}
 
   if(roomList){
     const searchWrap=document.createElement('div');searchWrap.className='room-search';searchWrap.innerHTML='<button id="roomSearchToggle" class="room-search-toggle" type="button" aria-label="搜尋房間" title="搜尋房間"><img src="./assets/hero/search.png" alt="搜尋"></button><input id="roomSearchInput" class="room-search-input" type="search" maxlength="40" placeholder="輸入房間關鍵字" aria-label="輸入房間關鍵字">';roomList.before(searchWrap);
     const searchToggle=searchWrap.querySelector('#roomSearchToggle'),searchInput=searchWrap.querySelector('#roomSearchInput');
+    let roomMeta=new Map();
+    const getAuthor=room=>String(room?.authorName??room?.author??room?.hostName??room?.ownerName??room?.creatorName??room?.createdByName??room?.host?.name??room?.owner?.name??'').trim();
+    const decorateRooms=()=>{roomList.querySelectorAll('.room-list-item[data-room-code]').forEach((card,index)=>{card.classList.add('lobby-room-card');card.dataset.tone=String((index%6)+1);const code=String(card.dataset.roomCode||'').toUpperCase(),room=roomMeta.get(code)||{};let author=card.querySelector('.room-list-author');if(!author){author=document.createElement('span');author.className='room-list-author';card.appendChild(author)}author.textContent=getAuthor(room)||'房主'})};
+    const refreshRoomMeta=async()=>{try{const r=await fetch('/api/rooms',{cache:'no-store'}),j=await r.json(),rooms=Array.isArray(j?.rooms)?j.rooms:[];roomMeta=new Map(rooms.map(room=>[String(room?.code||'').toUpperCase(),room]));decorateRooms()}catch{decorateRooms()}};
     const applyRoomFilter=()=>{const q=String(searchInput?.value||'').trim().toLowerCase();roomList.querySelectorAll('[data-room-code]').forEach(card=>{const title=String(card.querySelector('.room-list-name')?.textContent||'').trim().toLowerCase(),code=String(card.dataset.roomCode||'').trim().toLowerCase(),match=!q||title.includes(q)||code.includes(q);if(match){card.style.removeProperty('display');card.removeAttribute('aria-hidden')}else{card.style.setProperty('display','none','important');card.setAttribute('aria-hidden','true')}})};
-    searchToggle?.addEventListener('click',()=>{const open=searchWrap.classList.toggle('open');if(open)setTimeout(()=>searchInput?.focus(),40);else if(searchInput){searchInput.value='';applyRoomFilter()}});['input','search','compositionend','keyup'].forEach(type=>searchInput?.addEventListener(type,applyRoomFilter));searchInput?.addEventListener('keydown',e=>{if(e.key==='Escape'){searchInput.value='';searchWrap.classList.remove('open');applyRoomFilter();searchInput.blur()}});new MutationObserver(()=>queueMicrotask(applyRoomFilter)).observe(roomList,{childList:true,subtree:true});
+    searchToggle?.addEventListener('click',()=>{const open=searchWrap.classList.toggle('open');if(open)setTimeout(()=>searchInput?.focus(),40);else if(searchInput){searchInput.value='';applyRoomFilter()}});['input','search','compositionend','keyup'].forEach(type=>searchInput?.addEventListener(type,applyRoomFilter));searchInput?.addEventListener('keydown',e=>{if(e.key==='Escape'){searchInput.value='';searchWrap.classList.remove('open');applyRoomFilter();searchInput.blur()}});new MutationObserver(()=>queueMicrotask(()=>{decorateRooms();applyRoomFilter()})).observe(roomList,{childList:true,subtree:false});
+    refreshRoomMeta();setInterval(refreshRoomMeta,10000);
   }
 
   const pad=n=>String(n).padStart(2,'0');
