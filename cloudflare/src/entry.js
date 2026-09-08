@@ -19,7 +19,7 @@ const redirect=(location,cookies=[])=>{const headers=new Headers({'location':loc
 const sessionSecret=env=>env.LINE_LOGIN_SESSION_SECRET||env.LINE_LOGIN_CHANNEL_SECRET||'';
 const configured=env=>!!(env.LINE_LOGIN_CHANNEL_ID&&env.LINE_LOGIN_CHANNEL_SECRET);
 const DEFAULT_VOTE_WINDOW_MS=7*24*60*60*1000;
-const ROOM_LIST_RESET_AT=1788864629000;
+const ROOM_LIST_RESET_AT=1788853354000;
 const GENDERS=['男','女','跨性別'];
 const AGES=['20歲以下','20-35歲','35-50歲','50-65歲'];
 const REGIONS=['北部地區','中部地區','南部地區','東部地區','外島'];
