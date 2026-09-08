@@ -18,23 +18,27 @@
 #roomView .room-head-compact h2{margin:0;text-align:center;font-size:32px;color:#667e86}
 #roomView .room-deadline-top{font-size:20px}
 
-/* Room top three actions: smaller mic/community, larger LINE reminder. */
-body:has(#roomView:not(.hidden)) .hero-actions{gap:24px!important;padding-top:4px!important}
-body:has(#roomView:not(.hidden)) .hero-action-btn{width:54px!important;height:54px!important}
-body:has(#roomView:not(.hidden)) .hero-action-btn img{width:46px!important;height:46px!important;object-fit:contain!important;transform:none!important}
-body:has(#roomView:not(.hidden)) .hero-mic-btn img{width:48px!important;height:48px!important}
-body:has(#roomView:not(.hidden)) .hero-line-note-btn{width:112px!important;height:64px!important;overflow:visible!important}
-body:has(#roomView:not(.hidden)) .hero-line-note-btn img{width:108px!important;height:62px!important;transform:none!important;object-fit:contain!important}
+/* Room top actions: mic/community 1.3x, LINE reminder free from button clipping. */
+body:has(#roomView:not(.hidden)) .hero-actions{gap:26px!important;padding-top:4px!important;overflow:visible!important}
+body:has(#roomView:not(.hidden)) .hero-action-btn{width:68px!important;height:68px!important;overflow:visible!important}
+body:has(#roomView:not(.hidden)) .hero-action-btn img{width:60px!important;height:60px!important;max-width:none!important;max-height:none!important;object-fit:contain!important;transform:none!important}
+body:has(#roomView:not(.hidden)) .hero-mic-btn img{width:62px!important;height:62px!important}
+body:has(#roomView:not(.hidden)) .hero-line-note-btn{width:132px!important;height:72px!important;overflow:visible!important}
+body:has(#roomView:not(.hidden)) .hero-line-note-btn img{width:126px!important;height:72px!important;max-width:none!important;max-height:none!important;transform:none!important;object-fit:contain!important}
+
+/* LINE reminder dialog: normal-sized LINE icon only. */
+#lineReminderDialog #openLineBindBtn{display:grid!important;place-items:center!important;width:72px!important;height:72px!important;margin:18px auto 0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+#lineReminderDialog #openLineBindBtn img{display:block!important;width:64px!important;height:64px!important;max-width:64px!important;max-height:64px!important;object-fit:contain!important;transform:none!important}
 
 /* Voted badge: only after the current user has actually voted. */
-#roomView .room-voted-badge{display:none!important;position:absolute;left:18px;top:50%;width:76px;height:76px;object-fit:contain;transform:translateY(-50%);z-index:2}
+#roomView .room-voted-badge{display:none!important;position:absolute;left:6px;top:50%;width:76px;height:76px;object-fit:contain;transform:translateY(-50%);z-index:4}
 #roomView .room-voted-badge.show{display:block!important}
 
-/* Vote / draw bears are the two permanent room navigation controls. */
+/* Vote / draw bears: interface selectors for host and participants. */
 #roomView #flowNav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:34px!important;max-width:660px!important;margin:18px auto 22px!important;background:transparent!important;padding:0!important}
 #roomView #flowNav button[data-step="setup"]{display:none!important}
-#roomView #flowNav button[data-step="vote"],#roomView #flowNav button[data-step="draw"]{display:grid!important;place-items:center!important;min-height:168px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;background-image:none!important;box-shadow:none!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important}
-#roomView #flowNav button[data-step="vote"] img,#roomView #flowNav button[data-step="draw"] img{display:block!important;width:168px!important;height:168px!important;max-width:100%!important;object-fit:contain!important;pointer-events:none!important}
+#roomView #flowNav button[data-step="vote"],#roomView #flowNav button[data-step="draw"]{display:grid!important;place-items:center!important;min-height:168px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;background-image:none!important;box-shadow:none!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important;overflow:visible!important}
+#roomView #flowNav button[data-step="vote"] img,#roomView #flowNav button[data-step="draw"] img{display:block!important;width:168px!important;height:168px!important;max-width:none!important;max-height:none!important;object-fit:contain!important;pointer-events:none!important}
 #roomView #flowNav button.active{transform:scale(1.03)!important}
 
 /* Setup page styling. */
@@ -58,7 +62,34 @@ html body #roomView #setupStep .choice-actions{display:flex!important;justify-co
 html body #roomView #setupStep #goVoteBtn{display:grid!important;place-items:center!important;width:min(220px,56vw)!important;min-height:0!important;height:auto!important;margin:0 auto!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;cursor:pointer!important}
 html body #roomView #setupStep #goVoteBtn .setup-action-image{display:block!important;width:100%!important;max-width:220px!important;height:auto!important;max-height:none!important;margin:0!important;object-fit:contain!important}
 
-#roomView .analysis-btn{display:block!important;width:224px!important;height:224px!important;min-height:224px!important;margin:22px auto 12px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent url('./assets/hero/analysis.png') center/contain no-repeat!important;box-shadow:none!important;font-size:0!important;color:transparent!important}
+/* Vote page: shorter pills shifted right, completed stamp at far-left edge, tight percentage area. */
+#roomView #voteStep .panel{display:flex!important;flex-direction:column!important}
+#roomView #pollTitleDisplay{order:1}
+#roomView #voteDeadlineText{order:2}
+#roomView #voteOptions{order:3;width:100%!important}
+#roomView #voteBtn{order:4;margin-top:20px!important}
+#roomView #analysisBtn{order:5}
+#roomView #voteOptions .percent-row{position:relative!important;width:calc(100% - 92px)!important;margin-left:92px!important;box-sizing:border-box!important;grid-template-columns:minmax(90px,140px) minmax(0,1fr) auto!important;column-gap:0!important;padding-left:14px!important;padding-right:12px!important}
+html body #roomView #voteOptions .percent-track{width:100%!important;max-width:none!important;margin:0!important;justify-self:stretch!important}
+html body #roomView #voteOptions .percent-value{margin-left:0!important;padding-left:6px!important;white-space:nowrap!important}
+#roomView #voteOptions .vote-choice-fx{position:absolute!important;left:-54px!important;top:50%!important;width:80px!important;height:80px!important;max-width:none!important;max-height:none!important;transform:translate(-50%,-50%)!important;object-fit:contain!important;z-index:5!important}
+
+/* Analysis image is a real large icon below the vote button, not clipped by a pill. */
+html body #roomView #analysisBtn.analysis-btn{display:block!important;order:5!important;width:min(448px,70vw)!important;height:auto!important;min-height:0!important;aspect-ratio:1/1!important;margin:20px auto 4px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent url('./assets/hero/analysis.png') center/contain no-repeat!important;box-shadow:none!important;font-size:0!important;color:transparent!important;overflow:visible!important;cursor:pointer!important}
+html body #roomView #analysisBtn.analysis-btn::before,html body #roomView #analysisBtn.analysis-btn::after{display:none!important}
+
+/* Draw screen: vertical choices, vivid selected state, smaller target/dart artwork. */
+html body #roomView #drawHostControls{display:flex!important;flex-direction:column!important;align-items:center!important;gap:18px!important}
+html body #roomView #drawChecks{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;gap:12px!important;width:min(660px,100%)!important;margin:0 auto!important}
+html body #roomView #drawChecks .draw-check{width:100%!important;min-height:62px!important;margin:0!important;padding:10px 18px!important;border:2px solid rgba(105,131,122,.15)!important;border-radius:18px!important;background:#eef1ed!important;box-sizing:border-box!important;transition:.18s ease!important}
+html body #roomView #drawChecks .draw-check:has(input:checked){background:linear-gradient(100deg,#fff1a9,#c8f0d8,#c7e7ff,#ffd8e6)!important;border-color:#fff!important;box-shadow:0 0 0 3px rgba(118,195,173,.35),0 8px 24px rgba(104,166,150,.22)!important;color:#315d65!important;font-weight:700!important;transform:scale(1.015)!important}
+html body #roomView #drawChecks .draw-check:has(input:checked)::after{content:'✦';margin-left:auto;font-size:26px;color:#fff;text-shadow:0 2px 8px rgba(65,119,104,.35)}
+html body #roomView #drawChecks .draw-check input{width:24px!important;height:24px!important;accent-color:#74b9a8!important}
+html body #roomView #throwBtn{width:min(170px,42vw)!important;min-height:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
+html body #roomView #throwBtn img{display:block!important;width:100%!important;height:auto!important;max-width:none!important;max-height:none!important;object-fit:contain!important}
+html body #roomView .draw-target-wrap{width:min(300px,52vw)!important;max-width:300px!important;margin:0 auto!important}
+html body #roomView .draw-target-img{width:100%!important;height:auto!important;max-width:300px!important;object-fit:contain!important}
+html body #roomView .draw-dart-img{width:34%!important;height:auto!important;max-width:110px!important;object-fit:contain!important}
 
 /* Chat: input/messages only; remove heading and empty-state copy. */
 #roomView .choice-chat{position:relative;z-index:2;pointer-events:auto}
@@ -69,10 +100,10 @@ html body #roomView #setupStep #goVoteBtn .setup-action-image{display:block!impo
 #roomView .choice-chat-compose input::placeholder{color:#84979c!important;-webkit-text-fill-color:#84979c!important;opacity:1!important}
 #roomView .choice-chat-compose button{font-size:18px}
 
-/* Leave / share controls: enlarged and anchored to both sides. */
-html body #roomView .room-utility-actions{display:flex!important;justify-content:space-between!important;align-items:center!important;width:100%!important;margin:14px 0 0!important;padding:0 6px!important;box-sizing:border-box!important}
-html body #roomView #outRoomBtn,html body #roomView #shareRoomBtn{width:150px!important;height:150px!important;min-width:150px!important;min-height:150px!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important;display:grid!important;place-items:center!important}
-html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{display:block!important;width:138px!important;height:138px!important;max-width:138px!important;max-height:138px!important;object-fit:contain!important}
+/* Leave / share controls: large artwork with no clipping frame. */
+html body #roomView .room-utility-actions{display:flex!important;justify-content:space-between!important;align-items:center!important;width:100%!important;margin:14px 0 0!important;padding:0!important;box-sizing:border-box!important;overflow:visible!important}
+html body #roomView #outRoomBtn,html body #roomView #shareRoomBtn{width:190px!important;height:190px!important;min-width:190px!important;min-height:190px!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important;display:grid!important;place-items:center!important;overflow:visible!important}
+html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{display:block!important;width:178px!important;height:178px!important;max-width:none!important;max-height:none!important;object-fit:contain!important}
 
 #openRoomDialog #createRoomBtn{appearance:none;border:0;background:transparent;box-shadow:none;padding:0;margin:18px auto 0;width:min(220px,56vw);display:block;cursor:pointer}
 #openRoomDialog #createRoomBtn img{display:block;width:100%;height:auto;object-fit:contain}
@@ -83,18 +114,18 @@ html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{displa
 #roomView .draw-check{font-size:22px}
 
 @media(max-width:600px){
-  /* Login social icon: move 30px upward from the previous mobile position. */
+  /* Login social icon stays 30px above its former mobile position. */
   body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{top:45px!important}
 
   #roomView .room-head-compact h2{font-size:28px}
   #roomView .room-deadline-top{font-size:18px}
-  #roomView .room-voted-badge{left:10px;width:62px;height:62px}
+  #roomView .room-voted-badge{left:2px;width:62px;height:62px}
   body:has(#roomView:not(.hidden)) .hero-actions{gap:16px!important}
-  body:has(#roomView:not(.hidden)) .hero-action-btn{width:46px!important;height:46px!important}
-  body:has(#roomView:not(.hidden)) .hero-action-btn img{width:40px!important;height:40px!important}
-  body:has(#roomView:not(.hidden)) .hero-mic-btn img{width:42px!important;height:42px!important}
-  body:has(#roomView:not(.hidden)) .hero-line-note-btn{width:98px!important;height:58px!important}
-  body:has(#roomView:not(.hidden)) .hero-line-note-btn img{width:94px!important;height:56px!important}
+  body:has(#roomView:not(.hidden)) .hero-action-btn{width:58px!important;height:58px!important}
+  body:has(#roomView:not(.hidden)) .hero-action-btn img{width:52px!important;height:52px!important}
+  body:has(#roomView:not(.hidden)) .hero-mic-btn img{width:55px!important;height:55px!important}
+  body:has(#roomView:not(.hidden)) .hero-line-note-btn{width:112px!important;height:62px!important;overflow:visible!important}
+  body:has(#roomView:not(.hidden)) .hero-line-note-btn img{width:108px!important;height:62px!important;max-width:none!important;max-height:none!important}
   #roomView #flowNav{gap:18px!important;max-width:390px!important}
   #roomView #flowNav button[data-step="vote"],#roomView #flowNav button[data-step="draw"]{min-height:138px!important}
   #roomView #flowNav button[data-step="vote"] img,#roomView #flowNav button[data-step="draw"] img{width:136px!important;height:136px!important}
@@ -104,10 +135,18 @@ html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{displa
   #roomView #setupStep .vote-setting{min-height:56px!important;font-size:18px!important;padding:10px 12px!important}
   html body #roomView #setupStep #goVoteBtn{width:min(190px,52vw)!important}
   html body #roomView #setupStep #goVoteBtn .setup-action-image{max-width:190px!important}
-  #roomView .analysis-btn{width:184px!important;height:184px!important;min-height:184px!important}
+  #roomView #voteOptions .percent-row{width:calc(100% - 70px)!important;margin-left:70px!important;grid-template-columns:minmax(72px,106px) minmax(0,1fr) auto!important;padding-left:10px!important;padding-right:8px!important}
+  #roomView #voteOptions .vote-choice-fx{left:-40px!important;width:64px!important;height:64px!important}
+  html body #roomView #analysisBtn.analysis-btn{width:min(368px,82vw)!important;height:auto!important;aspect-ratio:1/1!important}
+  html body #roomView #drawChecks{gap:10px!important}
+  html body #roomView #drawChecks .draw-check{min-height:56px!important;padding:9px 14px!important;font-size:19px!important}
+  html body #roomView #throwBtn{width:min(145px,40vw)!important}
+  html body #roomView .draw-target-wrap{width:min(240px,58vw)!important;max-width:240px!important}
+  html body #roomView .draw-target-img{max-width:240px!important}
+  html body #roomView .draw-dart-img{max-width:88px!important}
   #roomView .choice-chat-compose input{font-size:18px!important}
-  html body #roomView #outRoomBtn,html body #roomView #shareRoomBtn{width:124px!important;height:124px!important;min-width:124px!important;min-height:124px!important}
-  html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{width:114px!important;height:114px!important;max-width:114px!important;max-height:114px!important}
+  html body #roomView #outRoomBtn,html body #roomView #shareRoomBtn{width:156px!important;height:156px!important;min-width:156px!important;min-height:156px!important}
+  html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{width:146px!important;height:146px!important;max-width:none!important;max-height:none!important}
   #openRoomDialog #createRoomBtn{width:min(190px,52vw)}
   #roomView .percent-name{font-size:19px}
 }
