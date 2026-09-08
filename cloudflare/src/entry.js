@@ -218,39 +218,33 @@ export class ChoiceRoom extends BaseChoiceRoom{
       return super.webSocketMessage(ws,JSON.stringify(msg));
     }
 
-    if(s.phase==='voting'&&msg.type==='phase'&&['setup','closed','draw'].includes(String(msg.phase||''))){
-      if(!this.voteExpired(s)){try{ws.send(JSON.stringify({type:'error',message:'投票截止前不能提前結算或抽籤'}))}catch{}return}
-      await this.closeVotingForDeadline();s=await this.getState();if(msg.phase!=='draw')return;
+    if(s.phase==='voting'&&msg.type==='phase'&&['setup','closed'].includes(String(msg.phase||''))){
+      if(!this.voteExpired(s)){try{ws.send(JSON.stringify({type:'error',message:'投票截止前不能提前結算'}))}catch{}return}
+      await this.closeVotingForDeadline();return;
     }
 
     if(msg.type==='phase'&&msg.phase==='draw'){
-      if(s.phase==='setup'){
-        s.firstDrawResult=null;s.firstDrawAt=null;s.firstDrawOptionIds=[];this.state=s;await this.persistState();
-        return super.webSocketMessage(ws,JSON.stringify(msg));
-      }
-      if(s.phase!=='closed'&&s.phase!=='draw'){try{ws.send(JSON.stringify({type:'error',message:'目前不能進行抽籤'}))}catch{}return}
-      if(s.phase==='closed'){s.phase='draw';this.state=s;await this.persistState();await this.broadcastState();return}
+      if(s.phase==='voting')return;
+      if(s.phase==='setup'||s.phase==='closed'||s.phase==='draw')return;
+      try{ws.send(JSON.stringify({type:'error',message:'目前不能進行抽籤'}))}catch{}
       return;
     }
 
     if(msg.type==='draw:request'){
       if(!a.isHost){try{ws.send(JSON.stringify({type:'error',message:'只有房主可以抽籤'}))}catch{}return}
       s=await this.getState();
-      if(s.phase==='voting'){
-        if(!this.voteExpired(s)){try{ws.send(JSON.stringify({type:'error',message:'投票截止前不能抽籤'}))}catch{}return}
-        await this.closeVotingForDeadline();s=await this.getState();
-      }
-      if(!['setup','closed','draw'].includes(s.phase)){try{ws.send(JSON.stringify({type:'error',message:'目前不能進行抽籤'}))}catch{}return}
+      if(!['setup','voting','closed','draw'].includes(s.phase)){try{ws.send(JSON.stringify({type:'error',message:'目前不能進行抽籤'}))}catch{}return}
       const ids=Array.isArray(msg.optionIds)?msg.optionIds.map(String):[],pool=(Array.isArray(s.options)?s.options:[]).filter(o=>ids.includes(String(o.id)));
       if(pool.length<2){try{ws.send(JSON.stringify({type:'error',message:'至少勾選 2 個項目'}))}catch{}return}
       const official=!String(s.firstDrawResult||'').trim();
-      s.phase='draw';this.state=s;await this.persistState();this.broadcast({type:'draw:start',optionIds:ids,by:a.name,official});
+      this.broadcast({type:'draw:start',optionIds:ids,by:a.name,official});
       await new Promise(resolve=>setTimeout(resolve,850));
       const r=crypto.getRandomValues(new Uint32Array(1))[0],pick=pool[r%pool.length];
       s.lastDraw=pick.name;s.recent=[pick.name,...(s.recent||[])].slice(0,5);
       if(official){s.firstDrawResult=pick.name;s.firstDrawAt=Date.now();s.firstDrawOptionIds=ids}
-      this.state=s;await this.persistState();this.broadcast({type:'draw',name:pick.name,optionIds:ids,by:a.name,official,firstDrawResult:s.firstDrawResult||null});await this.broadcastState();
-      if(official)await this.notifyLineSubscribers(`首次抽籤：${pick.name}`);
+      this.state=s;await this.persistState();
+      this.broadcast({type:'draw',name:pick.name,optionIds:ids,by:a.name,official,firstDrawResult:s.firstDrawResult||null});
+      await this.broadcastState();
       return;
     }
 
