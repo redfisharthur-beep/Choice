@@ -169,3 +169,53 @@ window.CHOICE_CONFIG={
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
   else init();
 })();
+
+(()=>{
+  const bgm=new Audio('./assets/music/choice.mp3');
+  bgm.loop=true;
+  bgm.volume=0.2;
+  bgm.preload='auto';
+
+  const dartsSfx=new Audio('./assets/music/darts.mp3');
+  dartsSfx.volume=0.5;
+  dartsSfx.preload='auto';
+
+  const startBgm=()=>{
+    bgm.volume=0.2;
+    bgm.play().catch(()=>{});
+  };
+
+  startBgm();
+  ['pointerdown','touchstart','keydown'].forEach(type=>{
+    document.addEventListener(type,startBgm,{once:true,capture:true});
+  });
+
+  const playDarts=()=>{
+    try{
+      dartsSfx.pause();
+      dartsSfx.currentTime=0;
+      dartsSfx.volume=0.5;
+      dartsSfx.play().catch(()=>{});
+    }catch{}
+  };
+
+  let wasDrawFocus=document.body.classList.contains('draw-focus-mode');
+  let dartsTimer=null;
+  const watchDrawFocus=()=>{
+    const active=document.body.classList.contains('draw-focus-mode');
+    if(active&&!wasDrawFocus){
+      if(dartsTimer)clearTimeout(dartsTimer);
+      dartsTimer=setTimeout(playDarts,1000);
+    }
+    if(!active&&dartsTimer){clearTimeout(dartsTimer);dartsTimer=null;}
+    wasDrawFocus=active;
+  };
+
+  const initAudioWatch=()=>{
+    wasDrawFocus=document.body.classList.contains('draw-focus-mode');
+    new MutationObserver(watchDrawFocus).observe(document.body,{attributes:true,attributeFilter:['class']});
+  };
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initAudioWatch,{once:true});
+  else initAudioWatch();
+})();
