@@ -84,6 +84,24 @@ body:has(#roomView:not(.hidden)) .shell{margin-top:94px!important;}
 body:has(#roomView:not(.hidden)) .room-view{display:block!important;height:auto!important;overflow:visible!important;}
 body:has(#roomView.hidden) .room-view.hidden{display:none!important;}
 
+/* ---------- room navigation / analysis / chat ---------- */
+html body #roomView #flowNav{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:22px!important;background:transparent!important;padding:0!important;}
+html body #roomView #flowNav button[data-step="setup"]{display:none!important;}
+html body #roomView #flowNav button[data-step="vote"],html body #roomView #flowNav button[data-step="draw"]{min-height:148px!important;border:0!important;border-radius:0!important;background-color:transparent!important;background-repeat:no-repeat!important;background-position:center!important;background-size:contain!important;box-shadow:none!important;font-size:0!important;color:transparent!important;opacity:1!important;cursor:pointer!important;pointer-events:auto!important;filter:none!important;}
+html body #roomView #flowNav button[data-step="vote"]{background-image:url('./assets/stamp/vote.png')!important;}
+html body #roomView #flowNav button[data-step="draw"]{background-image:url('./assets/dart/darts.png')!important;}
+html body #roomView #flowNav button.active{opacity:1!important;transform:scale(1.04)!important;box-shadow:none!important;}
+html body #roomView #flowNav button:disabled{opacity:1!important;cursor:pointer!important;pointer-events:auto!important;}
+html body #roomView #analysisBtn.analysis-btn{display:block!important;width:112px!important;height:112px!important;min-height:0!important;margin:18px auto 10px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent url('./assets/hero/analysis.png') center/contain no-repeat!important;box-shadow:none!important;font-size:0!important;color:transparent!important;cursor:pointer!important;}
+html body #roomView #analysisBtn.analysis-btn::before,html body #roomView #analysisBtn.analysis-btn::after{display:none!important;}
+html body #roomView .player-strip.public-votes-only .player-name::after{content:none!important;display:none!important;}
+html body #roomView .player-strip.public-votes-only .player-choice{border-left:0!important;padding-left:0!important;}
+html body #roomView #choiceChat.choice-chat{position:relative!important;z-index:40!important;pointer-events:auto!important;overflow:visible!important;}
+html body #roomView #choiceChat.choice-chat *{pointer-events:auto!important;}
+html body #roomView #choiceChat .choice-chat-compose{position:relative!important;z-index:41!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important;}
+html body #roomView #choiceChatInput{display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;user-select:text!important;-webkit-user-select:text!important;touch-action:manipulation!important;min-height:48px!important;position:relative!important;z-index:42!important;}
+html body #roomView #choiceChat .choice-chat-compose button{pointer-events:auto!important;position:relative!important;z-index:42!important;}
+
 /* ---------- Mobile ---------- */
 @media(max-width:600px){
   .hero-actions{top:6px!important;width:calc(100% - 14px)!important;gap:24px!important;padding:8px 12px 10px!important;}
@@ -104,4 +122,7 @@ body:has(#roomView.hidden) .room-view.hidden{display:none!important;}
   body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .shell{margin-top:96px!important;}
   .room-search{min-height:54px!important;margin-bottom:12px!important;gap:8px!important;}.room-search-toggle{width:54px!important;height:54px!important;min-width:54px!important;max-width:54px!important;min-height:54px!important;max-height:54px!important;flex-basis:54px!important;}.room-search-toggle img{width:50px!important;height:50px!important;min-width:50px!important;max-width:50px!important;min-height:50px!important;max-height:50px!important;}.room-search.open .room-search-input{width:calc(100% - 62px)!important;}
   #roomList{gap:10px!important;}#roomList .room-list-item{min-height:64px!important;grid-template-columns:minmax(48px,.8fr) minmax(0,2.8fr) minmax(70px,1fr)!important;gap:6px!important;padding:13px 14px!important;border-radius:16px!important;}#roomList .room-list-name{font-size:17px!important;}#roomList .room-list-date,#roomList .room-list-author{font-size:13px!important;}
+  html body #roomView #flowNav{gap:12px!important;}
+  html body #roomView #flowNav button[data-step="vote"],html body #roomView #flowNav button[data-step="draw"]{min-height:118px!important;}
+  html body #roomView #analysisBtn.analysis-btn{width:92px!important;height:92px!important;}
 }
