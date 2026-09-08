@@ -94,13 +94,13 @@ html body #roomView #drawOptionSummary,html body.choice-participant #roomView #d
 
 html body #roomView .draw-target-wrap{position:relative!important;width:min(300px,52vw)!important;max-width:300px!important;margin:0 auto!important;display:grid!important;place-items:center!important}
 html body #roomView .draw-target-img{grid-area:1/1!important;width:100%!important;height:auto!important;max-width:300px!important;object-fit:contain!important;transform-origin:center!important}
-html body #roomView .draw-dart-img{grid-area:1/1!important;display:block!important;width:38%!important;height:auto!important;max-width:118px!important;object-fit:contain!important;opacity:0!important;z-index:3!important;pointer-events:none!important;transform:translate(230%,-160%) rotate(-18deg) scale(1.12)!important;transform-origin:center!important}
-html body #roomView .draw-dart-img.hit{opacity:1!important;animation:choiceDartHit .65s cubic-bezier(.16,.82,.22,1) forwards!important}
+html body #roomView .draw-dart-img{grid-area:1/1!important;display:block!important;width:38%!important;height:auto!important;max-width:118px!important;object-fit:contain!important;opacity:0!important;z-index:3!important;pointer-events:none!important;transform:translate(230%,-160%) rotate(-18deg) scale(1.12);transform-origin:center!important}
+html body #roomView .draw-dart-img.hit{opacity:1!important;animation:choiceDartHit .72s cubic-bezier(.16,.82,.22,1) forwards!important}
 html body #roomView .draw-target-img.spinning{animation:choiceTargetSpin .58s linear infinite!important}
 html body #roomView .draw-target-img.stopping{animation:choiceTargetSettle .30s cubic-bezier(.2,.7,.3,1) forwards!important}
 @keyframes choiceTargetSpin{to{transform:rotate(360deg)}}
 @keyframes choiceTargetSettle{0%{transform:rotate(0deg)}65%{transform:rotate(14deg)}100%{transform:rotate(0deg)}}
-@keyframes choiceDartHit{0%{opacity:0;transform:translate(230%,-160%) rotate(-18deg) scale(1.16)}8%{opacity:1}100%{opacity:1;transform:translate(calc(-88% - 100px),22%) rotate(-18deg) scale(.84)}}
+@keyframes choiceDartHit{0%{transform:translate(230%,-160%) rotate(-18deg) scale(1.16)}100%{transform:translate(48%,-14%) rotate(-18deg) scale(.84)}}
 
 /* Static participant view is choice list only. Fullscreen target appears only while the host is throwing. */
 html body.choice-participant #roomView .draw-stage{display:none!important}
