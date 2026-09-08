@@ -18,7 +18,6 @@
 #roomView .room-head-compact h2{margin:0;text-align:center;font-size:32px;color:#667e86}
 #roomView .room-deadline-top{font-size:20px}
 
-/* Room top actions: mic/community 1.3x, LINE reminder free from button clipping. */
 body:has(#roomView:not(.hidden)) .hero-actions{gap:26px!important;padding-top:4px!important;overflow:visible!important}
 body:has(#roomView:not(.hidden)) .hero-action-btn{width:68px!important;height:68px!important;overflow:visible!important}
 body:has(#roomView:not(.hidden)) .hero-action-btn img{width:60px!important;height:60px!important;max-width:none!important;max-height:none!important;object-fit:contain!important;transform:none!important}
@@ -32,10 +31,11 @@ body:has(#roomView:not(.hidden)) .hero-line-note-btn img{width:126px!important;h
 #roomView .room-voted-badge{display:none!important;position:absolute;left:6px;top:50%;width:76px;height:76px;object-fit:contain;transform:translateY(-50%);z-index:4}
 #roomView .room-voted-badge.show{display:block!important}
 
-/* Vote / draw bears: use the original button backgrounds only once. */
+/* Vote / draw bears: real img elements only; remove all background artwork. */
 #roomView #flowNav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:34px!important;max-width:660px!important;margin:18px auto 22px!important;background:transparent!important;padding:0!important}
 #roomView #flowNav button[data-step="setup"]{display:none!important}
-#roomView #flowNav button[data-step="vote"],#roomView #flowNav button[data-step="draw"]{display:grid!important;place-items:center!important;min-height:168px!important;padding:0!important;border:0!important;border-radius:0!important;background-color:transparent!important;box-shadow:none!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important;overflow:visible!important}
+html body #roomView #flowNav button[data-step="vote"],html body #roomView #flowNav button[data-step="draw"]{display:grid!important;place-items:center!important;min-height:168px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;background-image:none!important;box-shadow:none!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important;overflow:visible!important}
+html body #roomView #flowNav button[data-step="vote"] img,html body #roomView #flowNav button[data-step="draw"] img{display:block!important;width:168px!important;height:168px!important;max-width:none!important;max-height:none!important;object-fit:contain!important;pointer-events:none!important}
 #roomView #flowNav button.active{transform:scale(1.03)!important}
 
 #roomView #setupStep .panel{padding:28px 30px 30px!important}
@@ -49,6 +49,9 @@ body:has(#roomView:not(.hidden)) .hero-line-note-btn img{width:126px!important;h
 #roomView #setupStep .vote-setting{display:flex!important;align-items:center!important;gap:12px!important;min-height:58px!important;padding:10px 14px!important;margin:0!important;border:1px solid rgba(102,124,117,.12)!important;border-radius:17px!important;background:#f2f3ee!important;color:#60767d!important;box-sizing:border-box!important}
 #roomView #setupStep .vote-setting.full{display:grid!important;grid-template-columns:auto minmax(0,1fr)!important}
 #roomView #setupStep .vote-setting input[type="checkbox"]{width:24px!important;height:24px!important;flex:0 0 auto!important}
+#roomView #setupStep .votes-per-person-setting{display:flex!important;align-items:center!important;gap:12px!important}
+#roomView #setupStep #votesPerPersonInput{width:72px!important;min-height:42px!important;border:0!important;border-radius:14px!important;background:#fff!important;text-align:center!important;font-size:18px!important}
+#roomView #setupStep #voteDeadlineInput:not(.has-value):not(:focus)::-webkit-datetime-edit{color:transparent!important}
 
 html body #roomView #setupStep .choice-actions{display:flex!important;justify-content:center!important;align-items:center!important;margin-top:22px!important}
 html body #roomView #setupStep #goVoteBtn{display:grid!important;place-items:center!important;width:min(220px,56vw)!important;min-height:0!important;height:auto!important;margin:0 auto!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;cursor:pointer!important}
@@ -113,6 +116,7 @@ html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{displa
   body:has(#roomView:not(.hidden)) .hero-line-note-btn img{width:108px!important;height:62px!important;max-width:none!important;max-height:none!important}
   #roomView #flowNav{gap:18px!important;max-width:390px!important}
   #roomView #flowNav button[data-step="vote"],#roomView #flowNav button[data-step="draw"]{min-height:138px!important}
+  html body #roomView #flowNav button[data-step="vote"] img,html body #roomView #flowNav button[data-step="draw"] img{width:136px!important;height:136px!important}
   #roomView #setupStep .panel{padding:22px 18px 24px!important}
   #roomView #setupStep .option-mode button{min-width:112px!important;min-height:50px!important;font-size:17px!important;padding:0 20px!important}
   #roomView #setupStep .vote-settings{padding:14px!important;gap:10px!important}
@@ -170,8 +174,8 @@ html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{displa
   <div id="roomDeadlineTop" class="room-deadline-top hidden" aria-live="polite"></div>
   <nav id="flowNav" class="flow-nav">
     <button type="button" data-step="setup" class="active">設定</button>
-    <button type="button" data-step="vote" aria-label="查看投票狀況"></button>
-    <button type="button" data-step="draw" aria-label="查看抽籤狀況"></button>
+    <button type="button" data-step="vote" aria-label="查看投票狀況"><img src="./assets/stamp/stamp.png" alt="投票"></button>
+    <button type="button" data-step="draw" aria-label="查看抽籤狀況"><img src="./assets/dart/darts.png" alt="抽籤"></button>
   </nav>
 
   <section id="setupStep" class="step active">
@@ -182,6 +186,7 @@ html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{displa
       <div class="vote-settings">
         <label class="vote-setting full"><span>投票截止時間</span><input id="voteDeadlineInput" type="datetime-local"></label>
         <label class="vote-setting"><input id="anonymousVoteInput" type="checkbox"><span>匿名投票</span></label>
+        <label class="vote-setting votes-per-person-setting"><input id="repeatVoteInput" type="checkbox" aria-label="啟用多票"><span>每人</span><input id="votesPerPersonInput" type="number" min="1" max="20" value="1"><span>票</span></label>
       </div>
       <div class="choice-actions"><button id="goVoteBtn" class="mode-choice vote-choice" type="button" aria-label="建立投票房間"><img class="setup-action-image" src="./assets/hero/go.png" alt="GO"></button></div>
     </div>
@@ -223,8 +228,13 @@ html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{displa
   const continueBtn=document.getElementById('homeContinueBtn');
   const backBtn=document.getElementById('homeBackBtn');
   const themeBtn=document.getElementById('themePageBtn');
+  const deadlineInput=document.getElementById('voteDeadlineInput');
   const saved=localStorage.getItem('choice-display-name')||'';
   if(nameInput&&!nameInput.value)nameInput.value=saved;
+  const syncDeadlineAppearance=()=>deadlineInput?.classList.toggle('has-value',!!deadlineInput.value);
+  deadlineInput?.addEventListener('input',syncDeadlineAppearance);
+  deadlineInput?.addEventListener('change',syncDeadlineAppearance);
+  syncDeadlineAppearance();
   const showLogin=()=>{loginPage?.classList.remove('hidden');lobbyPage?.classList.add('hidden');setTimeout(()=>nameInput?.focus(),50)};
   const showLobby=()=>{const name=String(nameInput?.value||localStorage.getItem('choice-display-name')||'').trim().slice(0,20);if(!name){showLogin();const t=document.getElementById('toast');if(t){t.textContent='請先輸入名字';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}return false}localStorage.setItem('choice-display-name',name);try{if(typeof data!=='undefined')data.displayName=name}catch{}if(lobbyName)lobbyName.textContent=name;loginPage?.classList.add('hidden');lobbyPage?.classList.remove('hidden');return true};
   continueBtn?.addEventListener('click',showLobby);
