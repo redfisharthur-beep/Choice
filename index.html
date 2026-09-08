@@ -72,24 +72,48 @@ html body #roomView #voteOptions .percent-value{margin-left:0!important;padding-
 html body #roomView #analysisBtn.analysis-btn{display:block!important;order:5!important;width:min(448px,70vw)!important;height:auto!important;min-height:0!important;aspect-ratio:1/1!important;margin:20px auto 4px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent url('./assets/hero/analysis.png') center/contain no-repeat!important;box-shadow:none!important;font-size:0!important;color:transparent!important;overflow:visible!important;cursor:pointer!important}
 html body #roomView #analysisBtn.analysis-btn::before,html body #roomView #analysisBtn.analysis-btn::after{display:none!important}
 
-/* Draw screen: throw button at the top, then choices, then target only. */
+/* Draw screen: one option list only. Host gets checkboxes; participants get the same choices as read-only Morandi chips. */
 html body #roomView #drawHostControls{display:flex!important;flex-direction:column!important;align-items:center!important;gap:18px!important}
 html body #roomView #throwBtn{order:-1!important;width:min(170px,42vw)!important;min-height:0!important;margin:0 auto 4px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important;cursor:pointer!important;pointer-events:auto!important;position:relative!important;z-index:3!important}
 html body #roomView #throwBtn img{display:block!important;width:100%!important;height:auto!important;max-width:none!important;max-height:none!important;object-fit:contain!important;pointer-events:none!important}
 html body #roomView #drawChecks{order:0!important;display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;gap:12px!important;width:min(660px,100%)!important;margin:0 auto!important}
 html body #roomView #drawChecks .draw-check{width:100%!important;min-height:62px!important;margin:0!important;padding:10px 18px!important;border:2px solid rgba(105,131,122,.15)!important;border-radius:18px!important;background:#eef1ed!important;box-sizing:border-box!important;transition:.18s ease!important}
-html body #roomView #drawChecks .draw-check:has(input:checked){background:linear-gradient(100deg,#fff1a9,#c8f0d8,#c7e7ff,#ffd8e6)!important;border-color:#fff!important;box-shadow:0 0 0 3px rgba(118,195,173,.35),0 8px 24px rgba(104,166,150,.22)!important;color:#315d65!important;font-weight:700!important;transform:scale(1.015)!important}
-html body #roomView #drawChecks .draw-check:has(input:checked)::after{content:'✦';margin-left:auto;font-size:26px;color:#fff;text-shadow:0 2px 8px rgba(65,119,104,.35)}
+html body #roomView #drawChecks .draw-check:nth-child(4n+1){background:#e6eeea!important}
+html body #roomView #drawChecks .draw-check:nth-child(4n+2){background:#eee9e0!important}
+html body #roomView #drawChecks .draw-check:nth-child(4n+3){background:#e6ebf0!important}
+html body #roomView #drawChecks .draw-check:nth-child(4n){background:#f0e7e7!important}
+html body #roomView #drawChecks .draw-check:has(input:checked){border-color:#88b8ab!important;box-shadow:0 0 0 2px rgba(136,184,171,.16)!important;color:#315d65!important;font-weight:700!important;transform:none!important}
+html body #roomView #drawChecks .draw-check:has(input:checked)::after{content:'✓';margin-left:auto;font-size:20px;color:#5f998a}
 html body #roomView #drawChecks .draw-check input{width:24px!important;height:24px!important;accent-color:#74b9a8!important}
-html body #roomView .draw-target-wrap{width:min(300px,52vw)!important;max-width:300px!important;margin:0 auto!important}
-html body #roomView .draw-target-img{width:100%!important;height:auto!important;max-width:300px!important;object-fit:contain!important}
-html body #roomView .draw-dart-img{display:none!important}
+
+/* app.js generates a result summary; hide the duplicate for the host, and use it as the participant's only read-only choice list. */
+html body #roomView #drawOptionSummary{display:none!important}
+html body.choice-participant #roomView #drawOptionSummary{display:flex!important;flex-direction:column!important;gap:12px!important;width:min(660px,100%)!important;margin:0 auto 22px!important;order:-1!important}
+html body.choice-participant #roomView #drawOptionSummary .draw-option-chip{display:block!important;width:100%!important;min-height:58px!important;padding:14px 18px!important;border-radius:18px!important;border:1px solid rgba(103,126,118,.12)!important;color:#526b72!important;font-size:20px!important;text-align:center!important;box-sizing:border-box!important}
+html body.choice-participant #roomView #drawOptionSummary .draw-option-chip:nth-child(4n+1){background:#e6eeea!important}
+html body.choice-participant #roomView #drawOptionSummary .draw-option-chip:nth-child(4n+2){background:#eee9e0!important}
+html body.choice-participant #roomView #drawOptionSummary .draw-option-chip:nth-child(4n+3){background:#e6ebf0!important}
+html body.choice-participant #roomView #drawOptionSummary .draw-option-chip:nth-child(4n){background:#f0e7e7!important}
+html body #roomView #drawOptionSummary .draw-option-chip.hit{background:linear-gradient(100deg,#fff0a8,#bdebd8,#bcdfff,#ffd4df)!important;border-color:#fff!important;color:#244f5b!important;font-weight:900!important;box-shadow:0 0 0 4px rgba(255,255,255,.96),0 0 36px rgba(104,194,170,.62)!important;transform:scale(1.04)!important}
+html body:not(.choice-participant) #roomView #drawOptionSummary:has(.hit){display:flex!important;justify-content:center!important;margin:12px auto 18px!important}
+html body:not(.choice-participant) #roomView #drawOptionSummary:has(.hit) .draw-option-chip:not(.hit){display:none!important}
+
+html body #roomView .draw-target-wrap{position:relative!important;width:min(300px,52vw)!important;max-width:300px!important;margin:0 auto!important;display:grid!important;place-items:center!important}
+html body #roomView .draw-target-img{grid-area:1/1!important;width:100%!important;height:auto!important;max-width:300px!important;object-fit:contain!important;transform-origin:center!important}
+html body #roomView .draw-dart-img{grid-area:1/1!important;display:block!important;width:38%!important;height:auto!important;max-width:118px!important;object-fit:contain!important;opacity:0!important;z-index:3!important;pointer-events:none!important;transform:translate(135%,-130%) rotate(-18deg) scale(1.1)!important;transform-origin:center!important}
+html body #roomView .draw-dart-img.hit{opacity:1!important;animation:choiceDartHit .30s cubic-bezier(.18,.82,.25,1) forwards!important}
+html body #roomView .draw-target-img.spinning{animation:choiceTargetSpin .62s linear infinite!important}
+html body #roomView .draw-target-img.stopping{animation:choiceTargetSettle .42s cubic-bezier(.2,.7,.3,1) forwards!important}
+@keyframes choiceTargetSpin{to{transform:rotate(360deg)}}
+@keyframes choiceTargetSettle{0%{transform:rotate(0deg)}65%{transform:rotate(18deg)}100%{transform:rotate(0deg)}}
+@keyframes choiceDartHit{0%{opacity:0;transform:translate(155%,-145%) rotate(-18deg) scale(1.18)}12%{opacity:1}100%{opacity:1;transform:translate(0,0) rotate(-18deg) scale(.82)}}
 
 /* During a throw, the target becomes a true fullscreen stage and everything behind it disappears. */
 html body.draw-focus-mode{overflow:hidden!important}
 html body.draw-focus-mode #roomView .draw-stage{position:fixed!important;inset:0!important;left:0!important;top:0!important;right:0!important;bottom:0!important;transform:none!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;background:#eef2ef!important;border:0!important;border-radius:0!important;box-shadow:none!important;z-index:10001!important;overflow:hidden!important}
 html body.draw-focus-mode #roomView .draw-target-wrap{display:grid!important;place-items:center!important;width:min(72vmin,560px)!important;max-width:none!important;margin:0!important}
 html body.draw-focus-mode #roomView .draw-target-img{display:block!important;width:100%!important;height:auto!important;max-width:none!important;object-fit:contain!important}
+html body.draw-focus-mode #roomView .draw-dart-img{display:block!important;max-width:none!important}
 html body.draw-focus-mode #roomView #drawResult{position:fixed!important;left:50%!important;bottom:7vh!important;transform:translateX(-50%)!important;z-index:10002!important}
 
 #roomView .choice-chat{position:relative;z-index:2;pointer-events:auto}
@@ -140,6 +164,9 @@ html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{displa
   html body #roomView #throwBtn{width:min(145px,40vw)!important}
   html body #roomView .draw-target-wrap{width:min(240px,58vw)!important;max-width:240px!important}
   html body #roomView .draw-target-img{max-width:240px!important}
+  html body #roomView .draw-dart-img{max-width:92px!important}
+  html body.choice-participant #roomView #drawOptionSummary{gap:10px!important}
+  html body.choice-participant #roomView #drawOptionSummary .draw-option-chip{min-height:54px!important;padding:12px 14px!important;font-size:18px!important}
   html body.draw-focus-mode #roomView .draw-target-wrap{width:min(78vmin,480px)!important;max-width:none!important}
   html body.draw-focus-mode #roomView .draw-target-img{max-width:none!important}
   #roomView .choice-chat-compose input{font-size:18px!important}
@@ -209,7 +236,7 @@ html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{displa
   <section id="drawStep" class="step">
     <div id="drawPanel" class="card panel draw-panel">
       <div id="drawHostControls" class="draw-host-controls"><button id="throwBtn" type="button" aria-label="射擊抽籤"><img src="./assets/dart/Darts fly.png" alt="射擊"></button><div id="drawChecks" class="draw-checks"></div></div>
-      <div class="draw-stage"><div class="draw-target-wrap"><img id="drawWheel" class="draw-target-img" src="./assets/target/target.png" alt="抽籤靶盤"></div><div id="drawResult" class="draw-answer-pill hidden" aria-live="polite"></div><button id="announceDrawBtn" class="big-btn hidden">公告決定</button></div>
+      <div class="draw-stage"><div class="draw-target-wrap"><img id="drawWheel" class="draw-target-img" src="./assets/target/target.png" alt="抽籤靶盤"><img id="drawDart" class="draw-dart-img" src="./assets/dart/Darts fly.png" alt="飛鏢射擊動畫"></div><div id="drawResult" class="draw-answer-pill hidden" aria-live="polite"></div><button id="announceDrawBtn" class="big-btn hidden">公告決定</button></div>
     </div>
   </section>
 
