@@ -20,8 +20,8 @@ body{margin:0!important;color:var(--ink)!important;background:#eef1ee!important;
 #homeView,.room-view{height:auto!important;min-height:0!important;overflow:visible!important;}
 
 /* ---------- PAGE 1: login ---------- */
-/* hero.png is 9:16 artwork. Desktop uses the same art at 1.2x the previous size. */
-#homeLoginPage{position:fixed!important;left:50%!important;top:50%!important;bottom:auto!important;transform:translate(-50%,-50%)!important;width:min(516px,45.6vw,calc(96dvh * 9 / 16))!important;height:auto!important;aspect-ratio:9/16!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:hidden!important;z-index:1!important;}
+/* hero.png is 9:16 artwork. Desktop uses the same art, now scaled another 1.1x. */
+#homeLoginPage{position:fixed!important;left:50%!important;top:50%!important;bottom:auto!important;transform:translate(-50%,-50%)!important;width:min(568px,50.16vw,calc(105.6dvh * 9 / 16))!important;height:auto!important;aspect-ratio:9/16!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:hidden!important;z-index:1!important;}
 #homeLoginPage.hidden{display:none!important;}
 #homeLoginPage .home-hero-image{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;object-fit:fill!important;object-position:center center!important;filter:none!important;transform:none!important;animation:none!important;pointer-events:none!important;z-index:1!important;}
 
@@ -38,7 +38,7 @@ body{margin:0!important;color:var(--ink)!important;background:#eef1ee!important;
 
 body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))){height:100dvh!important;overflow:hidden!important;background:#eef1ee!important;}
 body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .shell{width:100%!important;height:100dvh!important;min-height:100dvh!important;margin:0!important;overflow:hidden!important;}
-body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{position:fixed!important;top:calc(50% - min(516px,45.6vw,calc(96dvh * 9 / 16)) * 8 / 9 + 34px)!important;left:50%!important;width:auto!important;padding:0!important;gap:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;z-index:20!important;}
+body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{position:fixed!important;top:calc(50% - min(568px,50.16vw,calc(105.6dvh * 9 / 16)) * 8 / 9 + 34px)!important;left:50%!important;width:auto!important;padding:0!important;gap:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;z-index:20!important;}
 body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) #voiceBtn,body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) #lineReminderBtn{display:none!important;}
 body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-action-btn{width:54px!important;height:54px!important;background:transparent!important;}
 body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-action-btn img{width:50px!important;height:50px!important;}
