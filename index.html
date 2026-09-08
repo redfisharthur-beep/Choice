@@ -100,7 +100,7 @@ html body #roomView .draw-target-img.spinning{animation:choiceTargetSpin .58s li
 html body #roomView .draw-target-img.stopping{animation:choiceTargetSettle .30s cubic-bezier(.2,.7,.3,1) forwards!important}
 @keyframes choiceTargetSpin{to{transform:rotate(360deg)}}
 @keyframes choiceTargetSettle{0%{transform:rotate(0deg)}65%{transform:rotate(14deg)}100%{transform:rotate(0deg)}}
-@keyframes choiceDartHit{0%{opacity:0;transform:translate(230%,-160%) rotate(-18deg) scale(1.16)}8%{opacity:1}100%{opacity:1;transform:translate(-88%,22%) rotate(-18deg) scale(.84)}}
+@keyframes choiceDartHit{0%{opacity:0;transform:translate(230%,-160%) rotate(-18deg) scale(1.16)}8%{opacity:1}100%{opacity:1;transform:translate(calc(-88% - 100px),22%) rotate(-18deg) scale(.84)}}
 
 /* Static participant view is choice list only. Fullscreen target appears only while the host is throwing. */
 html body.choice-participant #roomView .draw-stage{display:none!important}
