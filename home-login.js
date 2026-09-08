@@ -1,7 +1,6 @@
 (()=>{
   const input=document.querySelector('#hostNameInput');
   const lineBtn=document.querySelector('#lineLoginBtn');
-  const openRoomBtn=document.querySelector('#openRoomBtn');
   const toastEl=document.querySelector('#toast');
   const roomList=document.querySelector('#roomList');
   const backBtn=document.querySelector('#homeBackBtn');
@@ -12,7 +11,6 @@
     const name=String(value||'').trim().slice(0,20);
     localStorage.setItem('choice-display-name',name);
     try{if(typeof data!=='undefined')data.displayName=name}catch{}
-    try{const key='choice-app-v4',saved=JSON.parse(localStorage.getItem(key)||'{}');saved.displayName=name;localStorage.setItem(key,JSON.stringify(saved))}catch{}
     return name;
   };
   const setLineUi=user=>{
@@ -56,26 +54,11 @@
       if(room){found=true;locked=!!room.locked}
     }catch{}
     const saved=String(localStorage.getItem('choice-display-name')||'').trim();
-    if(found&&!locked&&saved){
-      try{attemptJoin(roomCode,'',saved);return}catch{}
-    }
+    if(found&&!locked&&saved){try{attemptJoin(roomCode,'',saved);return}catch{}}
     configureJoinDialog(roomCode,found?locked:false);
   };
 
-  const currentVoteFlow=()=>{try{if(typeof data==='undefined'||!data?.roomCode)return {room:false,host:false,phase:'setup',tie:false};const options=Array.isArray(data.options)?data.options:[],max=options.reduce((m,o)=>Math.max(m,Math.max(0,Number(o?.votes)||0)),0),tie=max>0&&options.filter(o=>(Number(o?.votes)||0)===max).length>1;return {room:true,host:typeof isHost!=='undefined'&&!!isHost,phase:String(data.phase||'setup'),tie}}catch{return {room:false,host:false,phase:'setup',tie:false}}};
-  const applyFlowRules=()=>{
-    const flow=currentVoteFlow(),nav=document.querySelector('#flowNav');if(!nav)return;
-    const setup=nav.querySelector('[data-step="setup"]'),vote=nav.querySelector('[data-step="vote"]'),draw=nav.querySelector('[data-step="draw"]');
-    if(!flow.room||!flow.host){[setup,vote,draw].forEach(b=>{if(b)b.disabled=true});return}
-    if(flow.phase==='setup'){if(setup)setup.disabled=false;if(vote)vote.disabled=true;if(draw)draw.disabled=true;return}
-    if(flow.phase==='voting'){if(setup)setup.disabled=true;if(vote)vote.disabled=false;if(draw)draw.disabled=true;return}
-    if(flow.phase==='closed'){if(setup)setup.disabled=true;if(vote)vote.disabled=false;if(draw)draw.disabled=!flow.tie;return}
-    if(flow.phase==='draw'){if(setup)setup.disabled=true;if(vote)vote.disabled=true;if(draw)draw.disabled=false}
-  };
-  document.addEventListener('click',e=>{const target=e.target.closest?.('#flowNav button');if(!target)return;const flow=currentVoteFlow();if(!flow.room||!flow.host)return;let blocked=false;if(flow.phase==='voting'&&target.dataset?.step!=='vote')blocked=true;else if(target.dataset?.step==='draw'&&flow.phase==='closed'&&!flow.tie)blocked=true;if(blocked){e.preventDefault();e.stopImmediatePropagation();showToast(flow.phase==='voting'?'需等待投票截止，系統會自動結算':'只有最高票平分時才能抽籤')}},true);
-
   if(input){const saved=localStorage.getItem('choice-display-name')||'';if(!input.value)input.value=saved;input.addEventListener('input',()=>syncName(input.value));input.addEventListener('change',()=>syncName(input.value))}
-  if(openRoomBtn){const original=openRoomBtn.onclick;openRoomBtn.onclick=e=>{const name=syncName(input?.value||'');if(!name){showToast('請先輸入名字');input?.focus();return}if(typeof original==='function')return original.call(openRoomBtn,e)}}
   if(lineBtn)lineBtn.onclick=async()=>{if(lineUser){showToast(`已使用 LINE 登入：${lineUser.displayName}`);return}try{const r=await fetch('/api/auth/line/status',{cache:'no-store',credentials:'same-origin'}),j=await r.json();if(!j.configured){showToast('LINE Login 尚未完成後台設定');return}location.assign('/api/auth/line/start')}catch{showToast('LINE Login 目前無法連線')}};
   if(backBtn){backBtn.textContent='';const img=document.createElement('img');img.src='./assets/hero/return.png';img.alt='返回';backBtn.appendChild(img)}
 
@@ -137,7 +120,6 @@
   }
 
   initMorandiDeadlinePicker();initMorandiOptionDatePicker();
-  setInterval(applyFlowRules,1000);applyFlowRules();
   const qs=new URL(location.href).searchParams,loginResult=qs.get('line_login');if(loginResult){history.replaceState({},'',location.pathname+location.hash);if(loginResult==='success')showToast('LINE 登入成功');else if(loginResult==='cancelled')showToast('已取消 LINE 登入');else if(loginResult==='not_configured')showToast('LINE Login 尚未完成設定');else showToast('LINE 登入失敗，請再試一次')}
   loadSession();
   setTimeout(resolveSharedRoom,0);
