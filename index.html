@@ -51,7 +51,8 @@ html body #roomView #flowNav button[data-step="vote"] img,html body #roomView #f
 #roomView #setupStep .vote-setting input[type="checkbox"]{width:24px!important;height:24px!important;flex:0 0 auto!important}
 #roomView #setupStep .votes-per-person-setting{display:flex!important;align-items:center!important;gap:12px!important}
 #roomView #setupStep #votesPerPersonInput{width:72px!important;min-height:42px!important;border:0!important;border-radius:14px!important;background:#fff!important;text-align:center!important;font-size:18px!important}
-#roomView #setupStep #voteDeadlineInput:not(.has-value):not(:focus)::-webkit-datetime-edit{color:transparent!important}
+#roomView #setupStep #voteDeadlineInput:not(.has-value)::-webkit-datetime-edit{color:transparent!important;-webkit-text-fill-color:transparent!important}
+#roomView #setupStep #voteDeadlineInput.has-value::-webkit-datetime-edit{color:inherit!important;-webkit-text-fill-color:currentColor!important}
 
 html body #roomView #setupStep .choice-actions{display:flex!important;justify-content:center!important;align-items:center!important;margin-top:22px!important}
 html body #roomView #setupStep #goVoteBtn{display:grid!important;place-items:center!important;width:min(220px,56vw)!important;min-height:0!important;height:auto!important;margin:0 auto!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;cursor:pointer!important}
