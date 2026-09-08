@@ -83,7 +83,7 @@ body:has(#roomView.hidden) .room-view.hidden{display:none!important;}
 @media(max-width:600px){
   .hero-actions{top:6px!important;width:calc(100% - 14px)!important;gap:24px!important;padding:8px 12px 10px!important;}
   .hero-action-btn{width:54px!important;height:54px!important;}.hero-action-btn img{width:48px!important;height:48px!important;}.shell{width:calc(100% - 16px)!important;margin-top:84px!important;}
-  #homeLoginPage{left:0!important;top:0!important;bottom:0!important;transform:none!important;width:100vw!important;height:100dvh!important;aspect-ratio:auto!important;min-height:100dvh!important;transform-origin:center center!important;}
+  #homeLoginPage{left:50%!important;top:50%!important;bottom:auto!important;transform:translate(-50%,-50%) scale(.95)!important;width:100vw!important;height:100dvh!important;aspect-ratio:auto!important;min-height:100dvh!important;transform-origin:center center!important;}
   #homeLoginPage .home-hero-image{width:100vw!important;height:100dvh!important;object-fit:cover!important;object-position:center center!important;}
   #homeLoginPage .home-login-row{left:5%!important;top:68.4%!important;width:90%!important;height:8.4%!important;grid-template-columns:75% 25%!important;}
   #homeLoginPage .home-name-input{font-size:clamp(20px,5.4vw,24px)!important;}
