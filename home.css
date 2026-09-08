@@ -20,21 +20,27 @@ body{margin:0!important;color:var(--ink)!important;background:#eef1ee!important;
 #homeView,.room-view{height:auto!important;min-height:0!important;overflow:visible!important;}
 
 /* ---------- PAGE 1: login ---------- */
-/* Desktop: keep the portrait artwork complete, centered and at a comfortable size. */
-#homeLoginPage{position:fixed!important;left:50%!important;top:50%!important;bottom:auto!important;transform:translate(-50%,-50%)!important;width:min(430px,38vw)!important;height:auto!important;aspect-ratio:9/19!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:hidden!important;z-index:1!important;}
+#homeLoginPage{position:fixed!important;left:50%!important;top:50%!important;bottom:auto!important;transform:translate(-50%,-50%)!important;width:min(430px,38vw,calc(100dvh * 9 / 19))!important;height:auto!important;aspect-ratio:9/19!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:hidden!important;z-index:1!important;}
 #homeLoginPage.hidden{display:none!important;}
 #homeLoginPage .home-hero-image{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;margin:0!important;object-fit:contain!important;object-position:center center!important;filter:none!important;transform:none!important;animation:none!important;pointer-events:none!important;z-index:1!important;}
-#homeLoginPage .home-login-row{position:absolute!important;left:50%!important;top:calc(67.3% + 10px)!important;transform:translateX(-50%)!important;width:76%!important;max-width:none!important;display:grid!important;grid-template-columns:minmax(0,1fr) 25%!important;gap:2%!important;align-items:stretch!important;margin:0!important;z-index:5!important;}
-#homeLoginPage .home-name-input{width:100%!important;height:62px!important;padding:0 10px!important;border:0!important;border-radius:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;color:#536b78!important;font-size:17px!important;text-align:center!important;transform:translateX(-8px)!important;}
-#homeLoginPage .home-name-input:focus{border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;}
+
+/* The two login hit areas are aligned directly to the artwork instead of being offset with transforms. */
+#homeLoginPage .home-login-row{position:absolute!important;left:5%!important;top:68.4%!important;width:90%!important;height:8.4%!important;max-width:none!important;display:grid!important;grid-template-columns:75% 25%!important;gap:0!important;align-items:stretch!important;margin:0!important;transform:none!important;z-index:5!important;box-sizing:border-box!important;}
+#homeLoginPage .home-name-input{appearance:none!important;-webkit-appearance:none!important;width:100%!important;height:100%!important;min-width:0!important;padding:0 8%!important;border:0!important;border-radius:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;color:#536b78!important;font-size:17px!important;line-height:1!important;text-align:center!important;transform:none!important;box-sizing:border-box!important;}
+#homeLoginPage .home-name-input:focus,#homeLoginPage .home-name-input:focus-visible{border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;}
 #homeLoginPage .home-name-input::placeholder{color:rgba(83,107,120,.48)!important;}
-#homeLoginPage .home-line-login{width:100%!important;height:62px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;transform:translate(26px,2px)!important;cursor:pointer!important;}
+#homeLoginPage .home-line-login{appearance:none!important;-webkit-appearance:none!important;width:100%!important;height:100%!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;transform:none!important;cursor:pointer!important;box-sizing:border-box!important;}
+#homeLoginPage .home-line-login:focus,#homeLoginPage .home-line-login:focus-visible,#homeLoginPage .home-line-login:active{border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;}
 #homeLoginPage .home-line-login img{display:none!important;}
-#homeLoginPage .home-login-image-btn{position:absolute!important;left:50%!important;top:83.7%!important;transform:translateX(-50%)!important;width:50%!important;height:10.5%!important;min-height:52px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;cursor:pointer!important;z-index:5!important;}
+
+/* GO artwork is already part of hero.png; this is only its transparent click target. */
+#homeLoginPage .home-login-image-btn{appearance:none!important;-webkit-appearance:none!important;position:absolute!important;left:19%!important;top:80.6%!important;width:62%!important;height:15.6%!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;transform:none!important;cursor:pointer!important;z-index:5!important;}
+#homeLoginPage .home-login-image-btn:focus,#homeLoginPage .home-login-image-btn:focus-visible,#homeLoginPage .home-login-image-btn:active{border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;}
 #homeLoginPage .home-login-image-btn img,#homeLoginPage .home-login-image-btn::before,#homeLoginPage .home-login-image-btn::after{display:none!important;}
+
 body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))){height:100dvh!important;overflow:hidden!important;background:#eef1ee!important;}
 body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .shell{width:100%!important;height:100dvh!important;min-height:100dvh!important;margin:0!important;overflow:hidden!important;}
-body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{position:fixed!important;top:calc(50% - min(430px,38vw) * 19 / 18 + 34px)!important;left:50%!important;width:auto!important;padding:0!important;gap:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;z-index:20!important;}
+body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{position:fixed!important;top:calc(50% - min(430px,38vw,calc(100dvh * 9 / 19)) * 19 / 18 + 34px)!important;left:50%!important;width:auto!important;padding:0!important;gap:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;z-index:20!important;}
 body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) #voiceBtn,body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) #lineReminderBtn{display:none!important;}
 body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-action-btn{width:54px!important;height:54px!important;background:transparent!important;}
 body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-action-btn img{width:50px!important;height:50px!important;}
@@ -75,16 +81,15 @@ body:has(#roomView:not(.hidden)) .shell{margin-top:94px!important;}
 body:has(#roomView:not(.hidden)) .room-view{display:block!important;height:auto!important;overflow:visible!important;}
 body:has(#roomView.hidden) .room-view.hidden{display:none!important;}
 
-/* ---------- Mobile: preserve the current full-screen design ---------- */
+/* ---------- Mobile ---------- */
 @media(max-width:600px){
   .hero-actions{top:6px!important;width:calc(100% - 14px)!important;gap:24px!important;padding:8px 12px 10px!important;}
   .hero-action-btn{width:54px!important;height:54px!important;}.hero-action-btn img{width:48px!important;height:48px!important;}.shell{width:calc(100% - 16px)!important;margin-top:84px!important;}
   #homeLoginPage{left:0!important;top:0!important;bottom:0!important;transform:none!important;width:100vw!important;height:100dvh!important;aspect-ratio:auto!important;min-height:100dvh!important;}
   #homeLoginPage .home-hero-image{width:100vw!important;height:100dvh!important;object-fit:cover!important;object-position:center center!important;}
-  #homeLoginPage .home-login-row{top:calc(67.3% + 10px)!important;width:76%!important;}
-  #homeLoginPage .home-name-input,#homeLoginPage .home-line-login{height:62px!important;}
-  #homeLoginPage .home-name-input{transform:translateX(-8px)!important;}#homeLoginPage .home-line-login{transform:translate(26px,2px)!important;}
-  #homeLoginPage .home-login-image-btn{top:83.7%!important;width:50%!important;height:10.5%!important;min-height:64px!important;}
+  #homeLoginPage .home-login-row{left:5%!important;top:68.4%!important;width:90%!important;height:8.4%!important;grid-template-columns:75% 25%!important;}
+  #homeLoginPage .home-name-input{font-size:clamp(15px,4.2vw,18px)!important;}
+  #homeLoginPage .home-login-image-btn{left:19%!important;top:80.6%!important;width:62%!important;height:15.6%!important;}
   body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{top:45px!important;}
   body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) .hero-actions{top:6px!important;left:calc(50% + 88px)!important;width:auto!important;height:auto!important;}
   body:has(#homeLobbyPage:not(.hidden)):not(:has(#roomView:not(.hidden))) #homeBackBtn{top:-9px!important;left:calc(50% - 88px)!important;width:auto!important;height:auto!important;}
