@@ -20,6 +20,11 @@ const sessionSecret=env=>env.LINE_LOGIN_SESSION_SECRET||env.LINE_LOGIN_CHANNEL_S
 const configured=env=>!!(env.LINE_LOGIN_CHANNEL_ID&&env.LINE_LOGIN_CHANNEL_SECRET);
 const DEFAULT_VOTE_WINDOW_MS=7*24*60*60*1000;
 const ROOM_LIST_RESET_AT=1788691747000;
+const GENDERS=['男','女','跨性別'];
+const AGES=['20歲以下','20-35歲','35-50歲','50-65歲'];
+const REGIONS=['北部地區','中部地區','南部地區','東部地區','外島'];
+const cleanProfile=value=>{const p=value||{},gender=String(p.gender||''),age=String(p.age||''),region=String(p.region||'');return {gender:GENDERS.includes(gender)?gender:'',age:AGES.includes(age)?age:'',region:REGIONS.includes(region)?region:''}};
+const profileComplete=p=>!!(p&&p.gender&&p.age&&p.region);
 const chatTone=value=>{
   const s=String(value||'');
   let h=2166136261>>>0;
@@ -119,6 +124,68 @@ async function handleLineAuth(request,env){
 }
 
 export class ChoiceRoom extends BaseChoiceRoom{
+  async fetch(request){
+    const url=new URL(request.url);
+    if(url.pathname==='/ws'){
+      const profile=cleanProfile({gender:url.searchParams.get('gender'),age:url.searchParams.get('age'),region:url.searchParams.get('region')});
+      if(!profileComplete(profile)){
+        const pair=new WebSocketPair();
+        pair[1].accept();
+        pair[1].send(JSON.stringify({type:'error',message:'請先完成性別、年齡與地區設定'}));
+        pair[1].close(4006,'profile required');
+        return new Response(null,{status:101,webSocket:pair[0]});
+      }
+      const voterKey=request.headers.get('x-choice-voter-key')||url.searchParams.get('clientId')||'';
+      if(!this.pendingProfiles)this.pendingProfiles=new Map();
+      this.pendingProfiles.set(String(voterKey),profile);
+    }
+    return super.fetch(request);
+  }
+
+  async upsertParticipant(voterKey,name,isHost=false){
+    const key=String(voterKey||'');if(!key)return;
+    const records=await this.getParticipantRecords(),old=records[key]||{},profile=this.pendingProfiles?.get(key)||cleanProfile(old.profile||{});
+    records[key]={name:String(name||old.name||'訪客').slice(0,20),isHost:!!(isHost||old.isHost),joinedAt:Number(old.joinedAt)||Date.now(),profile:profileComplete(profile)?profile:(old.profile||null)};
+    this.participantRecords=records;
+    await this.ctx.storage.put('participantRecords',records);
+  }
+
+  async analyticsSnapshot(){
+    const s=await this.getState(),options=Array.isArray(s.options)?s.options:[],records=await this.getParticipantRecords(),ballots=await this.getBallots();
+    const dimensions={gender:GENDERS,age:AGES,region:REGIONS};
+    const counts={gender:{},age:{},region:{}};
+    for(const [dim,labels] of Object.entries(dimensions))for(const label of labels)counts[dim][label]={};
+    let profiledVotes=0;
+    for(const [key,value] of Object.entries(ballots)){
+      const profile=cleanProfile(records[key]?.profile||{});if(!profileComplete(profile))continue;
+      for(const optionId of this.ballotList(value)){
+        if(!options.some(o=>String(o.id)===String(optionId)))continue;
+        profiledVotes++;
+        for(const dim of Object.keys(dimensions)){const label=profile[dim];counts[dim][label][optionId]=(counts[dim][label][optionId]||0)+1}
+      }
+    }
+    const groups={};
+    for(const [dim,labels] of Object.entries(dimensions))groups[dim]=labels.map(label=>{
+      const row=counts[dim][label]||{},total=Object.values(row).reduce((a,b)=>a+b,0),choices=options.map(o=>{const count=row[o.id]||0;return {id:o.id,name:o.name,count,percent:total?Math.round(count/total*1000)/10:0}});
+      const max=choices.reduce((m,c)=>Math.max(m,c.count),0),top=max>0?choices.filter(c=>c.count===max).map(c=>c.name):[];
+      return {label,total,top,choices};
+    });
+    const byOption=options.map(o=>{
+      const leaders={};
+      for(const [dim,labels] of Object.entries(dimensions)){
+        const values=labels.map(label=>({label,count:counts[dim][label]?.[o.id]||0})),max=values.reduce((m,x)=>Math.max(m,x.count),0);
+        leaders[dim]={count:max,labels:max>0?values.filter(x=>x.count===max).map(x=>x.label):[]};
+      }
+      return {id:o.id,name:o.name,votes:Number(o.votes)||0,leaders};
+    });
+    return {profiledVotes,totalVotes:options.reduce((a,o)=>a+(Number(o.votes)||0),0),byOption,groups};
+  }
+
+  async sendSnapshot(ws){
+    const a=this.attachment(ws),ballots=await this.getBallots(),mine=this.ballotList(ballots[a.voterKey||a.clientId]);
+    try{ws.send(JSON.stringify({type:'snapshot',state:await this.getState(),isHost:!!a.isHost,myVote:mine.at(-1)||null,votesUsed:mine.length,members:await this.memberSnapshot(),chat:await this.getChatMessages(),analytics:await this.analyticsSnapshot()}))}catch{}
+  }
+
   async webSocketMessage(ws,message){
     let msg=null;try{msg=JSON.parse(message)}catch{}
     if(!msg)return;
@@ -128,18 +195,8 @@ export class ChoiceRoom extends BaseChoiceRoom{
       const text=String(msg.text||'').trim().replace(/\s+/g,' ').slice(0,300);
       if(!text)return;
       let list=await this.getChatMessages();
-      const item={
-        id:crypto.randomUUID(),
-        name:String(a.name||'訪客').slice(0,20),
-        text,
-        at:Date.now(),
-        tone:chatTone(a.voterKey||a.clientId)
-      };
-      list=[...list,item].slice(-100);
-      this.chatMessages=list;
-      await this.ctx.storage.put('chatMessages',list);
-      this.broadcast({type:'chat',message:item});
-      return;
+      const item={id:crypto.randomUUID(),name:String(a.name||'訪客').slice(0,20),text,at:Date.now(),tone:chatTone(a.voterKey||a.clientId)};
+      list=[...list,item].slice(-100);this.chatMessages=list;await this.ctx.storage.put('chatMessages',list);this.broadcast({type:'chat',message:item});return;
     }
 
     if(msg.type==='room:close'){
@@ -151,113 +208,56 @@ export class ChoiceRoom extends BaseChoiceRoom{
     const a=this.attachment(ws);
 
     if(msg.type==='state:set'&&s.phase==='setup'){
-      s.firstDrawResult=null;
-      s.firstDrawAt=null;
-      s.firstDrawOptionIds=[];
-      this.state=s;
-      await this.persistState();
+      s.firstDrawResult=null;s.firstDrawAt=null;s.firstDrawOptionIds=[];this.state=s;await this.persistState();
     }
 
     if(msg.type==='phase'&&msg.phase==='voting'){
-      if(s.phase!=='setup'){
-        try{ws.send(JSON.stringify({type:'error',message:'目前流程不能重新開始投票'}))}catch{}
-        return;
-      }
+      if(s.phase!=='setup'){try{ws.send(JSON.stringify({type:'error',message:'目前流程不能重新開始投票'}))}catch{}return}
       if(!s.voteDeadline)s.voteDeadline=new Date(Date.now()+DEFAULT_VOTE_WINDOW_MS).toISOString();
-      s.voteFinalizedAt=null;
-      s.voteTieIds=[];
-      s.firstDrawResult=null;
-      s.firstDrawAt=null;
-      s.firstDrawOptionIds=[];
-      this.state=s;
-      await this.persistState();
+      s.voteFinalizedAt=null;s.voteTieIds=[];s.firstDrawResult=null;s.firstDrawAt=null;s.firstDrawOptionIds=[];this.state=s;await this.persistState();
       return super.webSocketMessage(ws,JSON.stringify(msg));
     }
 
     if(s.phase==='voting'&&msg.type==='phase'&&['setup','closed','draw'].includes(String(msg.phase||''))){
-      if(!this.voteExpired(s)){
-        try{ws.send(JSON.stringify({type:'error',message:'投票截止前不能提前結算、公告或抽籤'}))}catch{}
-        return;
-      }
-      await this.closeVotingForDeadline();
-      s=await this.getState();
-      if(msg.phase!=='draw')return;
+      if(!this.voteExpired(s)){try{ws.send(JSON.stringify({type:'error',message:'投票截止前不能提前結算或抽籤'}))}catch{}return}
+      await this.closeVotingForDeadline();s=await this.getState();if(msg.phase!=='draw')return;
     }
 
     if(msg.type==='phase'&&msg.phase==='draw'){
       if(s.phase==='setup'){
-        s.firstDrawResult=null;
-        s.firstDrawAt=null;
-        s.firstDrawOptionIds=[];
-        this.state=s;
-        await this.persistState();
+        s.firstDrawResult=null;s.firstDrawAt=null;s.firstDrawOptionIds=[];this.state=s;await this.persistState();
         return super.webSocketMessage(ws,JSON.stringify(msg));
       }
-      if(s.phase!=='closed'&&s.phase!=='draw'){
-        try{ws.send(JSON.stringify({type:'error',message:'目前不能進行抽籤'}))}catch{}
-        return;
-      }
-      if(s.phase==='closed'){
-        const {max,winners}=voteOutcome(s);
-        if(max<=0||winners.length<2){
-          try{ws.send(JSON.stringify({type:'error',message:'只有最高票平分時才能抽籤'}))}catch{}
-          return;
-        }
-        s.voteTieIds=winners.map(o=>String(o.id));
-        s.phase='draw';
-        this.state=s;
-        await this.persistState();
-        await this.broadcastState();
-        return;
-      }
+      if(s.phase!=='closed'&&s.phase!=='draw'){try{ws.send(JSON.stringify({type:'error',message:'目前不能進行抽籤'}))}catch{}return}
+      if(s.phase==='closed'){s.phase='draw';this.state=s;await this.persistState();await this.broadcastState();return}
       return;
     }
 
     if(msg.type==='draw:request'){
       if(!a.isHost){try{ws.send(JSON.stringify({type:'error',message:'只有房主可以抽籤'}))}catch{}return}
       s=await this.getState();
-      let ids=Array.isArray(msg.optionIds)?msg.optionIds.map(String):[];
-      if(s.voteFinalizedAt){
-        const {max,winners}=voteOutcome(s);
-        if(max<=0||winners.length<2){try{ws.send(JSON.stringify({type:'error',message:'只有最高票平分時才能抽籤'}))}catch{}return}
-        ids=winners.map(o=>String(o.id));
+      if(s.phase==='voting'){
+        if(!this.voteExpired(s)){try{ws.send(JSON.stringify({type:'error',message:'投票截止前不能抽籤'}))}catch{}return}
+        await this.closeVotingForDeadline();s=await this.getState();
       }
-      const pool=(Array.isArray(s.options)?s.options:[]).filter(o=>ids.includes(String(o.id)));
+      if(!['setup','closed','draw'].includes(s.phase)){try{ws.send(JSON.stringify({type:'error',message:'目前不能進行抽籤'}))}catch{}return}
+      const ids=Array.isArray(msg.optionIds)?msg.optionIds.map(String):[],pool=(Array.isArray(s.options)?s.options:[]).filter(o=>ids.includes(String(o.id)));
       if(pool.length<2){try{ws.send(JSON.stringify({type:'error',message:'至少勾選 2 個項目'}))}catch{}return}
-
       const official=!String(s.firstDrawResult||'').trim();
-      s.phase='draw';
-      this.state=s;
-      await this.persistState();
-      this.broadcast({type:'draw:start',optionIds:ids,by:a.name,official});
+      s.phase='draw';this.state=s;await this.persistState();this.broadcast({type:'draw:start',optionIds:ids,by:a.name,official});
       await new Promise(resolve=>setTimeout(resolve,850));
       const r=crypto.getRandomValues(new Uint32Array(1))[0],pick=pool[r%pool.length];
-      s.lastDraw=pick.name;
-      s.recent=[pick.name,...(s.recent||[])].slice(0,5);
-      if(official){
-        s.firstDrawResult=pick.name;
-        s.firstDrawAt=Date.now();
-        s.firstDrawOptionIds=ids;
-      }
-      this.state=s;
-      await this.persistState();
-      this.broadcast({type:'draw',name:pick.name,optionIds:ids,by:a.name,official,firstDrawResult:s.firstDrawResult||null});
-      await this.broadcastState();
-      if(official)await this.notifyLineSubscribers(pick.name);
+      s.lastDraw=pick.name;s.recent=[pick.name,...(s.recent||[])].slice(0,5);
+      if(official){s.firstDrawResult=pick.name;s.firstDrawAt=Date.now();s.firstDrawOptionIds=ids}
+      this.state=s;await this.persistState();this.broadcast({type:'draw',name:pick.name,optionIds:ids,by:a.name,official,firstDrawResult:s.firstDrawResult||null});await this.broadcastState();
+      if(official)await this.notifyLineSubscribers(`首次抽籤：${pick.name}`);
       return;
     }
 
     if(msg.type==='announce'){
       s=await this.getState();
-      if(s.phase==='voting'){
-        if(this.voteExpired(s))await this.closeVotingForDeadline();
-        try{ws.send(JSON.stringify({type:'error',message:'投票結果會在截止時間由系統自動公告'}))}catch{}
-        return;
-      }
-      if(s.voteFinalizedAt&&s.phase!=='draw'){
-        try{ws.send(JSON.stringify({type:'error',message:'投票結果已由系統自動公告'}))}catch{}
-        return;
-      }
+      if(s.phase==='voting'){if(this.voteExpired(s))await this.closeVotingForDeadline();try{ws.send(JSON.stringify({type:'error',message:'投票結果會在截止時間由系統自動公告'}))}catch{}return}
+      if(s.voteFinalizedAt&&s.phase!=='draw'){try{ws.send(JSON.stringify({type:'error',message:'投票結果已由系統自動公告'}))}catch{}return}
       if(s.phase==='draw')return;
     }
 
@@ -268,15 +268,11 @@ export class ChoiceRoom extends BaseChoiceRoom{
     const s=await this.getState();
     if(s.phase!=='voting'||!this.voteExpired(s))return false;
     const {winners}=voteOutcome(s);
-    s.phase='closed';
-    s.voteFinalizedAt=Date.now();
-    s.voteTieIds=winners.length>1?winners.map(o=>String(o.id)):[];
-    this.state=s;
-    await this.persistState();
-    await this.broadcastState();
+    s.phase='closed';s.voteFinalizedAt=Date.now();s.voteTieIds=winners.length>1?winners.map(o=>String(o.id)):[];this.state=s;
+    await this.persistState();await this.broadcastState();
     const result=finalVoteResult(s);
     this.broadcast({type:'announce',result,automatic:true,tie:s.voteTieIds.length>1});
-    if(s.voteTieIds.length<2)await this.notifyLineSubscribers(result);
+    await this.notifyLineSubscribers(`投票結果：${result}`);
     return true;
   }
 
@@ -287,18 +283,13 @@ export default{
   async fetch(request,env,ctx){
     const url=new URL(request.url);
     if(url.pathname==='/api/line/bot-info'&&request.method==='GET'){
-      const info=await getMessagingBotInfo(env);
-      return json(info.data,info.status);
+      const info=await getMessagingBotInfo(env);return json(info.data,info.status);
     }
-    const auth=await handleLineAuth(request,env);
-    if(auth)return auth;
+    const auth=await handleLineAuth(request,env);if(auth)return auth;
     if(url.pathname==='/api/rooms'&&request.method==='GET'){
-      const response=await baseWorker.fetch(request,env,ctx);
-      if(!response.ok)return response;
-      const data=await response.clone().json().catch(()=>null);
-      if(!data||!Array.isArray(data.rooms))return response;
-      const rooms=data.rooms.filter(room=>Number(room?.createdAt||0)>=ROOM_LIST_RESET_AT);
-      return json({...data,rooms},response.status);
+      const response=await baseWorker.fetch(request,env,ctx);if(!response.ok)return response;
+      const data=await response.clone().json().catch(()=>null);if(!data||!Array.isArray(data.rooms))return response;
+      const rooms=data.rooms.filter(room=>Number(room?.createdAt||0)>=ROOM_LIST_RESET_AT);return json({...data,rooms},response.status);
     }
     return baseWorker.fetch(request,env,ctx);
   }
