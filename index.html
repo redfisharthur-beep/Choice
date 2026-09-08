@@ -26,22 +26,18 @@ body:has(#roomView:not(.hidden)) .hero-mic-btn img{width:62px!important;height:6
 body:has(#roomView:not(.hidden)) .hero-line-note-btn{width:132px!important;height:72px!important;overflow:visible!important}
 body:has(#roomView:not(.hidden)) .hero-line-note-btn img{width:126px!important;height:72px!important;max-width:none!important;max-height:none!important;transform:none!important;object-fit:contain!important}
 
-/* LINE reminder dialog: normal-sized LINE icon only. */
 #lineReminderDialog #openLineBindBtn{display:grid!important;place-items:center!important;width:72px!important;height:72px!important;margin:18px auto 0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important}
 #lineReminderDialog #openLineBindBtn img{display:block!important;width:64px!important;height:64px!important;max-width:64px!important;max-height:64px!important;object-fit:contain!important;transform:none!important}
 
-/* Voted badge: only after the current user has actually voted. */
 #roomView .room-voted-badge{display:none!important;position:absolute;left:6px;top:50%;width:76px;height:76px;object-fit:contain;transform:translateY(-50%);z-index:4}
 #roomView .room-voted-badge.show{display:block!important}
 
-/* Vote / draw bears: interface selectors for host and participants. */
+/* Vote / draw bears: use the original button backgrounds only once. */
 #roomView #flowNav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:34px!important;max-width:660px!important;margin:18px auto 22px!important;background:transparent!important;padding:0!important}
 #roomView #flowNav button[data-step="setup"]{display:none!important}
-#roomView #flowNav button[data-step="vote"],#roomView #flowNav button[data-step="draw"]{display:grid!important;place-items:center!important;min-height:168px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;background-image:none!important;box-shadow:none!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important;overflow:visible!important}
-#roomView #flowNav button[data-step="vote"] img,#roomView #flowNav button[data-step="draw"] img{display:block!important;width:168px!important;height:168px!important;max-width:none!important;max-height:none!important;object-fit:contain!important;pointer-events:none!important}
+#roomView #flowNav button[data-step="vote"],#roomView #flowNav button[data-step="draw"]{display:grid!important;place-items:center!important;min-height:168px!important;padding:0!important;border:0!important;border-radius:0!important;background-color:transparent!important;box-shadow:none!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important;overflow:visible!important}
 #roomView #flowNav button.active{transform:scale(1.03)!important}
 
-/* Setup page styling. */
 #roomView #setupStep .panel{padding:28px 30px 30px!important}
 #roomView #setupStep .option-mode{display:flex!important;gap:12px!important;margin-bottom:18px!important}
 #roomView #setupStep .option-mode button{min-width:130px!important;min-height:54px!important;padding:0 24px!important;border:1px solid rgba(92,116,108,.18)!important;border-radius:999px!important;background:#e8ece8!important;color:#627981!important;font-size:18px!important;box-shadow:none!important}
@@ -52,17 +48,12 @@ body:has(#roomView:not(.hidden)) .hero-line-note-btn img{width:126px!important;h
 #roomView #setupStep .vote-settings{display:grid!important;grid-template-columns:1fr!important;gap:12px!important;margin-top:22px!important;padding:18px!important;border-radius:22px!important;background:#e4e9e6!important}
 #roomView #setupStep .vote-setting{display:flex!important;align-items:center!important;gap:12px!important;min-height:58px!important;padding:10px 14px!important;margin:0!important;border:1px solid rgba(102,124,117,.12)!important;border-radius:17px!important;background:#f2f3ee!important;color:#60767d!important;box-sizing:border-box!important}
 #roomView #setupStep .vote-setting.full{display:grid!important;grid-template-columns:auto minmax(0,1fr)!important}
-#roomView #setupStep .repeat-setting{grid-column:1/-1!important;display:flex!important;flex-wrap:wrap!important}
 #roomView #setupStep .vote-setting input[type="checkbox"]{width:24px!important;height:24px!important;flex:0 0 auto!important}
-#roomView #setupStep .vote-setting input[type="number"]{width:72px!important;min-height:42px!important;border:0!important;border-radius:14px!important;background:#fff!important;text-align:center!important;font-size:18px!important}
-#roomView #setupStep .repeat-spacer{margin-left:8px!important}
 
-/* Setup completion uses the existing go.png button. */
 html body #roomView #setupStep .choice-actions{display:flex!important;justify-content:center!important;align-items:center!important;margin-top:22px!important}
 html body #roomView #setupStep #goVoteBtn{display:grid!important;place-items:center!important;width:min(220px,56vw)!important;min-height:0!important;height:auto!important;margin:0 auto!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;cursor:pointer!important}
 html body #roomView #setupStep #goVoteBtn .setup-action-image{display:block!important;width:100%!important;max-width:220px!important;height:auto!important;max-height:none!important;margin:0!important;object-fit:contain!important}
 
-/* Vote page: shorter pills shifted right, completed stamp at far-left edge, tight percentage area. */
 #roomView #voteStep .panel{display:flex!important;flex-direction:column!important}
 #roomView #pollTitleDisplay{order:1}
 #roomView #voteDeadlineText{order:2}
@@ -74,11 +65,9 @@ html body #roomView #voteOptions .percent-track{width:100%!important;max-width:n
 html body #roomView #voteOptions .percent-value{margin-left:0!important;padding-left:6px!important;white-space:nowrap!important}
 #roomView #voteOptions .vote-choice-fx{position:absolute!important;left:-54px!important;top:50%!important;width:80px!important;height:80px!important;max-width:none!important;max-height:none!important;transform:translate(-50%,-50%)!important;object-fit:contain!important;z-index:5!important}
 
-/* Analysis image is a real large icon below the vote button, not clipped by a pill. */
 html body #roomView #analysisBtn.analysis-btn{display:block!important;order:5!important;width:min(448px,70vw)!important;height:auto!important;min-height:0!important;aspect-ratio:1/1!important;margin:20px auto 4px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent url('./assets/hero/analysis.png') center/contain no-repeat!important;box-shadow:none!important;font-size:0!important;color:transparent!important;overflow:visible!important;cursor:pointer!important}
 html body #roomView #analysisBtn.analysis-btn::before,html body #roomView #analysisBtn.analysis-btn::after{display:none!important}
 
-/* Draw screen: vertical choices, vivid selected state, smaller target/dart artwork. */
 html body #roomView #drawHostControls{display:flex!important;flex-direction:column!important;align-items:center!important;gap:18px!important}
 html body #roomView #drawChecks{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;gap:12px!important;width:min(660px,100%)!important;margin:0 auto!important}
 html body #roomView #drawChecks .draw-check{width:100%!important;min-height:62px!important;margin:0!important;padding:10px 18px!important;border:2px solid rgba(105,131,122,.15)!important;border-radius:18px!important;background:#eef1ed!important;box-sizing:border-box!important;transition:.18s ease!important}
@@ -91,7 +80,6 @@ html body #roomView .draw-target-wrap{width:min(300px,52vw)!important;max-width:
 html body #roomView .draw-target-img{width:100%!important;height:auto!important;max-width:300px!important;object-fit:contain!important}
 html body #roomView .draw-dart-img{width:34%!important;height:auto!important;max-width:110px!important;object-fit:contain!important}
 
-/* Chat: input/messages only; remove heading and empty-state copy. */
 #roomView .choice-chat{position:relative;z-index:2;pointer-events:auto}
 #roomView .choice-chat-title,#roomView .choice-chat-empty{display:none!important}
 #roomView .choice-chat-list:empty{display:none!important}
@@ -100,7 +88,6 @@ html body #roomView .draw-dart-img{width:34%!important;height:auto!important;max
 #roomView .choice-chat-compose input::placeholder{color:#84979c!important;-webkit-text-fill-color:#84979c!important;opacity:1!important}
 #roomView .choice-chat-compose button{font-size:18px}
 
-/* Leave / share controls: large artwork with no clipping frame. */
 html body #roomView .room-utility-actions{display:flex!important;justify-content:space-between!important;align-items:center!important;width:100%!important;margin:14px 0 0!important;padding:0!important;box-sizing:border-box!important;overflow:visible!important}
 html body #roomView #outRoomBtn,html body #roomView #shareRoomBtn{width:190px!important;height:190px!important;min-width:190px!important;min-height:190px!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important;display:grid!important;place-items:center!important;overflow:visible!important}
 html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{display:block!important;width:178px!important;height:178px!important;max-width:none!important;max-height:none!important;object-fit:contain!important}
@@ -114,9 +101,7 @@ html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{displa
 #roomView .draw-check{font-size:22px}
 
 @media(max-width:600px){
-  /* Login social icon mobile position. */
   body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{top:75px!important}
-
   #roomView .room-head-compact h2{font-size:28px}
   #roomView .room-deadline-top{font-size:18px}
   #roomView .room-voted-badge{left:2px;width:62px;height:62px}
@@ -128,7 +113,6 @@ html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{displa
   body:has(#roomView:not(.hidden)) .hero-line-note-btn img{width:108px!important;height:62px!important;max-width:none!important;max-height:none!important}
   #roomView #flowNav{gap:18px!important;max-width:390px!important}
   #roomView #flowNav button[data-step="vote"],#roomView #flowNav button[data-step="draw"]{min-height:138px!important}
-  #roomView #flowNav button[data-step="vote"] img,#roomView #flowNav button[data-step="draw"] img{width:136px!important;height:136px!important}
   #roomView #setupStep .panel{padding:22px 18px 24px!important}
   #roomView #setupStep .option-mode button{min-width:112px!important;min-height:50px!important;font-size:17px!important;padding:0 20px!important}
   #roomView #setupStep .vote-settings{padding:14px!important;gap:10px!important}
@@ -186,8 +170,8 @@ html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{displa
   <div id="roomDeadlineTop" class="room-deadline-top hidden" aria-live="polite"></div>
   <nav id="flowNav" class="flow-nav">
     <button type="button" data-step="setup" class="active">設定</button>
-    <button type="button" data-step="vote" aria-label="查看投票狀況"><img src="./assets/stamp/stamp.png" alt="投票"></button>
-    <button type="button" data-step="draw" aria-label="查看抽籤狀況"><img src="./assets/dart/darts.png" alt="抽籤"></button>
+    <button type="button" data-step="vote" aria-label="查看投票狀況"></button>
+    <button type="button" data-step="draw" aria-label="查看抽籤狀況"></button>
   </nav>
 
   <section id="setupStep" class="step active">
@@ -198,7 +182,6 @@ html body #roomView #outRoomBtn img,html body #roomView #shareRoomBtn img{displa
       <div class="vote-settings">
         <label class="vote-setting full"><span>投票截止時間</span><input id="voteDeadlineInput" type="datetime-local"></label>
         <label class="vote-setting"><input id="anonymousVoteInput" type="checkbox"><span>匿名投票</span></label>
-        <label class="vote-setting repeat-setting"><input id="repeatVoteInput" type="checkbox"><span>重複投票</span><span class="repeat-spacer">每人</span><input id="votesPerPersonInput" type="number" min="1" max="20" value="1"><span>票</span></label>
       </div>
       <div class="choice-actions"><button id="goVoteBtn" class="mode-choice vote-choice" type="button" aria-label="建立投票房間"><img class="setup-action-image" src="./assets/hero/go.png" alt="GO"></button></div>
     </div>
