@@ -81,7 +81,8 @@
     const style=document.createElement('style');style.id='morandiPickerStyles';style.textContent=`
       #voteDeadlineInput{position:absolute!important;opacity:0!important;pointer-events:none!important;width:1px!important;height:1px!important;overflow:hidden!important}
       .morandi-deadline-btn,.morandi-option-date-btn{width:100%;min-height:58px;border:1px solid rgba(103,126,119,.12);border-radius:16px;background:#f3f2ec;color:#526b73;font:inherit;font-size:18px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;box-shadow:0 5px 14px rgba(83,102,96,.05)}
-      .morandi-deadline-btn::after,.morandi-option-date-btn::after{content:'▾';display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:#cadbd5;color:#4f7168;font-size:16px;flex:0 0 auto}
+      .morandi-deadline-btn:not(.has-value){font-size:0!important;color:transparent!important;-webkit-text-fill-color:transparent!important}
+      .morandi-deadline-btn::after,.morandi-option-date-btn::after{content:'▾';display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:#cadbd5;color:#4f7168;font-size:16px;flex:0 0 auto;-webkit-text-fill-color:#4f7168}
       .morandi-deadline-btn.has-value,.morandi-option-date-btn.has-value{background:#edf2ef;color:#3f665f}
       .morandi-picker-backdrop{position:fixed;inset:0;z-index:10000;background:rgba(67,75,72,.30);backdrop-filter:blur(7px);display:grid;place-items:center;padding:18px;animation:morandiFade .16s ease}
       .morandi-picker{width:min(500px,calc(100vw - 28px));max-height:calc(100dvh - 30px);overflow:auto;border-radius:28px;background:#f4f1e9;padding:22px;box-shadow:0 24px 70px rgba(54,70,66,.22);color:#48616a}
@@ -105,9 +106,9 @@
 
   function initMorandiDeadlinePicker(){
     const native=document.querySelector('#voteDeadlineInput');if(!native||document.querySelector('#morandiDeadlineBtn'))return;ensureMorandiStyles();
-    const display=document.createElement('button');display.id='morandiDeadlineBtn';display.type='button';display.className='morandi-deadline-btn';native.insertAdjacentElement('afterend',display);
+    const display=document.createElement('button');display.id='morandiDeadlineBtn';display.type='button';display.className='morandi-deadline-btn';display.setAttribute('aria-label','選擇投票截止日期與時間');native.insertAdjacentElement('afterend',display);
     const toLocalValue=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    const refresh=()=>{if(native.value){const d=new Date(native.value);display.textContent=`${d.getFullYear()} / ${pad(d.getMonth()+1)} / ${pad(d.getDate())}　${d.getHours()<12?'上午':'下午'} ${pad(d.getHours()%12||12)}:${pad(d.getMinutes())}`}else display.textContent='';display.classList.toggle('has-value',!!native.value);const disabled=typeof data!=='undefined'&&(!isHost||data.phase!=='setup');display.disabled=!!disabled;display.style.opacity=disabled?'.55':'1'};
+    const refresh=()=>{if(native.value){const d=new Date(native.value);display.textContent=`${d.getFullYear()} / ${pad(d.getMonth()+1)} / ${pad(d.getDate())}　${d.getHours()<12?'上午':'下午'} ${pad(d.getHours()%12||12)}:${pad(d.getMinutes())}`}else display.replaceChildren();display.classList.toggle('has-value',!!native.value);const disabled=typeof data!=='undefined'&&(!isHost||data.phase!=='setup');display.disabled=!!disabled;display.style.opacity=disabled?'.55':'1'};
     display.onclick=()=>{if(display.disabled)return;const selected=native.value?new Date(native.value):new Date(Date.now()+60*60*1000);buildCalendar({selected,withTime:true,requireFuture:true,label:'選擇投票截止時間',onClear:()=>{native.value='';native.dispatchEvent(new Event('change',{bubbles:true}));refresh()},onConfirm:d=>{native.value=toLocalValue(d);native.dispatchEvent(new Event('change',{bubbles:true}));refresh()}})};native.addEventListener('change',refresh);setInterval(refresh,1000);refresh();
   }
 
