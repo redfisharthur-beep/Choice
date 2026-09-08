@@ -31,7 +31,6 @@ body:has(#roomView:not(.hidden)) .hero-line-note-btn img{width:126px!important;h
 #roomView .room-voted-badge{display:none!important;position:absolute;left:6px;top:50%;width:76px;height:76px;object-fit:contain;transform:translateY(-50%);z-index:4}
 #roomView .room-voted-badge.show{display:block!important}
 
-/* Vote / draw bears: real img elements only; remove all background artwork. */
 #roomView #flowNav{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:34px!important;max-width:660px!important;margin:18px auto 22px!important;background:transparent!important;padding:0!important}
 #roomView #flowNav button[data-step="setup"]{display:none!important}
 html body #roomView #flowNav button[data-step="vote"],html body #roomView #flowNav button[data-step="draw"]{display:grid!important;place-items:center!important;min-height:168px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;background-image:none!important;box-shadow:none!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important;overflow:visible!important}
@@ -69,8 +68,11 @@ html body #roomView #voteOptions .percent-value{margin-left:0!important;padding-
 
 html body #roomView #analysisBtn.analysis-btn{display:block!important;order:3!important;width:min(448px,70vw)!important;height:auto!important;min-height:0!important;aspect-ratio:1/1!important;margin:20px auto 4px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent url('./assets/hero/analysis.png') center/contain no-repeat!important;box-shadow:none!important;font-size:0!important;color:transparent!important;overflow:visible!important;cursor:pointer!important}
 html body #roomView #analysisBtn.analysis-btn::before,html body #roomView #analysisBtn.analysis-btn::after{display:none!important}
+#voteAnalysisContent .analysis-summary>.analysis-option-card:nth-child(4n+1),#voteAnalysisContent .analysis-group-card:nth-of-type(4n+1){background:#e7efeb!important}
+#voteAnalysisContent .analysis-summary>.analysis-option-card:nth-child(4n+2),#voteAnalysisContent .analysis-group-card:nth-of-type(4n+2){background:#efe9df!important}
+#voteAnalysisContent .analysis-summary>.analysis-option-card:nth-child(4n+3),#voteAnalysisContent .analysis-group-card:nth-of-type(4n+3){background:#e7ebf0!important}
+#voteAnalysisContent .analysis-summary>.analysis-option-card:nth-child(4n),#voteAnalysisContent .analysis-group-card:nth-of-type(4n){background:#f0e7e7!important}
 
-/* Draw screen: one option list. Host can check; participants see the same list read-only. */
 html body #roomView #drawHostControls{display:flex!important;flex-direction:column!important;align-items:center!important;gap:18px!important;width:100%!important}
 html body.choice-participant #roomView #drawHostControls{display:flex!important}
 html body #roomView #throwBtn{order:-1!important;width:min(170px,42vw)!important;min-height:0!important;margin:0 auto 4px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;overflow:visible!important;cursor:pointer!important;pointer-events:auto!important;position:relative!important;z-index:3!important}
@@ -85,13 +87,12 @@ html body #roomView #drawChecks .draw-check:nth-child(4n){background:#f0e7e7!imp
 html body #roomView #drawChecks .draw-check:has(input:checked){border-color:#88b8ab!important;box-shadow:0 0 0 2px rgba(136,184,171,.16)!important;color:#315d65!important;font-weight:700!important;transform:none!important}
 html body #roomView #drawChecks .draw-check:has(input:checked)::after{content:'✓';margin-left:auto;font-size:20px;color:#5f998a}
 html body #roomView #drawChecks .draw-check input{width:24px!important;height:24px!important;accent-color:#74b9a8!important}
-html body #roomView #drawChecks .draw-check.readonly{justify-content:center!important;cursor:default!important}
+html body #roomView #drawChecks .draw-check.readonly{justify-content:flex-start!important;text-align:left!important;cursor:default!important}
 html body #roomView #drawChecks .draw-check.hit{background:linear-gradient(100deg,#ffe69a,#9edfc7,#9ccdf4,#ffc4d5)!important;border:4px solid #4d7b73!important;color:#214d55!important;font-weight:1000!important;box-shadow:0 0 0 4px rgba(255,255,255,.98),0 0 38px rgba(65,160,141,.72)!important;transform:scale(1.045)!important;animation:choiceWinnerPulse .72s ease-in-out 4!important}
 @keyframes choiceWinnerPulse{0%,100%{filter:brightness(1);transform:scale(1.035)}50%{filter:brightness(1.22);transform:scale(1.07)}}
 
-/* Remove the old duplicate result chip row completely. */
 html body #roomView #drawOptionSummary,html body.choice-participant #roomView #drawOptionSummary{display:none!important}
-
+html body #roomView .draw-stage{display:none!important}
 html body #roomView .draw-target-wrap{position:relative!important;width:min(300px,52vw)!important;max-width:300px!important;margin:0 auto!important;display:grid!important;place-items:center!important}
 html body #roomView .draw-target-img{grid-area:1/1!important;width:100%!important;height:auto!important;max-width:300px!important;object-fit:contain!important;transform-origin:center!important}
 html body #roomView .draw-dart-img{grid-area:1/1!important;display:block!important;width:38%!important;height:auto!important;max-width:118px!important;object-fit:contain!important;opacity:0!important;z-index:3!important;pointer-events:none!important;transform:translate(230%,-160%) rotate(-18deg) scale(1.12);transform-origin:center!important}
@@ -102,8 +103,6 @@ html body #roomView .draw-target-img.stopping{animation:choiceTargetSettle .30s 
 @keyframes choiceTargetSettle{0%{transform:rotate(0deg)}65%{transform:rotate(14deg)}100%{transform:rotate(0deg)}}
 @keyframes choiceDartHit{0%{transform:translate(230%,-160%) rotate(-18deg) scale(1.16)}100%{transform:translate(48%,-14%) rotate(-18deg) scale(.84)}}
 
-/* Static participant view is choice list only. Fullscreen target appears only while the host is throwing. */
-html body.choice-participant #roomView .draw-stage{display:none!important}
 html body #roomView #drawResult{display:none!important}
 html body.draw-focus-mode{overflow:hidden!important}
 html body.draw-focus-mode #roomView .draw-stage,html body.draw-focus-mode.choice-participant #roomView .draw-stage{position:fixed!important;inset:0!important;left:0!important;top:0!important;right:0!important;bottom:0!important;transform:none!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;margin:0!important;padding:0!important;display:grid!important;place-items:center!important;background:#eef2ef!important;border:0!important;border-radius:0!important;box-shadow:none!important;z-index:10001!important;overflow:hidden!important}
@@ -118,6 +117,10 @@ html body.draw-focus-mode #roomView .draw-dart-img{display:block!important;max-w
 #roomView .choice-chat-compose input{display:block!important;min-height:52px!important;color:#3f5965!important;-webkit-text-fill-color:#3f5965!important;caret-color:#3f5965!important;background:#f5f5f1!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;font-size:19px!important}
 #roomView .choice-chat-compose input::placeholder{color:#84979c!important;-webkit-text-fill-color:#84979c!important;opacity:1!important}
 #roomView .choice-chat-compose button{font-size:18px}
+
+.player-strip.public-votes-only .player-chip{justify-content:flex-start!important;text-align:left!important}
+.player-strip.public-votes-only .player-name{min-width:auto!important;text-align:left!important}
+.player-strip.public-votes-only .player-choice{text-align:left!important}
 
 html body #roomView .room-utility-actions{display:flex!important;justify-content:space-between!important;align-items:center!important;width:100%!important;margin:14px 0 0!important;padding:0!important;box-sizing:border-box!important;overflow:visible!important}
 html body #roomView #outRoomBtn,html body #roomView #shareRoomBtn{width:190px!important;height:190px!important;min-width:190px!important;min-height:190px!important;padding:0!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important;display:grid!important;place-items:center!important;overflow:visible!important}
