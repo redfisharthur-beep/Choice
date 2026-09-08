@@ -15,3 +15,8 @@
 
 /* During dart animation, keep only the target itself — no white capsule/square behind it. */
 body.draw-focus-mode .draw-stage{background:transparent!important;border-radius:0!important;box-shadow:none!important}
+
+/* Keep draw content visible whenever the draw tab is active. JS may temporarily set inline display:none/min-height:0 during reset. */
+#drawStep.active .draw-target-wrap{display:grid!important}
+#drawStep.active .draw-stage{min-height:540px!important}
+@media(max-width:600px){#drawStep.active .draw-stage{min-height:470px!important}}
