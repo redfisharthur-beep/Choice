@@ -4,6 +4,10 @@
   const toastEl=document.querySelector('#toast');
   const roomList=document.querySelector('#roomList');
   const backBtn=document.querySelector('#homeBackBtn');
+  const homeLoginPage=document.querySelector('#homeLoginPage');
+  const homeLobbyPage=document.querySelector('#homeLobbyPage');
+  const roomView=document.querySelector('#roomView');
+  const heroActions=document.querySelector('.hero-actions');
   let lineUser=null;
 
   const showToast=text=>{if(!toastEl)return;toastEl.textContent=text;toastEl.classList.add('show');clearTimeout(showToast.t);showToast.t=setTimeout(()=>toastEl.classList.remove('show'),2200)};
@@ -22,6 +26,23 @@
     else{localStorage.removeItem('choice-line-user-id');localStorage.removeItem('choice-line-picture')}
   };
   const loadSession=async()=>{try{const r=await fetch('/api/auth/me',{cache:'no-store',credentials:'same-origin'}),j=await r.json();if(j.authenticated&&j.user){setLineUi(j.user);if(input){input.value=j.user.displayName||input.value;syncName(input.value)}}else setLineUi(null)}catch{setLineUi(null)}};
+
+  const syncHomeSocialPosition=()=>{
+    if(!heroActions||!homeLoginPage)return;
+    const onLogin=!homeLoginPage.classList.contains('hidden')&&homeLobbyPage?.classList.contains('hidden')!==false&&roomView?.classList.contains('hidden')!==false;
+    if(!onLogin){heroActions.style.removeProperty('top');heroActions.style.removeProperty('left');heroActions.style.removeProperty('transform');return}
+    const r=homeLoginPage.getBoundingClientRect();
+    if(!r.width||!r.height)return;
+    heroActions.style.setProperty('top',`${r.top+r.height*0.075}px`,'important');
+    heroActions.style.setProperty('left',`${r.left+r.width/2}px`,'important');
+    heroActions.style.setProperty('transform','translateX(-50%)','important');
+  };
+  const scheduleHomeSocialSync=()=>requestAnimationFrame(syncHomeSocialPosition);
+  window.addEventListener('resize',scheduleHomeSocialSync,{passive:true});
+  window.addEventListener('orientationchange',scheduleHomeSocialSync,{passive:true});
+  visualViewport?.addEventListener('resize',scheduleHomeSocialSync,{passive:true});
+  visualViewport?.addEventListener('scroll',scheduleHomeSocialSync,{passive:true});
+  [homeLoginPage,homeLobbyPage,roomView].forEach(el=>el&&new MutationObserver(scheduleHomeSocialSync).observe(el,{attributes:true,attributeFilter:['class']}));
 
   const sharedGuestName=()=>{
     const saved=String(localStorage.getItem('choice-display-name')||'').trim();
@@ -126,5 +147,5 @@
   initMorandiDeadlinePicker();initMorandiOptionDatePicker();
   const qs=new URL(location.href).searchParams,loginResult=qs.get('line_login');if(loginResult){history.replaceState({},'',location.pathname+location.hash);if(loginResult==='success')showToast('LINE 登入成功');else if(loginResult==='cancelled')showToast('已取消 LINE 登入');else if(loginResult==='not_configured')showToast('LINE Login 尚未完成設定');else showToast('LINE 登入失敗，請再試一次')}
   loadSession();
-  setTimeout(resolveSharedRoom,0);
+  setTimeout(()=>{resolveSharedRoom();syncHomeSocialPosition()},0);
 })();
