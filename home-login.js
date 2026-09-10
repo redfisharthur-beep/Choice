@@ -23,22 +23,26 @@
   };
   const loadSession=async()=>{try{const r=await fetch('/api/auth/me',{cache:'no-store',credentials:'same-origin'}),j=await r.json();if(j.authenticated&&j.user){setLineUi(j.user);if(input){input.value=j.user.displayName||input.value;syncName(input.value)}}else setLineUi(null)}catch{setLineUi(null)}};
 
+  const sharedGuestName=()=>{
+    const saved=String(localStorage.getItem('choice-display-name')||'').trim();
+    if(saved)return saved;
+    let guest=String(localStorage.getItem('choice-shared-guest-name')||'').trim();
+    if(!guest){guest=`訪客${String(Math.floor(1000+Math.random()*9000))}`;localStorage.setItem('choice-shared-guest-name',guest)}
+    syncName(guest);
+    return guest;
+  };
   const configureJoinDialog=(code,locked)=>{
     const dialog=document.querySelector('#joinDialog'),nameInput=document.querySelector('#joinNameInput'),passLabel=document.querySelector('#joinPasswordLabel'),passInput=document.querySelector('#joinPasswordInput'),btn=document.querySelector('#joinWithPasswordBtn');
     if(!dialog)return;
     const heading=dialog.querySelector('h3'),icon=dialog.querySelector('.dialog-icon');
-    if(heading)heading.textContent=locked?'加入房間':'輸入名字';
-    if(icon)icon.textContent=locked?'🔐':'👋';
-    if(nameInput){
-      nameInput.type='text';nameInput.placeholder='輸入名字';nameInput.autocomplete='nickname';nameInput.maxLength=20;nameInput.setAttribute('aria-label','輸入名字');
-      nameInput.value=localStorage.getItem('choice-display-name')||'';
-      nameInput.style.display='block';nameInput.style.width='100%';nameInput.style.minHeight='58px';nameInput.style.margin='12px 0';nameInput.style.padding='0 16px';nameInput.style.borderRadius='16px';nameInput.style.boxSizing='border-box';
-    }
+    if(heading){heading.textContent=locked?'輸入房間密碼':'';heading.style.display=locked?'block':'none'}
+    if(icon){icon.textContent=locked?'🔐':'';icon.style.display=locked?'block':'none'}
+    if(nameInput){nameInput.type='hidden';nameInput.value=sharedGuestName();nameInput.style.display='none'}
     passLabel?.classList.toggle('hidden',!locked);if(passInput&&!locked)passInput.value='';
     if(btn)btn.textContent='進入房間';
     try{pendingJoinCode=String(code||'').toUpperCase();pendingJoinLocked=!!locked}catch{}
     if(!dialog.open)dialog.showModal();
-    setTimeout(()=>{if(nameInput&&!nameInput.value)nameInput.focus();else if(locked)passInput?.focus();else btn?.focus()},60);
+    setTimeout(()=>{if(locked)passInput?.focus();else btn?.focus()},60);
   };
   const resolveSharedRoom=async()=>{
     const code=new URL(location.href).searchParams.get('room');
@@ -53,8 +57,8 @@
       const room=Array.isArray(j?.rooms)?j.rooms.find(x=>String(x?.code||'').toUpperCase()===roomCode):null;
       if(room){found=true;locked=!!room.locked}
     }catch{}
-    const saved=String(localStorage.getItem('choice-display-name')||'').trim();
-    if(found&&!locked&&saved){try{attemptJoin(roomCode,'',saved);return}catch{}}
+    const joinName=sharedGuestName();
+    if(found&&!locked){try{attemptJoin(roomCode,'',joinName);return}catch{}}
     configureJoinDialog(roomCode,found?locked:false);
   };
 
