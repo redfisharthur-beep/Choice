@@ -1,1 +1,3 @@
 .announce-social{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin:14px 0 18px}.announce-social a{display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;padding:10px 14px;border-radius:999px;background:#fff;border:1px solid #dfeaf2;color:#35506a;font-size:16px}
+
+body:has(#homeLoginPage:not(.hidden)):not(:has(#roomView:not(.hidden))):not(:has(#homeLobbyPage:not(.hidden))) .hero-actions{margin-top:-15px!important}
