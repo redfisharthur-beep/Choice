@@ -56,7 +56,7 @@
     const dialog=document.querySelector('#joinDialog'),nameInput=document.querySelector('#joinNameInput'),passLabel=document.querySelector('#joinPasswordLabel'),passInput=document.querySelector('#joinPasswordInput'),btn=document.querySelector('#joinWithPasswordBtn');
     if(!dialog)return;
     const heading=dialog.querySelector('h3'),icon=dialog.querySelector('.dialog-icon');
-    if(heading){heading.textContent=locked?'輸入房間密碼':'';heading.style.display=locked?'block':'none'}
+    if(heading){heading.textContent='';heading.style.display='none'}
     if(icon){icon.textContent=locked?'🔐':'';icon.style.display=locked?'block':'none'}
     if(nameInput){nameInput.type='hidden';nameInput.value=sharedGuestName();nameInput.style.display='none'}
     passLabel?.classList.toggle('hidden',!locked);if(passInput&&!locked)passInput.value='';
